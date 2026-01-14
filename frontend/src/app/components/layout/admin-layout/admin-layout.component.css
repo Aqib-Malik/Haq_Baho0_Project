@@ -1,0 +1,215 @@
+/* Main Container */
+.sidenav-container {
+    height: 100vh;
+    background-color: #fce4ec;
+}
+
+/* Sidebar Styling - The "Nuclear Option" for Colors */
+.sidenav {
+    width: 250px;
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    color: white !important;
+    border: none;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Force ALL text and icons in sidenav to be white, with high specificity */
+.sidenav .mat-list-item,
+.sidenav .mat-list-item-content,
+.sidenav .mat-expansion-panel-header,
+.sidenav .mat-expansion-panel-header-title,
+.sidenav .mat-expansion-panel-header-description {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Force Icons specifically */
+.sidenav mat-icon {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Brand Header */
+.brand-header {
+    padding: 24px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 16px;
+}
+
+.brand-logo {
+    height: 40px;
+    width: 40px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #ffd740;
+}
+
+.brand-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: white;
+    margin: 0;
+}
+
+/* Nav List & Items */
+.mat-nav-list {
+    padding-top: 0;
+}
+
+.mat-nav-list a {
+    color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* Fix for ALL sidebar items text color (including Users/Roles) which might be overridden by MDC styles */
+.sidenav a [matListItemTitle],
+.sidenav a .mat-list-item-content,
+.sidenav .mat-list-item {
+    color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* Hover state for all */
+.sidenav a:hover [matListItemTitle],
+.sidenav a:hover .mat-list-item-content {
+    color: white !important;
+}
+
+.mat-nav-list a:hover .mat-icon {
+    color: #ffd740 !important;
+}
+
+/* Active State */
+.active-link {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-left: 4px solid #fbbf24;
+    color: #ffffff !important;
+    font-weight: 600;
+    box-shadow: none;
+}
+
+.active-link .mat-icon {
+    color: #fbbf24 !important;
+}
+
+/* Nav Icon Size/Spacing */
+.mat-nav-list .mat-icon {
+    margin-right: 14px;
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+}
+
+/* Divider */
+.mat-divider {
+    border-top-color: rgba(255, 255, 255, 0.15);
+    margin: 16px 20px;
+}
+
+/* Section Header */
+.section-header {
+    padding: 0 24px;
+    margin-top: 24px;
+    margin-bottom: 8px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(255, 255, 255, 0.5) !important;
+    font-weight: 700;
+}
+
+/* --- Top Toolbar (Keep White) --- */
+.mat-toolbar.mat-primary {
+    background: white;
+    color: #333;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding: 0 24px;
+}
+
+.mat-toolbar h1 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-left: 12px;
+}
+
+.spacer {
+    flex: 1 1 auto;
+}
+
+.user-button {
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    background: #f5f5f5;
+    transition: all 0.3s ease;
+}
+
+.user-button:hover {
+    background: #eeeeee;
+}
+
+/* --- Content Area --- */
+.content-container {
+    padding: 0;
+    background-color: #f1f5f9;
+    min-height: calc(100vh - 64px);
+    border-top-left-radius: 0;
+}
+
+@media (max-width: 600px) {
+    .content-container {
+        padding: 16px;
+        border-radius: 0;
+    }
+}
+
+/* --- EXPANSION PANEL NUCLEAR FIXES --- */
+.sidenav-expansion {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.sidenav-expansion .mat-expansion-panel-header {
+    padding: 0 24px;
+    height: 52px;
+}
+
+.sidenav-expansion .mat-expansion-panel-header-title {
+    color: rgba(255, 255, 255, 0.9) !important;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+}
+
+/* FORCE ARROWS WHITE - Fix using ng-deep to penetrate ViewEncapsulation */
+::ng-deep .sidenav .mat-expansion-indicator::after,
+::ng-deep .sidenav .mat-expansion-panel-header .mat-expansion-indicator::after {
+    color: white !important;
+    border-color: white !important;
+}
+
+/* Also target the SVG if it's being used (newer Material versions) */
+::ng-deep .sidenav .mat-expansion-indicator svg {
+    fill: white !important;
+}
+
+/* Ensure the indicator container itself is white */
+::ng-deep .sidenav .mat-expansion-indicator {
+    color: white !important;
+}
+
+/* Explicit Hover/Focus Overrides */
+.sidenav-expansion .mat-expansion-panel-header:hover,
+.sidenav-expansion .mat-expansion-panel-header:focus,
+.sidenav-expansion .mat-expansion-panel-header.cdk-keyboard-focused,
+.sidenav-expansion .mat-expansion-panel-header.cdk-program-focused {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.sidenav-expansion .mat-expansion-panel-header:hover .mat-expansion-panel-header-title {
+    color: white !important;
+}

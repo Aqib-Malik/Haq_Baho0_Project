@@ -1,0 +1,227 @@
+<div class="payment-container">
+  <!-- Compact Header & Filters -->
+  <div class="compact-header">
+    <div class="header-left">
+      <div class="icon-circle-small">
+        <mat-icon>payments</mat-icon>
+      </div>
+      <div>
+        <h1 class="page-title-compact">Payments</h1>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <mat-form-field appearance="outline" class="company-field-compact" subscriptSizing="dynamic">
+        <mat-select [value]="selectedCompanyId()" (selectionChange)="onCompanyFilterChange($event.value)"
+          placeholder="Filter by Company">
+          <mat-option [value]="null">All Companies</mat-option>
+          @for (company of companies(); track company.id) {
+          <mat-option [value]="company.id">
+            {{ company.name }}
+          </mat-option>
+          }
+        </mat-select>
+        <mat-icon matPrefix>business</mat-icon>
+      </mat-form-field>
+
+      @if (authService.hasPermission('add_payment')) {
+      <button mat-raised-button color="primary" (click)="showAddForm()" class="add-btn-compact">
+        <mat-icon>add</mat-icon>
+        New Payment
+      </button>
+      }
+    </div>
+  </div>
+
+
+
+  <!-- Loading Spinner -->
+  @if (isLoading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="60"></mat-spinner>
+    <p class="loading-text">Loading payments...</p>
+  </div>
+  }
+
+  <!-- Payments Table -->
+  @if (!isLoading() && payments().length > 0) {
+  <mat-card class="table-card">
+    <mat-card-header class="table-header">
+      <div class="table-header-content">
+        <div class="table-title-section">
+          <mat-icon class="table-icon">list</mat-icon>
+          <mat-card-title class="table-title">Payments ({{ payments().length }})</mat-card-title>
+        </div>
+      </div>
+    </mat-card-header>
+    <mat-card-content class="table-content">
+      <div class="table-wrapper">
+        <div class="table-container hide-on-mobile">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Payment Number</th>
+                <th>Date</th>
+                <th>Company</th>
+                <th class="text-right">Amount</th>
+                <th>Payment Mode</th>
+                <th>Description</th>
+                <th>Reference</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (payment of payments(); track payment.id; let i = $index) {
+              <tr class="payment-row">
+                <td class="payment-number-cell">
+                  <span class="payment-number-badge">#{{ payment.payment_number }}</span>
+                </td>
+                <td class="date-cell">
+                  <div class="date-wrapper">
+                    <mat-icon class="mini-icon">calendar_today</mat-icon>
+                    {{ formatDate(payment.payment_date) }}
+                  </div>
+                </td>
+                <td class="company-cell">
+                  @if (payment.company_name) {
+                  <div class="company-info">
+                    <div class="company-avatar" [style.background]="getAvatarColor(payment.company_name)">
+                      {{ getInitials(payment.company_name) }}
+                    </div>
+                    <span class="company-name">{{ payment.company_name }}</span>
+                  </div>
+                  } @else {
+                  <span class="no-company">N/A</span>
+                  }
+                </td>
+                <td class="text-right amount-cell">
+                  <span class="amount-badge">{{ formatCurrency(payment.amount) }}</span>
+                </td>
+                <td>
+                  <span class="payment-mode-badge" [class]="payment.payment_mode">
+                    {{ getPaymentModeLabel(payment.payment_mode) }}
+                  </span>
+                </td>
+                <td class="description-cell">
+                  <span class="truncate-text" [matTooltip]="payment.description || ''">
+                    {{ payment.description || '-' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="reference-text">{{ payment.reference || '-' }}</span>
+                </td>
+                <td class="text-center actions-cell">
+                  @if (authService.hasPermission('change_payment')) {
+                  <button class="action-btn-text edit-btn" (click)="showEditForm(payment)">
+                    <mat-icon>edit</mat-icon>
+                    Edit
+                  </button>
+                  }
+                  @if (authService.hasPermission('delete_payment')) {
+                  <button class="action-btn-text delete-btn" (click)="deletePayment(payment)">
+                    <mat-icon>delete</mat-icon>
+                    Delete
+                  </button>
+                  }
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Card View -->
+        <div class="mobile-cards hide-on-desktop">
+          @for (payment of payments(); track payment.id) {
+          <div class="mobile-payment-card">
+            <div class="card-header-mobile">
+              <div class="header-top-row">
+                <span class="payment-number-badge">#{{ payment.payment_number }}</span>
+                <span class="amount-badge">{{ formatCurrency(payment.amount) }}</span>
+              </div>
+              <div class="date-wrapper-mobile">
+                <mat-icon class="mini-icon">calendar_today</mat-icon>
+                {{ formatDate(payment.payment_date) }}
+              </div>
+            </div>
+
+            <div class="card-body-mobile">
+              @if (payment.company_name) {
+              <div class="company-info-mobile">
+                <div class="company-avatar small" [style.background]="getAvatarColor(payment.company_name)">
+                  {{ getInitials(payment.company_name) }}
+                </div>
+                <span class="company-name">{{ payment.company_name }}</span>
+              </div>
+              } @else {
+              <span class="no-company">No Company</span>
+              }
+
+              <div class="payment-mode-section">
+                <span class="payment-mode-badge" [class]="payment.payment_mode">
+                  {{ getPaymentModeLabel(payment.payment_mode) }}
+                </span>
+              </div>
+
+              @if (payment.description) {
+              <p class="mobile-description">{{ payment.description }}</p>
+              }
+
+              @if (payment.reference) {
+              <p class="mobile-reference">Ref: {{ payment.reference }}</p>
+              }
+            </div>
+
+            <div class="card-actions-mobile">
+              @if (authService.hasPermission('change_payment')) {
+              <button class="mobile-action-btn edit" (click)="showEditForm(payment)">
+                <mat-icon>edit</mat-icon>
+                Edit
+              </button>
+              }
+              @if (authService.hasPermission('delete_payment')) {
+              <button class="mobile-action-btn delete" (click)="deletePayment(payment)">
+                <mat-icon>delete</mat-icon>
+                Delete
+              </button>
+              }
+            </div>
+          </div>
+          }
+        </div>
+        <mat-paginator [length]="totalPayments()" [pageSize]="pageSize()" [pageSizeOptions]="[6, 10, 25, 50]"
+          [pageIndex]="pageIndex()" (page)="onPageChange($event)" showFirstLastButtons
+          aria-label="Select page of payments">
+        </mat-paginator>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading() && payments().length === 0) {
+  <mat-card class="empty-state-card">
+    <mat-card-content>
+      <div class="empty-state-content">
+        <div class="empty-icon-wrapper">
+          <mat-icon class="empty-icon">payment</mat-icon>
+        </div>
+        <h2 class="empty-title">No Payments Found</h2>
+        <p class="empty-text">
+          @if (selectedCompanyId()) {
+          No payments found for the selected company. Click "Add Payment" to create one.
+          } @else {
+          No payments found. Click "Add Payment" to create your first payment.
+          }
+        </p>
+        @if (authService.hasPermission('add_payment')) {
+        <button mat-raised-button color="primary" (click)="showAddForm()" class="empty-action-btn">
+          <mat-icon>add</mat-icon>
+          Add Payment
+        </button>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+  }
+</div>

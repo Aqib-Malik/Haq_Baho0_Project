@@ -1,0 +1,126 @@
+<div class="page-container user-management-container">
+    <div class="app-header-card">
+        <div class="header-icon-container">
+            <mat-icon>people</mat-icon>
+        </div>
+        <div class="header-content-wrapper">
+            <h1 class="app-page-title">User Management</h1>
+            <p class="app-page-subtitle">Manage users, assign roles, and control system access</p>
+        </div>
+        <div class="header-actions">
+            <button mat-raised-button color="primary" (click)="openDialog()">
+                <mat-icon>add</mat-icon> Add User
+            </button>
+        </div>
+    </div>
+
+    <div *ngIf="loading" class="spinner-container">
+        <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <!-- Desktop Table View -->
+    <div class="table-container desktop-only" *ngIf="!loading">
+        <table mat-table [dataSource]="dataSource" class="user-table">
+
+            <!-- Username Column -->
+            <ng-container matColumnDef="username">
+                <th mat-header-cell *matHeaderCellDef> Username </th>
+                <td mat-cell *matCellDef="let element" class="username-cell">
+                    <span class="user-username">{{element.username}}</span>
+                </td>
+            </ng-container>
+
+            <!-- Email Column -->
+            <ng-container matColumnDef="email">
+                <th mat-header-cell *matHeaderCellDef> Email </th>
+                <td mat-cell *matCellDef="let element"> {{element.email}} </td>
+            </ng-container>
+
+            <!-- First Name Column -->
+            <ng-container matColumnDef="firstName">
+                <th mat-header-cell *matHeaderCellDef> First Name </th>
+                <td mat-cell *matCellDef="let element"> {{element.first_name}} </td>
+            </ng-container>
+
+            <!-- Last Name Column -->
+            <ng-container matColumnDef="lastName">
+                <th mat-header-cell *matHeaderCellDef> Last Name </th>
+                <td mat-cell *matCellDef="let element"> {{element.last_name}} </td>
+            </ng-container>
+
+            <!-- Roles Column -->
+            <ng-container matColumnDef="roles">
+                <th mat-header-cell *matHeaderCellDef> Roles </th>
+                <td mat-cell *matCellDef="let element" class="roles-cell">
+                    <div class="chip-wrapper">
+                        <span class="role-chip" *ngFor="let role of getVisibleRoles(element.roles)">
+                            {{role.name}}
+                        </span>
+                        <span class="role-chip more-chip" *ngIf="getHiddenRolesCount(element.roles) > 0"
+                            [matTooltip]="getHiddenRolesTooltip(element.roles)" matTooltipClass="custom-tooltip">
+                            +{{getHiddenRolesCount(element.roles)}} more
+                        </span>
+                        <span class="no-perms" *ngIf="element.roles.length === 0">No Roles</span>
+                    </div>
+                </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef> Actions </th>
+                <td mat-cell *matCellDef="let element" class="text-right actions-cell">
+                    <button class="action-btn-text edit-btn" (click)="openDialog(element)">
+                        <mat-icon>edit</mat-icon>
+                        Edit
+                    </button>
+                    <button class="action-btn-text delete-btn" (click)="deleteUser(element.id)">
+                        <mat-icon>delete</mat-icon>
+                        Delete
+                    </button>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="user-row"></tr>
+        </table>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="mobile-list mobile-only" *ngIf="!loading">
+        <div class="mobile-user-card" *ngFor="let element of dataSource">
+            <div class="mobile-card-header">
+                <div class="mobile-user-info">
+                    <div class="user-icon">
+                        {{ element.username.charAt(0).toUpperCase() }}
+                    </div>
+                    <div class="user-details">
+                        <h3>{{ element.username }}</h3>
+                        <div class="user-email">{{ element.email }}</div>
+                    </div>
+                </div>
+                <div class="mobile-actions">
+                    <button mat-icon-button color="primary" (click)="openDialog(element)">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="deleteUser(element.id)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mobile-card-body">
+                <div class="mobile-roles-label">Roles ({{element.roles.length}})</div>
+                <div class="chip-wrapper">
+                    <span class="role-chip" *ngFor="let role of getVisibleRoles(element.roles)">
+                        {{role.name}}
+                    </span>
+                    <span class="role-chip more-chip" *ngIf="getHiddenRolesCount(element.roles) > 0"
+                        (click)="openDialog(element)">
+                        +{{getHiddenRolesCount(element.roles)}} more...
+                    </span>
+                    <span class="no-perms" *ngIf="element.roles.length === 0">No Roles Assigned</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

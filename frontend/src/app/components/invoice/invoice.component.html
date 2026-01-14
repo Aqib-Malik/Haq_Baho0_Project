@@ -1,0 +1,215 @@
+<div class="invoice-container">
+  <!-- Compact Header & Filters -->
+  <div class="compact-header">
+    <div class="header-left">
+      <div class="icon-circle-small">
+        <mat-icon>receipt_long</mat-icon>
+      </div>
+      <div>
+        <h1 class="page-title-compact">Invoices</h1>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <mat-form-field appearance="outline" class="company-field-compact" subscriptSizing="dynamic">
+        <mat-select [value]="selectedCompanyId()" (selectionChange)="onCompanyFilterChange($event.value)"
+          placeholder="Filter by Company">
+          <mat-option [value]="null">All Companies</mat-option>
+          @for (company of companies(); track company.id) {
+          <mat-option [value]="company.id">
+            {{ company.name }}
+          </mat-option>
+          }
+        </mat-select>
+        <mat-icon matPrefix>business</mat-icon>
+      </mat-form-field>
+
+      @if (authService.hasPermission('add_invoice')) {
+      <button mat-raised-button color="primary" (click)="showAddForm()" class="add-btn-compact">
+        <mat-icon>add</mat-icon>
+        New Invoice
+      </button>
+      }
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  @if (isLoading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="60"></mat-spinner>
+    <p class="loading-text">Loading invoices...</p>
+  </div>
+  }
+
+  <!-- Invoices Table -->
+  @if (!isLoading() && invoices().length > 0) {
+  <mat-card class="table-card">
+    <mat-card-header class="table-header">
+      <div class="table-header-content">
+        <div class="table-title-section">
+          <mat-icon class="table-icon">list</mat-icon>
+          <mat-card-title class="table-title">Invoices ({{ invoices().length }})</mat-card-title>
+        </div>
+      </div>
+    </mat-card-header>
+    <mat-card-content class="table-content">
+      <div class="table-wrapper">
+        <div class="table-container hide-on-mobile">
+          <!-- Table logic ... -->
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Invoice Number</th>
+                <th>Date</th>
+                <th>Company</th>
+                <th class="text-right">Amount</th>
+                <th>Description</th>
+                <th>Reference</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (invoice of invoices(); track invoice.id; let i = $index) {
+              <tr class="invoice-row">
+                <!-- ... rows ... -->
+                <td class="invoice-number-cell">
+                  <span class="invoice-number-badge">#{{ invoice.invoice_number }}</span>
+                </td>
+                <td class="date-cell">
+                  <div class="date-wrapper">
+                    <mat-icon class="mini-icon">calendar_today</mat-icon>
+                    {{ formatDate(invoice.invoice_date) }}
+                  </div>
+                </td>
+                <td class="company-cell">
+                  @if (invoice.company_name) {
+                  <div class="company-info">
+                    <div class="company-avatar" [style.background]="getAvatarColor(invoice.company_name)">
+                      {{ getInitials(invoice.company_name) }}
+                    </div>
+                    <span class="company-name">{{ invoice.company_name }}</span>
+                  </div>
+                  } @else {
+                  <span class="no-company">N/A</span>
+                  }
+                </td>
+                <td class="text-right amount-cell">
+                  <span class="amount-badge">{{ formatCurrency(invoice.amount) }}</span>
+                </td>
+                <td class="description-cell">
+                  <span class="truncate-text" [matTooltip]="invoice.description || ''">
+                    {{ invoice.description || '-' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="reference-text">{{ invoice.reference || '-' }}</span>
+                </td>
+                <td class="text-center actions-cell">
+                  @if (authService.hasPermission('change_invoice')) {
+                  <button class="action-btn-text edit-btn" (click)="showEditForm(invoice)">
+                    <mat-icon>edit</mat-icon>
+                    Edit
+                  </button>
+                  }
+                  @if (authService.hasPermission('delete_invoice')) {
+                  <button class="action-btn-text delete-btn" (click)="deleteInvoice(invoice)">
+                    <mat-icon>delete</mat-icon>
+                    Delete
+                  </button>
+                  }
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Card View -->
+        <div class="mobile-cards hide-on-desktop">
+          @for (invoice of invoices(); track invoice.id) {
+          <div class="mobile-invoice-card">
+            <div class="card-header-mobile">
+              <div class="header-top-row">
+                <span class="invoice-number-badge">#{{ invoice.invoice_number }}</span>
+                <span class="amount-badge">{{ formatCurrency(invoice.amount) }}</span>
+              </div>
+              <div class="date-wrapper-mobile">
+                <mat-icon class="mini-icon">calendar_today</mat-icon>
+                {{ formatDate(invoice.invoice_date) }}
+              </div>
+            </div>
+
+            <div class="card-body-mobile">
+              @if (invoice.company_name) {
+              <div class="company-info-mobile">
+                <div class="company-avatar small" [style.background]="getAvatarColor(invoice.company_name)">
+                  {{ getInitials(invoice.company_name) }}
+                </div>
+                <span class="company-name">{{ invoice.company_name }}</span>
+              </div>
+              } @else {
+              <span class="no-company">No Company</span>
+              }
+
+              @if (invoice.description) {
+              <p class="mobile-description">{{ invoice.description }}</p>
+              }
+
+              @if (invoice.reference) {
+              <p class="mobile-reference">Ref: {{ invoice.reference }}</p>
+              }
+            </div>
+
+            <div class="card-actions-mobile">
+              @if (authService.hasPermission('change_invoice')) {
+              <button class="mobile-action-btn edit" (click)="showEditForm(invoice)">
+                <mat-icon>edit</mat-icon>
+                Edit
+              </button>
+              }
+              @if (authService.hasPermission('delete_invoice')) {
+              <button class="mobile-action-btn delete" (click)="deleteInvoice(invoice)">
+                <mat-icon>delete</mat-icon>
+                Delete
+              </button>
+              }
+            </div>
+          </div>
+          }
+        </div>
+        <mat-paginator [length]="totalInvoices()" [pageSize]="pageSize()" [pageSizeOptions]="[6, 10, 25, 50]"
+          [pageIndex]="pageIndex()" (page)="onPageChange($event)" showFirstLastButtons
+          aria-label="Select page of invoices">
+        </mat-paginator>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading() && invoices().length === 0) {
+  <mat-card class="empty-state-card">
+    <mat-card-content>
+      <div class="empty-state-content">
+        <div class="empty-icon-wrapper">
+          <mat-icon class="empty-icon">receipt_long</mat-icon>
+        </div>
+        <h2 class="empty-title">No Invoices Found</h2>
+        <p class="empty-text">
+          @if (selectedCompanyId()) {
+          No invoices found for the selected company. Click "Add Invoice" to create one.
+          } @else {
+          No invoices found. Click "Add Invoice" to create your first invoice.
+          }
+        </p>
+        @if (authService.hasPermission('add_invoice')) {
+        <button mat-raised-button color="primary" (click)="showAddForm()" class="empty-action-btn">
+          <mat-icon>add</mat-icon>
+          Add Invoice
+        </button>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+  }
+</div>

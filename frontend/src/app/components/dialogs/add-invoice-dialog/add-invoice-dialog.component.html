@@ -1,0 +1,104 @@
+<div class="dialog-container">
+    <div class="dialog-header">
+        <h2 mat-dialog-title>
+            <mat-icon>receipt_long</mat-icon>
+            New Invoice
+        </h2>
+        <button mat-icon-button (click)="close()" class="close-btn">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <mat-dialog-content>
+        <form [formGroup]="invoiceForm" (ngSubmit)="saveInvoice()" class="dialog-form">
+
+            <!-- Company -->
+            <div class="form-group full-width">
+                <label class="input-label">Company <span class="required">*</span></label>
+                <mat-form-field appearance="outline" class="clean-field">
+                    <mat-select formControlName="company" placeholder="Select Company">
+                        @for (company of companies(); track company.id) {
+                        <mat-option [value]="company.id">
+                            {{ company.name }}
+                        </mat-option>
+                        }
+                    </mat-select>
+                    <mat-icon matPrefix>business</mat-icon>
+                    @if (invoiceForm.get('company')?.invalid && invoiceForm.get('company')?.touched) {
+                    <mat-error>Company is required</mat-error>
+                    }
+                </mat-form-field>
+            </div>
+
+            <!-- Row: Number & Date -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="input-label">Invoice Number <span class="required">*</span></label>
+                    <mat-form-field appearance="outline" class="clean-field">
+                        <input matInput formControlName="invoice_number" placeholder="INV-001">
+                        <mat-icon matPrefix>badge</mat-icon>
+                        @if (invoiceForm.get('invoice_number')?.invalid && invoiceForm.get('invoice_number')?.touched) {
+                        <mat-error>Required</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+
+                <div class="form-group">
+                    <label class="input-label">Invoice Date <span class="required">*</span></label>
+                    <mat-form-field appearance="outline" class="clean-field">
+                        <input matInput type="date" formControlName="invoice_date">
+                        <mat-icon matPrefix>event</mat-icon>
+                        @if (invoiceForm.get('invoice_date')?.invalid && invoiceForm.get('invoice_date')?.touched) {
+                        <mat-error>Required</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- Row: Amount & Reference -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="input-label">Amount <span class="required">*</span></label>
+                    <mat-form-field appearance="outline" class="clean-field">
+                        <input matInput type="number" formControlName="amount" step="0.01" min="0.01"
+                            placeholder="0.00">
+                        <span matPrefix class="currency-prefix">Rs.</span>
+                        @if (invoiceForm.get('amount')?.invalid && invoiceForm.get('amount')?.touched) {
+                        <mat-error>Invalid amount</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+
+                <div class="form-group">
+                    <label class="input-label">Reference</label>
+                    <mat-form-field appearance="outline" class="clean-field">
+                        <input matInput formControlName="reference" placeholder="e.g. PO-123">
+                        <mat-icon matPrefix>link</mat-icon>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group full-width">
+                <label class="input-label">Description</label>
+                <mat-form-field appearance="outline" class="clean-field description-field">
+                    <textarea matInput formControlName="description" rows="5"
+                        placeholder="Enter detailed description here..."></textarea>
+                    <mat-icon matPrefix>description</mat-icon>
+                </mat-form-field>
+            </div>
+
+        </form>
+    </mat-dialog-content>
+
+    <div class="dialog-actions">
+        <button mat-stroked-button (click)="close()" type="button" class="cancel-btn">Cancel</button>
+        <button mat-raised-button (click)="saveInvoice()" [disabled]="invoiceForm.invalid || isLoading()"
+            class="save-btn">
+            @if (isLoading()) {
+            <mat-spinner diameter="18" class="spinner-btn"></mat-spinner>
+            }
+            Create Invoice
+        </button>
+    </div>
+</div>

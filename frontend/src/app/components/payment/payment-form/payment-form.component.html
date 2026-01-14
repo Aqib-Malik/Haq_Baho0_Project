@@ -1,0 +1,106 @@
+<div class="dialog-container">
+    <div class="dialog-header">
+        <div class="title-wrapper">
+            <div class="icon-circle">
+                <mat-icon>payments</mat-icon>
+            </div>
+            <div>
+                <h2 class="dialog-title">{{ isEditMode ? 'Edit Payment' : 'New Payment' }}</h2>
+                <p class="dialog-subtitle">Enter payment details below</p>
+            </div>
+        </div>
+        <button mat-icon-button class="close-btn" (click)="onCancel()">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <div class="dialog-content">
+        <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
+            <div class="form-grid">
+                <!-- Company Selection -->
+                <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+                    <mat-select formControlName="company" placeholder="Select Company">
+                        @for (company of companies(); track company.id) {
+                        <mat-option [value]="company.id">{{ company.name }}</mat-option>
+                        }
+                    </mat-select>
+                    <mat-icon matPrefix>business</mat-icon>
+                    <mat-error *ngIf="paymentForm.get('company')?.hasError('required')">
+                        Company is required
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Payment Number -->
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <input matInput formControlName="payment_number" placeholder="Payment Number" autocomplete="off"
+                        required>
+                    <mat-icon matPrefix>tag</mat-icon>
+                    <mat-error *ngIf="paymentForm.get('payment_number')?.hasError('required')">
+                        Payment number is required
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Payment Date -->
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <input matInput [matDatepicker]="picker" formControlName="payment_date" placeholder="Payment Date"
+                        autocomplete="off" required>
+                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                    <mat-error *ngIf="paymentForm.get('payment_date')?.hasError('required')">
+                        Date is required
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Payment Mode -->
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-select formControlName="payment_mode" placeholder="Payment Mode">
+                        @for (mode of paymentModes; track mode.value) {
+                        <mat-option [value]="mode.value">{{ mode.label }}</mat-option>
+                        }
+                    </mat-select>
+                    <mat-icon matPrefix>category</mat-icon>
+                    <mat-error *ngIf="paymentForm.get('payment_mode')?.hasError('required')">
+                        Payment mode is required
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Amount -->
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <input matInput type="number" formControlName="amount" placeholder="Amount" autocomplete="off"
+                        min="0" required>
+                    <mat-icon matPrefix>currency_rupee</mat-icon>
+                    <mat-error *ngIf="paymentForm.get('amount')?.hasError('required')">
+                        Amount is required
+                    </mat-error>
+                    <mat-error *ngIf="paymentForm.get('amount')?.hasError('min')">
+                        Amount must be greater than 0
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Reference -->
+                <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+                    <input matInput formControlName="reference" placeholder="Reference / Transaction ID"
+                        autocomplete="off">
+                    <mat-icon matPrefix>bookmark</mat-icon>
+                </mat-form-field>
+
+                <!-- Description (Full Width) -->
+                <mat-form-field appearance="outline" class="full-width textarea-field" subscriptSizing="dynamic">
+                    <textarea matInput formControlName="description" rows="3" placeholder="Description"
+                        autocomplete="off"></textarea>
+                    <mat-icon matPrefix>description</mat-icon>
+                </mat-form-field>
+            </div>
+
+            <div class="dialog-actions">
+                <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="isLoading">
+                    Cancel
+                </button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="paymentForm.invalid || isLoading">
+                    <mat-icon>save</mat-icon>
+                    {{ isLoading ? 'Saving...' : (isEditMode ? 'Update Payment' : 'Create Payment') }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

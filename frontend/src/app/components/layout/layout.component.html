@@ -1,0 +1,28 @@
+<div class="app-layout">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="header-left">
+        <div class="logo-container">
+          <img src="/assets/images/logo.jpeg" alt="Haq Bahoo Mian & Company Logo" class="logo-image">
+          <h1 class="app-title">{{ appTitle }}</h1>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <a routerLink="/ledger" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}" class="nav-link">
+          <mat-icon>account_balance</mat-icon>
+          <span>Ledger</span>
+        </a>
+        <a routerLink="/add-company" routerLinkActive="active" class="nav-link">
+          <mat-icon>business</mat-icon>
+          <span>Add Company</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="app-main">
+    <router-outlet />
+  </main>
+</div>

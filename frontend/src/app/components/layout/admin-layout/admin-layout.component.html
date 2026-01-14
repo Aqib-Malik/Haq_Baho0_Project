@@ -1,0 +1,159 @@
+<mat-sidenav-container class="sidenav-container">
+    <mat-sidenav #drawer class="sidenav" fixedInViewport [attr.role]="(isHandset) ? 'dialog' : 'navigation'"
+        [mode]="(isHandset) ? 'over' : 'side'" [opened]="isHandset ? false : isSidebarOpen">
+
+        <!-- Brand Header -->
+        <div class="brand-header">
+            <img src="assets/images/logo.jpeg" alt="Logo" class="brand-logo">
+            <div class="brand-name">Haq Bahoo Mian</div>
+        </div>
+
+        <mat-nav-list>
+            <!-- Accounting Group -->
+            <mat-expansion-panel [class.mat-elevation-z0]="true" class="sidenav-expansion">
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        <mat-icon>account_balance</mat-icon>
+                        <span>Company Ledger</span>
+                    </mat-panel-title>
+                </mat-expansion-panel-header>
+
+                <mat-nav-list class="sub-menu">
+                    <a mat-list-item routerLink="/ledger" routerLinkActive="active-link"
+                        [routerLinkActiveOptions]="{exact: true}" *ngIf="hasPermission('view_company')">
+                        <mat-icon matListItemIcon>dashboard</mat-icon>
+                        <div matListItemTitle>Company Dashboard</div>
+                    </a>
+                    <a mat-list-item routerLink="/invoices" routerLinkActive="active-link"
+                        *ngIf="hasPermission('view_invoice')">
+                        <mat-icon matListItemIcon>receipt</mat-icon>
+                        <div matListItemTitle>Invoices</div>
+                    </a>
+                    <a mat-list-item routerLink="/payments" routerLinkActive="active-link"
+                        *ngIf="hasPermission('view_payment')">
+                        <mat-icon matListItemIcon>payment</mat-icon>
+                        <div matListItemTitle>Payments</div>
+                    </a>
+                </mat-nav-list>
+            </mat-expansion-panel>
+
+
+
+            <!-- Inventory Group -->
+            <mat-expansion-panel [class.mat-elevation-z0]="true" class="sidenav-expansion">
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        <mat-icon>inventory_2</mat-icon>
+                        <span>Inventory</span>
+                    </mat-panel-title>
+                </mat-expansion-panel-header>
+                <mat-nav-list class="sub-menu">
+                    <a mat-list-item (click)="showComingSoon('Inventory List')">
+                        <mat-icon matListItemIcon>list</mat-icon>
+                        <div matListItemTitle>Items List</div>
+                    </a>
+                    <a mat-list-item (click)="showComingSoon('Stock Receipt')">
+                        <mat-icon matListItemIcon>add_shopping_cart</mat-icon>
+                        <div matListItemTitle>Stock Receipt</div>
+                    </a>
+                    <a mat-list-item (click)="showComingSoon('Stock Issue')">
+                        <mat-icon matListItemIcon>output</mat-icon>
+                        <div matListItemTitle>Issue Stock</div>
+                    </a>
+                    <a mat-list-item (click)="showComingSoon('Stock Return')">
+                        <mat-icon matListItemIcon>assignment_return</mat-icon>
+                        <div matListItemTitle>Returns</div>
+                    </a>
+                </mat-nav-list>
+            </mat-expansion-panel>
+
+            <!-- Projects Link -->
+            <a mat-list-item (click)="showComingSoon('Projects')">
+                <mat-icon matListItemIcon>assignment</mat-icon>
+                <div matListItemTitle>Projects</div>
+            </a>
+
+            <!-- HR Group -->
+            <mat-expansion-panel [class.mat-elevation-z0]="true" class="sidenav-expansion">
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        <mat-icon>people_alt</mat-icon>
+                        <span>HR Management</span>
+                    </mat-panel-title>
+                </mat-expansion-panel-header>
+                <mat-nav-list class="sub-menu">
+                    <a mat-list-item (click)="showComingSoon('Employee List')">
+                        <mat-icon matListItemIcon>badge</mat-icon>
+                        <div matListItemTitle>Employees</div>
+                    </a>
+                    <a mat-list-item (click)="showComingSoon('Attendance')">
+                        <mat-icon matListItemIcon>schedule</mat-icon>
+                        <div matListItemTitle>Attendance</div>
+                    </a>
+                </mat-nav-list>
+            </mat-expansion-panel>
+
+            <!-- Reports Link -->
+            <a mat-list-item (click)="showComingSoon('Reports')">
+                <mat-icon matListItemIcon>analytics</mat-icon>
+                <div matListItemTitle>Reports</div>
+            </a>
+
+            <div class="section-header" *ngIf="hasPermission('view_user') || hasPermission('view_group')">
+                Admin Settings
+            </div>
+
+            <!-- Admin Links -->
+            <a mat-list-item routerLink="/admin/users" routerLinkActive="active-link"
+                *ngIf="hasPermission('view_user')">
+                <mat-icon matListItemIcon>people</mat-icon>
+                <div matListItemTitle>Users</div>
+            </a>
+            <a mat-list-item routerLink="/admin/roles" routerLinkActive="active-link"
+                *ngIf="hasPermission('view_group')">
+                <mat-icon matListItemIcon>admin_panel_settings</mat-icon>
+                <div matListItemTitle>Roles & Permissions</div>
+            </a>
+
+            <mat-divider></mat-divider>
+
+            <!-- Logout Link -->
+            <a mat-list-item (click)="logout()" class="logout-item">
+                <mat-icon matListItemIcon color="warn">exit_to_app</mat-icon>
+                <div matListItemTitle>Logout</div>
+            </a>
+
+
+        </mat-nav-list>
+    </mat-sidenav>
+    <mat-sidenav-content>
+        <mat-toolbar color="primary" *ngIf="!isWelcomePage">
+            <button type="button" aria-label="Toggle sidenav" mat-icon-button
+                (click)="isHandset ? drawer.toggle() : toggleSidebar()">
+                <mat-icon aria-label="Side nav toggle icon">{{ isHandset ? 'menu' : (isSidebarOpen ? 'menu_open' :
+                    'menu') }}</mat-icon>
+            </button>
+            <h1 *ngIf="!isHandset">Dashboard</h1>
+            <span class="spacer"></span>
+
+            <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-button">
+                <mat-icon>account_circle</mat-icon>
+            </button>
+            <mat-menu #userMenu="matMenu">
+                <button mat-menu-item disabled>
+                    <mat-icon>person</mat-icon>
+                    <span>{{ (authService.currentUser | async)?.username }}</span>
+                </button>
+                <button mat-menu-item (click)="logout()">
+                    <mat-icon>exit_to_app</mat-icon>
+                    <span>Logout</span>
+                </button>
+            </mat-menu>
+        </mat-toolbar>
+
+        <div class="content-container">
+            <router-outlet></router-outlet>
+        </div>
+
+    </mat-sidenav-content>
+</mat-sidenav-container>

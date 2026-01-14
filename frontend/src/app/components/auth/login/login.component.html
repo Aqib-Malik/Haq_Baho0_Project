@@ -1,0 +1,80 @@
+<div class="login-container">
+    <!-- Floating Particles -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <!-- Geometric Decorations -->
+    <div class="geometric-bg">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+        <div class="square square-1"></div>
+        <div class="square square-2"></div>
+    </div>
+
+    <div class="login-wrapper">
+        <mat-card class="login-card">
+            <mat-card-content>
+                <div class="brand-header">
+                    <div class="logo-circle">
+                        <div class="logo-glow"></div>
+                        <img src="assets/images/logo.jpeg" alt="Haq Bahoo Mian Logo" class="brand-logo-img">
+                    </div>
+                    <h1>Haq Bahoo Mian</h1>
+                    <p class="subtitle">Inventory & HR Management System</p>
+                </div>
+
+                <div class="alert-error" *ngIf="error">
+                    <mat-icon color="warn">error_outline</mat-icon>
+                    <span>{{ error }}</span>
+                </div>
+
+                <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+                    <div class="form-group">
+                        <mat-form-field appearance="outline" color="primary">
+                            <mat-icon matPrefix>person_outline</mat-icon>
+                            <input matInput formControlName="username" placeholder="Username" autocomplete="username">
+                            <mat-error *ngIf="submitted && f['username'].errors">Username is required</mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="form-group">
+                        <mat-form-field appearance="outline" color="primary">
+                            <mat-icon matPrefix>lock_outline</mat-icon>
+                            <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password"
+                                placeholder="Password" autocomplete="current-password">
+                            <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button"
+                                [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword">
+                                <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+                            </button>
+                            <mat-error *ngIf="submitted && f['password'].errors">Password is required</mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <button mat-flat-button class="submit-btn" [disabled]="loading">
+                        <span class="btn-content">
+                            <mat-spinner diameter="20" *ngIf="loading" class="btn-spinner"></mat-spinner>
+                            <span *ngIf="!loading">
+                                <mat-icon class="btn-icon">login</mat-icon>
+                                Sign In
+                            </span>
+                            <span *ngIf="loading">Signing In...</span>
+                        </span>
+                        <span class="btn-ripple"></span>
+                    </button>
+                </form>
+            </mat-card-content>
+        </mat-card>
+
+        <div class="footer">
+            <p>&copy; 2026 Haq Bahoo Mian. <a href="#">Need Help?</a></p>
+        </div>
+    </div>
+</div>

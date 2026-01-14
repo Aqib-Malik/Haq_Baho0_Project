@@ -1,0 +1,232 @@
+/* Dialog Styles */
+.dialog-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: 85vh;
+    /* Reduced slightly to ensure it fits well */
+    overflow: hidden;
+    /* Prevent container scrolling, force inner scroll */
+}
+
+/* ... existing styles ... */
+
+/* Content */
+.dialog-content {
+    padding: 24px;
+    /* Remove padding bottom if needed, or keep it */
+    overflow: hidden;
+    /* Crucial */
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    /* Take remaining space */
+    min-height: 0;
+    /* Crucial for nested flex scrolling */
+}
+
+.role-form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    /* Take all space in dialog-content */
+    min-height: 0;
+    /* Crucial */
+    overflow: hidden;
+    /* Crucial */
+}
+
+/* ... existing styles ... */
+
+/* Permissions List */
+.permissions-list {
+    flex: 1;
+    /* Take remaining space in form */
+    overflow-y: auto;
+    /* Enable scroll here */
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: white;
+    min-height: 0;
+    /* Crucial */
+}
+
+.dialog-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    flex-shrink: 0;
+}
+
+.title-wrapper {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.icon-circle {
+    background: linear-gradient(135deg, #a855f7, #9333ea);
+    /* Role Purple Theme */
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.2);
+    color: white;
+}
+
+.icon-circle mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+}
+
+.dialog-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+.dialog-subtitle {
+    color: #64748b;
+    font-size: 13px;
+    margin: 2px 0 0 0;
+}
+
+.close-btn {
+    color: #94a3b8;
+}
+
+.close-btn:hover {
+    color: #ef4444;
+    background: #fee2e2;
+}
+
+/* Form Fields */
+mat-form-field {
+    width: 100%;
+}
+
+mat-form-field ::ng-deep .mat-mdc-text-field-wrapper {
+    background-color: #f8fafc !important;
+    border-radius: 12px !important;
+    padding: 0 16px !important;
+    border: 1px solid #e2e8f0;
+}
+
+mat-form-field mat-icon[matPrefix] {
+    margin-right: 12px;
+    color: #94a3b8;
+}
+
+/* Permissions Section */
+.permissions-header {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+    margin: 16px 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.permission-search {
+    display: flex;
+    align-items: center;
+    background: #f1f5f9;
+    padding: 10px 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.permission-search mat-icon {
+    color: #94a3b8;
+    margin-right: 10px;
+}
+
+.permission-search input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    outline: none;
+    font-size: 14px;
+    color: #334155;
+}
+
+/* Permissions List */
+/* See top of file for definition */
+
+.permission-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.permission-item:hover {
+    background-color: #f8fafc;
+}
+
+.permission-item.selected {
+    background-color: #f3e8ff;
+    /* Light purple bg */
+}
+
+.permission-item:last-child {
+    border-bottom: none;
+}
+
+.perm-info {
+    margin-left: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.perm-name {
+    font-weight: 500;
+    color: #1e293b;
+    font-size: 14px;
+}
+
+.perm-code {
+    color: #64748b;
+    font-size: 12px;
+}
+
+/* Checkbox Color Override */
+::ng-deep .mat-mdc-checkbox.mat-primary .mdc-checkbox__native-control:checked~.mdc-checkbox__background {
+    background-color: #9333ea !important;
+    /* Purple */
+    border-color: #9333ea !important;
+}
+
+/* Actions */
+.dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    padding-top: 16px;
+    margin-top: 16px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.dialog-actions button {
+    padding: 0 24px;
+    height: 40px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.dialog-actions button[color="primary"] {
+    color: white !important;
+    background: #9333ea;
+    box-shadow: 0 4px 6px -1px rgba(147, 51, 234, 0.2);
+}

@@ -1,0 +1,84 @@
+<div class="dialog-container">
+    <div class="dialog-header">
+        <h2 mat-dialog-title>
+            <mat-icon>receipt</mat-icon>
+            Transaction Details
+        </h2>
+        <button mat-icon-button (click)="close()" class="close-btn">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <mat-dialog-content>
+        <div class="receipt-container">
+
+            <!-- Hero Amount Section -->
+            <div class="amount-hero" [class.debit]="transaction().transaction_type === 'debit'"
+                [class.credit]="transaction().transaction_type === 'credit'">
+                <span class="currency-symbol">Rs.</span>
+                <span class="amount-value">
+                    {{ transaction().transaction_type === 'debit' ? transaction().debit_amount :
+                    transaction().credit_amount | number:'1.2-2' }}
+                </span>
+                <div class="transaction-badge">
+                    {{ getTransactionTypeLabel(transaction().transaction_type) }}
+                </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <!-- Details Grid -->
+            <div class="details-grid">
+                <!-- Row 1 -->
+                <div class="detail-item">
+                    <label>Transaction ID</label>
+                    <div class="value">{{ transaction().transaction_number }}</div>
+                </div>
+                <div class="detail-item">
+                    <label>Date</label>
+                    <div class="value">{{ formatDate(transaction().transaction_date) }}</div>
+                </div>
+
+                <!-- Row 2 -->
+                <div class="detail-item full-width">
+                    <label>Company</label>
+                    <div class="value link-style">
+                        <mat-icon inline>business</mat-icon>
+                        {{ transaction().company_name }}
+                    </div>
+                </div>
+
+                <!-- Row 3 -->
+                @if (transaction().reference) {
+                <div class="detail-item full-width">
+                    <label>Reference</label>
+                    <div class="value">{{ transaction().reference }}</div>
+                </div>
+                }
+
+                <!-- Description -->
+                <div class="detail-item full-width description-section">
+                    <label>Description</label>
+                    <div class="value description-box">
+                        {{ transaction().description || 'No description provided.' }}
+                    </div>
+                </div>
+
+                <!-- Balance Info -->
+                <div class="detail-item full-width balance-section">
+                    <label>Running Balance After Transaction</label>
+                    <div class="value balance-value">{{ formatCurrency(transaction().running_balance) }}</div>
+                </div>
+            </div>
+
+        </div>
+    </mat-dialog-content>
+
+    <div class="dialog-actions">
+        <button mat-stroked-button (click)="close()" class="close-action-btn">Close</button>
+        <!-- Placeholder for future print/download features -->
+        <!-- <button mat-flat-button color="primary" class="print-btn">
+      <mat-icon>print</mat-icon> Print Receipt
+    </button> -->
+    </div>
+</div>

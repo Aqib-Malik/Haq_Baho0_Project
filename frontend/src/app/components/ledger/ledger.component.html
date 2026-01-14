@@ -1,0 +1,379 @@
+<div class="ledger-container">
+  <!-- Header Section -->
+  <!-- Header Section -->
+  @if (selectedCompany()) {
+  <div class="app-header-card">
+    <div class="header-icon-container">
+      <mat-icon>account_balance</mat-icon>
+    </div>
+    <div class="header-content-wrapper">
+      <h1 class="app-page-title">Company Ledger / Accounts</h1>
+      <p class="app-page-subtitle">Track company-wise financial records with automatic debit and credit calculations</p>
+    </div>
+  </div>
+  }
+
+  <!-- Filters Section -->
+  @if (selectedCompany()) {
+  <mat-card class="filters-card">
+    <mat-card-content class="compact-filters">
+      <!-- Company Selector -->
+      <mat-form-field appearance="outline" class="compact-field">
+        <mat-label>Select Company</mat-label>
+        <mat-select [value]="selectedCompany()?.id" (selectionChange)="onCompanySelectionChange($event.value)"
+          placeholder="Choose a company">
+          <mat-option [value]="null">
+            <em>-- Back to Dashboard --</em>
+          </mat-option>
+          @for (company of companies(); track company.id) {
+          <mat-option [value]="company.id">
+            {{ company.name }}
+          </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Date Fields -->
+      <mat-form-field appearance="outline" class="compact-field">
+        <mat-label>Start Date</mat-label>
+        <input matInput [matDatepicker]="startPicker" [value]="startDate()" (dateChange)="onStartDateChange($event)">
+        <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+        <mat-datepicker #startPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="compact-field">
+        <mat-label>End Date</mat-label>
+        <input matInput [matDatepicker]="endPicker" [value]="endDate()" (dateChange)="onEndDateChange($event)">
+        <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+        <mat-datepicker #endPicker></mat-datepicker>
+      </mat-form-field>
+
+      <!-- Actions -->
+      <div class="compact-actions">
+        <button mat-raised-button color="primary" (click)="loadLedger()" [disabled]="!selectedCompany() || isLoading()">
+          <mat-icon>refresh</mat-icon>
+          Refresh
+        </button>
+
+        <div class="divider"></div>
+
+        @if (authService.hasPermission('add_invoice')) {
+        <button mat-raised-button color="accent" (click)="openAddInvoiceDialog()">
+          <mat-icon>add</mat-icon>
+          Add Invoice
+        </button>
+        }
+        @if (authService.hasPermission('add_payment')) {
+        <button mat-raised-button color="primary" (click)="openAddPaymentDialog()">
+          <mat-icon>add</mat-icon>
+          Add Payment
+        </button>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <!-- Loading Spinner -->
+  @if (isLoading() && selectedCompany()) {
+  <div class="loading-container">
+    <div class="loading-content">
+      <mat-spinner diameter="60"></mat-spinner>
+      <p class="loading-text">Loading ledger data...</p>
+    </div>
+  </div>
+  }
+
+  <!-- Ledger Data Section -->
+  @if (ledgerData() && !isLoading() && selectedCompany()) {
+  <div class="ledger-content">
+
+    <!-- Vertical Summary Stack (Left Side usually, but sticking to flow) -->
+    <!-- Reverting to "Prev Design" style requested: Simple cards with Title and Amount -->
+    <div class="simple-summary-container">
+      <mat-card class="simple-stat-card opening">
+        <div class="stat-content">
+          <span class="stat-label">Opening Balance</span>
+          <span class="stat-value">{{ formatCurrency(ledgerData()!.opening_balance) }}</span>
+        </div>
+      </mat-card>
+
+      <mat-card class="simple-stat-card debit">
+        <div class="stat-content">
+          <span class="stat-label">Total Debit</span>
+          <span class="stat-value">{{ formatCurrency(ledgerData()!.total_debit) }}</span>
+        </div>
+      </mat-card>
+
+      <mat-card class="simple-stat-card credit">
+        <div class="stat-content">
+          <span class="stat-label">Total Credit</span>
+          <span class="stat-value">{{ formatCurrency(ledgerData()!.total_credit) }}</span>
+        </div>
+      </mat-card>
+
+      <mat-card class="simple-stat-card closing">
+        <div class="stat-content">
+          <span class="stat-label">Closing Balance</span>
+          <span class="stat-value">{{ formatCurrency(ledgerData()!.closing_balance) }}</span>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- Company Info Card -->
+    <mat-card class="company-info-card">
+      <mat-card-header class="company-header">
+        <div class="company-header-content">
+          <div class="company-title-section">
+            <div class="company-icon-circle">
+              <mat-icon>business_center</mat-icon>
+            </div>
+            <div>
+              <mat-card-title class="company-title">{{ ledgerData()!.company.name }}</mat-card-title>
+              @if (ledgerData()!.company.gstin) {
+              <span class="company-gstin">GSTIN: {{ ledgerData()!.company.gstin }}</span>
+              }
+            </div>
+          </div>
+          <div class="export-buttons">
+            <button mat-raised-button color="accent" (click)="exportPdf()" [disabled]="isLoading()" class="export-btn">
+              <mat-icon>picture_as_pdf</mat-icon>
+              <span>Export PDF</span>
+            </button>
+            <button mat-raised-button color="accent" (click)="exportExcel()" [disabled]="isLoading()"
+              class="export-btn">
+              <mat-icon>table_chart</mat-icon>
+              <span>Export Excel</span>
+            </button>
+          </div>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="company-details">
+          @if (ledgerData()!.company.email) {
+          <div class="detail-item">
+            <mat-icon class="detail-icon">email</mat-icon>
+            <span>{{ ledgerData()!.company.email }}</span>
+          </div>
+          }
+          @if (ledgerData()!.company.phone) {
+          <div class="detail-item">
+            <mat-icon class="detail-icon">phone</mat-icon>
+            <span>{{ ledgerData()!.company.phone }}</span>
+          </div>
+          }
+          @if (ledgerData()!.company.address) {
+          <div class="detail-item full-width">
+            <mat-icon class="detail-icon">location_on</mat-icon>
+            <span>{{ ledgerData()!.company.address }}</span>
+          </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Ledger Table -->
+    <mat-card class="ledger-table-card">
+      <mat-card-header class="table-header">
+        <div class="table-header-content">
+          <div class="table-title-section">
+            <mat-icon class="table-icon">receipt_long</mat-icon>
+            <mat-card-title class="table-title">Transaction Details</mat-card-title>
+          </div>
+          <div class="table-stats">
+            <span class="transaction-count-badge">
+              <mat-icon class="badge-icon">list</mat-icon>
+              {{ ledgerData()!.entries.length }} {{ ledgerData()!.entries.length === 1 ? 'Transaction' : 'Transactions'
+              }}
+            </span>
+          </div>
+        </div>
+      </mat-card-header>
+      <mat-card-content class="table-content">
+        @if (ledgerData()!.entries.length > 0) {
+
+        <!-- Desktop Table View -->
+        <div class="table-wrapper desktop-only">
+          <div class="table-container">
+            <table class="ledger-table">
+              <thead>
+                <tr>
+                  <th class="date-col">Date</th>
+                  <th class="ref-col">Ref #</th>
+                  <th class="desc-col">Description</th>
+                  <th class="amount-col text-right">Debit</th>
+                  <th class="amount-col text-right">Credit</th>
+                  <th class="amount-col text-right">Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (entry of ledgerData()!.entries; track entry.id; let i = $index) {
+                <tr class="table-row clickable-row" (click)="openTransactionDetail(entry)">
+                  <td class="date-cell">
+                    <span class="date-text">{{ formatDate(entry.transaction_date) }}</span>
+                  </td>
+                  <td class="ref-cell">
+                    <span class="type-badge" [class.debit-badge]="entry.transaction_type === 'debit'"
+                      [class.credit-badge]="entry.transaction_type === 'credit'">
+                      {{ entry.transaction_type === 'debit' ? 'INV' : 'PAY' }}
+                    </span>
+                    <span class="ref-number">{{ entry.transaction_number }}</span>
+                  </td>
+                  <td class="desc-cell">
+                    <span class="description-text">{{ entry.description || '-' }}</span>
+                  </td>
+                  <td class="amount-cell text-right debit-cell">
+                    @if(entry.debit_amount) {
+                    {{ formatCurrency(entry.debit_amount) }}
+                    } @else {
+                    <span class="muted">-</span>
+                    }
+                  </td>
+                  <td class="amount-cell text-right credit-cell">
+                    @if(entry.credit_amount) {
+                    {{ formatCurrency(entry.credit_amount) }}
+                    } @else {
+                    <span class="muted">-</span>
+                    }
+                  </td>
+                  <td class="amount-cell text-right balance-cell">
+                    <span class="balance-value">{{ formatCurrency(entry.running_balance) }}</span>
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Mobile Text/Card View -->
+        <div class="mobile-transaction-list mobile-only">
+          @for (entry of ledgerData()!.entries; track entry.id) {
+          <div class="mobile-transaction-card" (click)="openTransactionDetail(entry)">
+            <div class="mobile-card-header">
+              <div class="mobile-date">{{ formatDate(entry.transaction_date) }}</div>
+              <div class="mobile-amount" [class.negative]="entry.transaction_type === 'credit'"
+                [class.positive]="entry.transaction_type === 'debit'">
+                {{ entry.transaction_type === 'debit' ? '+ ' + formatCurrency(entry.debit_amount || '0') : '- ' +
+                formatCurrency(entry.credit_amount || '0') }}
+              </div>
+            </div>
+            <div class="mobile-card-body">
+              <div class="mobile-ref">
+                <span class="type-badge small" [class.debit-badge]="entry.transaction_type === 'debit'"
+                  [class.credit-badge]="entry.transaction_type === 'credit'">
+                  {{ entry.transaction_type === 'debit' ? 'INV' : 'PAY' }}
+                </span>
+                <span class="ref-text">{{ entry.transaction_number }}</span>
+              </div>
+              <div class="mobile-desc">{{ entry.description }}</div>
+            </div>
+            <div class="mobile-card-footer">
+              <span class="balance-label">Balance:</span>
+              <span class="mobile-balance">{{ formatCurrency(entry.running_balance) }}</span>
+            </div>
+          </div>
+          }
+        </div>
+
+        } @else {
+        <div class="no-data-container">
+          <div class="no-data-content">
+            <mat-icon class="no-data-icon">inbox</mat-icon>
+            <h3 class="no-data-title">No Transactions Found</h3>
+            <p class="no-data-text">No transactions were found for the selected period and company.</p>
+          </div>
+        </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+  } @else if (!selectedCompany() && !isLoading()) {
+  <!-- Company Dashboard (No Selection) -->
+  <div class="dashboard-container">
+    <!-- Dashboard Header (Global Theme) -->
+    <div class="app-header-card">
+      <div class="header-icon-container">
+        <mat-icon>dashboard</mat-icon>
+      </div>
+      <div class="header-content-wrapper">
+        <h1 class="app-page-title">Company Dashboard</h1>
+        <p class="app-page-subtitle">Select a company to view their ledger or add a new one</p>
+      </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section">
+      <div class="search-box-wrapper">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input type="text" placeholder="Search companies..." [ngModel]="searchQuery()"
+          (ngModelChange)="onSearchQueryChange($event)" class="search-input">
+      </div>
+    </div>
+
+    <!-- Companies Grid -->
+    <div class="companies-grid">
+      <!-- Add New Company Card -->
+      @if (authService.hasPermission('add_company')) {
+      <div class="company-card add-card" (click)="openAddCompanyDialog()">
+        <div class="add-card-content">
+          <mat-icon class="add-icon">add</mat-icon>
+          <span class="add-text">Add New Company</span>
+        </div>
+      </div>
+      }
+
+      <!-- Company Cards -->
+      @for (company of filteredCompanies(); track company.id) {
+      <div class="company-card" (click)="onCompanySelected(company)">
+        <!-- Top Section: Identity -->
+        <div class="card-top">
+          <div class="company-avatar-small" [style.background]="getAvatarColor(company.name)">
+            {{ company.name.charAt(0).toUpperCase() }}
+          </div>
+          <div class="company-identity">
+            <h3 class="company-name" [matTooltip]="company.name">{{ company.name }}</h3>
+            <span class="company-role">{{ company.contact_person || 'Client' }}</span>
+          </div>
+        </div>
+
+        <!-- Middle Section: Balance -->
+        <div class="card-balance">
+          <span class="label">Outstanding Balance</span>
+          <span class="amount" [class.positive]="getNumericBalance(company.outstanding_balance) > 0"
+            [class.negative]="getNumericBalance(company.outstanding_balance) < 0">
+            {{ formatCurrency(company.outstanding_balance) }}
+          </span>
+        </div>
+
+        <!-- Bottom Section: Contact (Compact) -->
+        <div class="card-footer">
+          @if (company.phone) {
+          <div class="footer-item" [matTooltip]="company.phone">
+            <mat-icon>phone</mat-icon>
+            <span>{{ company.phone }}</span>
+          </div>
+          }
+          @if (company.email) {
+          <div class="footer-item" [matTooltip]="company.email">
+            <mat-icon>email</mat-icon>
+            <span>{{ company.email }}</span>
+          </div>
+          }
+        </div>
+      </div>
+      }
+    </div>
+
+    @if (filteredCompanies().length === 0 && searchQuery()) {
+    <div class="no-results">
+      <div class="no-results-content">
+        <mat-icon>search_off</mat-icon>
+        <h3>No companies found</h3>
+        <p>Try adjusting your search query</p>
+      </div>
+    </div>
+    }
+  </div>
+  }
+</div>

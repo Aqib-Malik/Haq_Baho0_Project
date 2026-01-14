@@ -1,0 +1,74 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="title-wrapper">
+      <div class="icon-circle">
+        <mat-icon>business</mat-icon>
+      </div>
+      <div>
+        <h2 class="dialog-title">Add New Company</h2>
+        <p class="dialog-subtitle">Register a company to track transactions</p>
+      </div>
+    </div>
+    <button mat-icon-button class="close-btn" (click)="goBack()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-content">
+    <form [formGroup]="companyForm" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <!-- Name Field (Full Width) -->
+        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+          <input matInput formControlName="name" placeholder="Company Name" autocomplete="off" required>
+          <mat-icon matPrefix>apartment</mat-icon>
+          <mat-error *ngIf="companyForm.get('name')?.hasError('required')">
+            Company name is required
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Contact Person -->
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <input matInput formControlName="contact_person" placeholder="Contact Person" autocomplete="off">
+          <mat-icon matPrefix>person</mat-icon>
+        </mat-form-field>
+
+        <!-- GSTIN -->
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <input matInput formControlName="gstin" placeholder="GSTIN" autocomplete="off">
+          <mat-icon matPrefix>confirmation_number</mat-icon>
+        </mat-form-field>
+
+        <!-- Email -->
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <input matInput formControlName="email" type="email" placeholder="Email Address" autocomplete="off">
+          <mat-icon matPrefix>email</mat-icon>
+          <mat-error *ngIf="companyForm.get('email')?.hasError('email')">
+            Please enter a valid email address
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Phone -->
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <input matInput formControlName="phone" type="tel" placeholder="Phone Number" autocomplete="off">
+          <mat-icon matPrefix>phone</mat-icon>
+        </mat-form-field>
+
+        <!-- Address (Full Width) -->
+        <mat-form-field appearance="outline" class="full-width textarea-field" subscriptSizing="dynamic">
+          <textarea matInput formControlName="address" rows="3" placeholder="Address" autocomplete="off"></textarea>
+          <mat-icon matPrefix>location_on</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="dialog-actions">
+        <button mat-stroked-button type="button" (click)="goBack()" [disabled]="isLoading">
+          Cancel
+        </button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="companyForm.invalid || isLoading">
+          <mat-icon>save</mat-icon>
+          {{ isLoading ? 'Saving...' : 'Save Company' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

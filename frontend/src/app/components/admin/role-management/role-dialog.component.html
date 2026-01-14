@@ -1,0 +1,60 @@
+<div class="dialog-container">
+    <div class="dialog-header">
+        <div class="title-wrapper">
+            <div class="icon-circle">
+                <mat-icon>shield</mat-icon>
+            </div>
+            <div>
+                <h2 class="dialog-title">{{ isEditMode ? 'Edit Role' : 'Create Role' }}</h2>
+                <p class="dialog-subtitle">{{ isEditMode ? 'Modify role details and permissions' : 'Define a new role
+                    and its permissions' }}</p>
+            </div>
+        </div>
+        <button mat-icon-button class="close-btn" (click)="onCancel()">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <div class="dialog-content">
+        <form [formGroup]="roleForm" (ngSubmit)="onSave()" class="role-form">
+            <!-- Role Name -->
+            <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+                <input matInput formControlName="name" placeholder="Role Name" autocomplete="off" required>
+                <mat-icon matPrefix>badge</mat-icon>
+                <mat-error *ngIf="roleForm.get('name')?.hasError('required')">
+                    Role name is required
+                </mat-error>
+            </mat-form-field>
+
+            <h3 class="permissions-header">Permissions</h3>
+
+            <div class="permission-search">
+                <mat-icon>search</mat-icon>
+                <input type="text" placeholder="Search permissions..." (input)="onSearch($event)">
+            </div>
+
+            <div class="permissions-list">
+                <div *ngFor="let perm of filteredPermissions" class="permission-item"
+                    [class.selected]="isSelected(perm.id)" (click)="togglePermission(perm.id)">
+                    <mat-checkbox [checked]="isSelected(perm.id)" (click)="$event.stopPropagation()"
+                        (change)="togglePermission(perm.id)">
+                    </mat-checkbox>
+                    <div class="perm-info">
+                        <span class="perm-name">{{ perm.name }}</span>
+                        <span class="perm-code">{{ perm.codename }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dialog-actions">
+                <button mat-stroked-button type="button" (click)="onCancel()">
+                    Cancel
+                </button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="roleForm.invalid">
+                    <mat-icon>save</mat-icon>
+                    {{ isEditMode ? 'Update Role' : 'Create Role' }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

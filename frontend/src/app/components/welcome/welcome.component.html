@@ -1,0 +1,61 @@
+<div class="welcome-container">
+    <!-- Floating Particles -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <!-- Geometric Decorations -->
+    <div class="geometric-bg">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+        <div class="square square-1"></div>
+        <div class="square square-2"></div>
+    </div>
+
+    <div class="welcome-content">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="hero-text">
+                <div class="brand-container">
+                    <div class="logo-wrapper">
+                        <div class="logo-glow"></div>
+                        <img src="assets/images/logo.jpeg" alt="Haq Bahoo Mian Logo" class="welcome-logo">
+                    </div>
+                    <h1 class="greeting">Haq Bahoo Mian & Company</h1>
+                </div>
+
+                <div class="date-chip">
+                    <mat-icon>calendar_today</mat-icon>
+                    <span>{{ currentDate | date:'fullDate' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module Grid -->
+        <div class="module-grid">
+            <div *ngFor="let action of quickActions; let i = index" class="module-card" matRipple
+                (click)="handleAction(action)" [style.animation-delay]="(i * 0.1) + 's'">
+                <div class="card-icon-wrapper">
+                    <div class="icon-glow"></div>
+                    <mat-icon>{{ action.icon }}</mat-icon>
+                </div>
+                <div class="card-content">
+                    <h3>{{ action.title }}</h3>
+                    <p>{{ action.description }}</p>
+                </div>
+                <div class="card-action">
+                    <mat-icon>arrow_forward</mat-icon>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
