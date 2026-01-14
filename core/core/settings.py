@@ -18,6 +18,8 @@ ALLOWED_HOSTS = [
     '13.61.5.28',
     'localhost',
     '127.0.0.1',
+    'haqbahoomianco.com',
+    'www.haqbahoomianco.com',
 ]
 
 
