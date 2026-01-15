@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Company, Invoice, Payment, LedgerEntry
+from .models import Company, Invoice, Payment, LedgerEntry, Tax, InventoryItem, Quotation, QuotationItem
 
 
 @admin.register(Company)
@@ -94,3 +94,111 @@ class LedgerEntryAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+
+# --- Quotation Module Admin ---
+
+@admin.register(Tax)
+class TaxAdmin(admin.ModelAdmin):
+    list_display = ('name', 'rate', 'is_active', 'is_default', 'created_at')
+    list_filter = ('is_active', 'is_default')
+    search_fields = ('name', 'description')
+    readonly_fields = ('created_at', 'updated_at')
+    fieldsets = (
+        ('Tax Information', {
+            'fields': ('name', 'rate', 'description')
+        }),
+        ('Settings', {
+            'fields': ('is_active', 'is_default')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(InventoryItem)
+class InventoryItemAdmin(admin.ModelAdmin):
+    list_display = ('name', 'unit_price', 'unit', 'category', 'stock_quantity', 'sku', 'created_at')
+    list_filter = ('category', 'created_at')
+    search_fields = ('name', 'description', 'sku', 'category')
+    readonly_fields = ('created_at', 'updated_at')
+    fieldsets = (
+        ('Item Information', {
+            'fields': ('name', 'description', 'sku', 'category')
+        }),
+        ('Pricing & Stock', {
+            'fields': ('unit_price', 'unit', 'stock_quantity')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+class QuotationItemInline(admin.TabularInline):
+    model = QuotationItem
+    extra = 1
+    fields = ('item_name', 'description', 'quantity', 'unit_price', 'unit', 'subtotal', 'machine_cost')
+    readonly_fields = ('subtotal',)
+
+
+@admin.register(Quotation)
+class QuotationAdmin(admin.ModelAdmin):
+    list_display = ('quotation_number', 'company', 'quotation_date', 'total_amount', 'status', 'created_at')
+    list_filter = ('status', 'quotation_date', 'created_at')
+    search_fields = ('quotation_number', 'company__name', 'notes')
+    date_hierarchy = 'quotation_date'
+    readonly_fields = ('quotation_number', 'subtotal', 'tax_amount', 'discount_amount', 'total_amount', 'created_at', 'updated_at')
+    inlines = [QuotationItemInline]
+    fieldsets = (
+        ('Quotation Information', {
+            'fields': ('quotation_number', 'company', 'quotation_date', 'valid_until', 'status')
+        }),
+        ('Tax & Discount', {
+            'fields': ('tax', 'discount_type', 'discount_value')
+        }),
+        ('Calculated Totals', {
+            'fields': ('subtotal', 'tax_amount', 'discount_amount', 'total_amount'),
+            'classes': ('collapse',)
+        }),
+        ('Notes', {
+            'fields': ('notes',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        obj.calculate_totals()
+        obj.save()
+
+
+@admin.register(QuotationItem)
+class QuotationItemAdmin(admin.ModelAdmin):
+    list_display = ('quotation', 'item_name', 'quantity', 'unit_price', 'unit', 'subtotal')
+    list_filter = ('quotation__quotation_date', 'created_at')
+    search_fields = ('item_name', 'description', 'quotation__quotation_number')
+    readonly_fields = ('subtotal', 'created_at', 'updated_at')
+    fieldsets = (
+        ('Quotation', {
+            'fields': ('quotation', 'inventory_item')
+        }),
+        ('Item Details', {
+            'fields': ('item_name', 'description', 'quantity', 'unit_price', 'unit', 'machine_cost')
+        }),
+        ('Calculated', {
+            'fields': ('subtotal',),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+

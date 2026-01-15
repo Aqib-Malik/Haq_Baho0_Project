@@ -7,18 +7,29 @@ from django.db.models import Sum
 from datetime import datetime
 from decimal import Decimal
 
-from .models import Company, Invoice, Payment, LedgerEntry
+from .models import Company, Invoice, Payment, LedgerEntry, Tax, InventoryItem, Quotation, QuotationItem
 from .serializers import (
     CompanySerializer, InvoiceSerializer, PaymentSerializer,
     LedgerEntrySerializer, LedgerEntryWithBalanceSerializer,
     CompanyLedgerSummarySerializer,
-    UserSerializer, RoleSerializer, PermissionSerializer
+    UserSerializer, RoleSerializer, PermissionSerializer,
+    TaxSerializer, InventoryItemSerializer, QuotationSerializer,
+    QuotationListSerializer, QuotationDetailSerializer, QuotationItemSerializer
 )
 from django.contrib.auth.models import User, Group, Permission
 from .export_utils import export_ledger_pdf, export_ledger_excel
 
 
-class CompanyViewSet(viewsets.ModelViewSet):
+class AuditMixin:
+    """Mixin to automatically set created_by and updated_by fields"""
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+    
+    def perform_update(self, serializer):
+        serializer.save(updated_by=self.request.user)
+
+
+class CompanyViewSet(AuditMixin, viewsets.ModelViewSet):
     """ViewSet for Company CRUD operations"""
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
@@ -41,7 +52,7 @@ class CompanyViewSet(viewsets.ModelViewSet):
         return Response([])
 
 
-class InvoiceViewSet(viewsets.ModelViewSet):
+class InvoiceViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = Invoice.objects.all()
     serializer_class = InvoiceSerializer
     permission_classes = [IsAuthenticated, CustomDjangoModelPermissions]
@@ -54,7 +65,7 @@ class InvoiceViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-class PaymentViewSet(viewsets.ModelViewSet):
+class PaymentViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
     permission_classes = [IsAuthenticated, CustomDjangoModelPermissions]
@@ -226,3 +237,152 @@ class PermissionViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PermissionSerializer
     permission_classes = [IsAuthenticated, CustomDjangoModelPermissions]
     pagination_class = None
+
+
+# --- Quotation Module ViewSets ---
+
+class TaxViewSet(AuditMixin, viewsets.ModelViewSet):
+    """ViewSet for Tax CRUD operations"""
+    queryset = Tax.objects.all()
+    serializer_class = TaxSerializer
+    permission_classes = [IsAuthenticated, CustomDjangoModelPermissions]
+    pagination_class = None
+    
+    def get_queryset(self):
+        queryset = Tax.objects.all()
+        # Filter active taxes by default
+        active_only = self.request.query_params.get('active_only', 'true')
+        if active_only.lower() == 'true':
+            queryset = queryset.filter(is_active=True)
+        return queryset
+    
+    @action(detail=False, methods=['get'])
+    def default(self, request):
+        """Get the default tax"""
+        try:
+            default_tax = Tax.objects.get(is_default=True, is_active=True)
+            serializer = self.get_serializer(default_tax)
+            return Response(serializer.data)
+        except Tax.DoesNotExist:
+            return Response({'error': 'No default tax found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class InventoryItemViewSet(AuditMixin, viewsets.ModelViewSet):
+    """ViewSet for InventoryItem CRUD operations"""
+    queryset = InventoryItem.objects.all()
+    serializer_class = InventoryItemSerializer
+    permission_classes = [IsAuthenticated, CustomDjangoModelPermissions]
+    
+    def get_queryset(self):
+        queryset = InventoryItem.objects.all()
+        
+        # Filter by category
+        category = self.request.query_params.get('category', None)
+        if category:
+            queryset = queryset.filter(category=category)
+        
+        # Search by name
+        search = self.request.query_params.get('search', None)
+        if search:
+            queryset = queryset.filter(name__icontains=search)
+        
+        return queryset
+    
+    @action(detail=False, methods=['get'])
+    def categories(self, request):
+        """Get list of unique categories"""
+        categories = InventoryItem.objects.values_list('category', flat=True).distinct()
+        categories = [cat for cat in categories if cat]  # Filter out None/empty
+        return Response(categories)
+
+
+class QuotationViewSet(AuditMixin, viewsets.ModelViewSet):
+    """ViewSet for Quotation CRUD operations"""
+    queryset = Quotation.objects.all()
+    permission_classes = [IsAuthenticated, CustomDjangoModelPermissions]
+    
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return QuotationListSerializer
+        elif self.action in ['create', 'update', 'partial_update']:
+            return QuotationDetailSerializer
+        return QuotationSerializer
+    
+    def get_queryset(self):
+        queryset = Quotation.objects.all()
+        
+        # Filter by company
+        company_id = self.request.query_params.get('company', None)
+        if company_id:
+            queryset = queryset.filter(company_id=company_id)
+        
+        # Filter by status
+        status_filter = self.request.query_params.get('status', None)
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+        
+        # Filter by date range
+        start_date = self.request.query_params.get('start_date', None)
+        if start_date:
+            try:
+                start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+                queryset = queryset.filter(quotation_date__gte=start_date_obj)
+            except ValueError:
+                pass
+        
+        end_date = self.request.query_params.get('end_date', None)
+        if end_date:
+            try:
+                end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
+                queryset = queryset.filter(quotation_date__lte=end_date_obj)
+            except ValueError:
+                pass
+        
+        return queryset
+    
+    @action(detail=True, methods=['get'])
+    def generate_pdf(self, request, pk=None):
+        """Generate PDF for a quotation"""
+        quotation = self.get_object()
+        
+        try:
+            from .quotation_pdf import generate_quotation_pdf
+            return generate_quotation_pdf(quotation)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    @action(detail=True, methods=['post'])
+    def change_status(self, request, pk=None):
+        """Change quotation status"""
+        quotation = self.get_object()
+        new_status = request.data.get('status')
+        
+        if new_status not in dict(Quotation.STATUS_CHOICES):
+            return Response(
+                {'error': 'Invalid status'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        quotation.status = new_status
+        quotation.save()
+        
+        serializer = self.get_serializer(quotation)
+        return Response(serializer.data)
+
+
+class QuotationItemViewSet(AuditMixin, viewsets.ModelViewSet):
+    """ViewSet for QuotationItem CRUD operations"""
+    queryset = QuotationItem.objects.all()
+    serializer_class = QuotationItemSerializer
+    permission_classes = [IsAuthenticated, CustomDjangoModelPermissions]
+    
+    def get_queryset(self):
+        queryset = QuotationItem.objects.all()
+        
+        # Filter by quotation
+        quotation_id = self.request.query_params.get('quotation', None)
+        if quotation_id:
+            queryset = queryset.filter(quotation_id=quotation_id)
+        
+        return queryset
+

@@ -282,3 +282,55 @@ table.user-table {
         padding: 1rem;
     }
 }
+
+/* Mobile Header Responsiveness */
+@media (max-width: 768px) {
+    .app-header-card {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 16px !important;
+        padding: 20px !important;
+        position: relative !important;
+        z-index: 1 !important;
+    }
+
+    .header-icon-container {
+        width: 48px !important;
+        height: 48px !important;
+    }
+
+    .header-icon-container mat-icon {
+        font-size: 24px !important;
+        width: 24px !important;
+        height: 24px !important;
+    }
+
+    .header-content-wrapper {
+        flex: 1 !important;
+        text-align: left !important;
+    }
+
+    .app-page-title {
+        font-size: 1.5rem !important;
+    }
+
+    .app-page-subtitle {
+        font-size: 0.875rem !important;
+    }
+
+    .header-actions {
+        width: 100% !important;
+        margin-top: 8px !important;
+        position: relative !important;
+        z-index: 10 !important;
+    }
+
+    .header-actions button {
+        width: 100% !important;
+        justify-content: center !important;
+        position: relative !important;
+        z-index: 10 !important;
+        pointer-events: auto !important;
+        touch-action: manipulation !important;
+    }
+}

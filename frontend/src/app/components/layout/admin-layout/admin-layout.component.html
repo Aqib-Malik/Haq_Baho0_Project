@@ -34,6 +34,10 @@
                         <mat-icon matListItemIcon>payment</mat-icon>
                         <div matListItemTitle>Payments</div>
                     </a>
+                    <a mat-list-item routerLink="/quotations" routerLinkActive="active-link">
+                        <mat-icon matListItemIcon>request_quote</mat-icon>
+                        <div matListItemTitle>Quotations</div>
+                    </a>
                 </mat-nav-list>
             </mat-expansion-panel>
 
@@ -127,13 +131,14 @@
         </mat-nav-list>
     </mat-sidenav>
     <mat-sidenav-content>
-        <mat-toolbar color="primary" *ngIf="!isWelcomePage">
+        <mat-toolbar color="primary">
             <button type="button" aria-label="Toggle sidenav" mat-icon-button
                 (click)="isHandset ? drawer.toggle() : toggleSidebar()">
                 <mat-icon aria-label="Side nav toggle icon">{{ isHandset ? 'menu' : (isSidebarOpen ? 'menu_open' :
                     'menu') }}</mat-icon>
             </button>
-            <h1 *ngIf="!isHandset">Dashboard</h1>
+            <h1 *ngIf="!isHandset && !isWelcomePage">Dashboard</h1>
+            <h1 *ngIf="!isHandset && isWelcomePage">Haq Bahoo Mian</h1>
             <span class="spacer"></span>
 
             <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-button">

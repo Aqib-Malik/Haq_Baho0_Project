@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import Company, Invoice, Payment, LedgerEntry
+from .models import Company, Invoice, Payment, LedgerEntry, Tax, InventoryItem, Quotation, QuotationItem
 
 # --- Existing Serializers ---
 
@@ -151,3 +151,125 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['permissions'] = list(perms)
         
         return token
+
+
+# --- Quotation Module Serializers ---
+
+class TaxSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tax
+        fields = '__all__'
+        
+    def validate(self, data):
+        # Ensure only one tax is marked as default
+        if data.get('is_default', False):
+            existing_default = Tax.objects.filter(is_default=True).exclude(
+                pk=self.instance.pk if self.instance else None
+            ).exists()
+            if existing_default:
+                # This will be handled by the model's save method
+                pass
+        return data
+
+
+class InventoryItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InventoryItem
+        fields = '__all__'
+
+
+class QuotationItemSerializer(serializers.ModelSerializer):
+    inventory_item_name = serializers.ReadOnlyField(source='inventory_item.name')
+    
+    class Meta:
+        model = QuotationItem
+        fields = '__all__'
+        read_only_fields = ['subtotal']
+    
+    def validate(self, data):
+        # Ensure either inventory_item or manual item_name is provided
+        if not data.get('inventory_item') and not data.get('item_name'):
+            raise serializers.ValidationError(
+                "Either inventory_item or item_name must be provided"
+            )
+        return data
+
+
+class QuotationSerializer(serializers.ModelSerializer):
+    company_name = serializers.ReadOnlyField(source='company.name')
+    tax_name = serializers.ReadOnlyField(source='tax.name')
+    tax_rate = serializers.ReadOnlyField(source='tax.rate')
+    items = QuotationItemSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Quotation
+        fields = '__all__'
+        read_only_fields = ['quotation_number', 'subtotal', 'tax_amount', 'discount_amount', 'total_amount']
+
+
+class QuotationListSerializer(serializers.ModelSerializer):
+    """Lightweight serializer for list views"""
+    company_name = serializers.ReadOnlyField(source='company.name')
+    tax_name = serializers.ReadOnlyField(source='tax.name')
+    item_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Quotation
+        fields = [
+            'id', 'quotation_number', 'company', 'company_name', 
+            'quotation_date', 'valid_until', 'total_amount', 'status',
+            'tax_name', 'item_count', 'created_at', 'updated_at'
+        ]
+    
+    def get_item_count(self, obj):
+        return obj.items.count()
+
+
+class QuotationDetailSerializer(serializers.ModelSerializer):
+    """Detailed serializer with nested items for create/update operations"""
+    company_name = serializers.ReadOnlyField(source='company.name')
+    tax_name = serializers.ReadOnlyField(source='tax.name')
+    tax_rate = serializers.ReadOnlyField(source='tax.rate')
+    items = QuotationItemSerializer(many=True)
+    
+    class Meta:
+        model = Quotation
+        fields = '__all__'
+        read_only_fields = ['quotation_number', 'subtotal', 'tax_amount', 'discount_amount', 'total_amount']
+    
+    def create(self, validated_data):
+        items_data = validated_data.pop('items', [])
+        quotation = Quotation.objects.create(**validated_data)
+        
+        for item_data in items_data:
+            QuotationItem.objects.create(quotation=quotation, **item_data)
+        
+        # Recalculate totals
+        quotation.calculate_totals()
+        quotation.save()
+        
+        return quotation
+    
+    def update(self, instance, validated_data):
+        items_data = validated_data.pop('items', None)
+        
+        # Update quotation fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        # Update items if provided
+        if items_data is not None:
+            # Delete existing items
+            instance.items.all().delete()
+            
+            # Create new items
+            for item_data in items_data:
+                QuotationItem.objects.create(quotation=instance, **item_data)
+        
+        # Recalculate totals
+        instance.calculate_totals()
+        instance.save()
+        
+        return instance
+

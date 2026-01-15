@@ -15,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-+pxk(8)b$3k2c0n%)yz#hfjk7jh&oti9)l0#s@eki8gc!7gzxh'
 DEBUG = False
 ALLOWED_HOSTS = [
-    '13.61.5.28',
+    'haqbahoomianco.com',
     'localhost',
     '127.0.0.1',
     'haqbahoomianco.com',
@@ -133,7 +133,7 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
     "http://127.0.0.1:4200",
-    "http://13.61.5.28",
+    "https://haqbahoomianco.com",
 ]
 
 

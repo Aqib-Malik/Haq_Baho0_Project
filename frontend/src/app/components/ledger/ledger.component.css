@@ -1596,13 +1596,64 @@
     flex: 1 1 100%;
   }
 
+
   .compact-actions {
     width: 100%;
     margin-left: 0;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
   }
 
   .compact-actions button {
-    flex: 1;
+    flex: none !important;
+    width: 100% !important;
+    padding: 12px 8px !important;
+    min-height: 56px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    font-size: 0.75rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .compact-actions button mat-icon {
+    margin: 0 !important;
+    font-size: 24px !important;
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .compact-actions .divider {
+    display: none !important;
+  }
+
+  /* Transaction Details Header Mobile */
+  .table-header-content {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .table-title-section {
+    width: 100%;
+  }
+
+  .table-stats {
+    width: 100%;
+  }
+
+  .transaction-count-badge {
+    font-size: 0.875rem !important;
+    padding: 8px 14px !important;
+  }
+
+  .badge-icon {
+    font-size: 16px !important;
+    width: 16px !important;
+    height: 16px !important;
   }
 
   /* Company Dashboard Mobile */

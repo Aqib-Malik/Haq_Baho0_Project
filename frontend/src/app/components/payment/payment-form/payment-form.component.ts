@@ -9,9 +9,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { LedgerService } from '../../../services/ledger.service';
+import { NotificationService } from '../../../services/notification.service';
 import { Payment } from '../../../models/payment.model';
 import { Company } from '../../../models/company.model';
 
@@ -28,8 +28,7 @@ import { Company } from '../../../models/company.model';
         MatSelectModule,
         MatDatepickerModule,
         MatNativeDateModule,
-        MatIconModule,
-        MatSnackBarModule
+        MatIconModule
     ],
     templateUrl: './payment-form.component.html',
     styleUrls: ['./payment-form.component.css']
@@ -52,7 +51,7 @@ export class PaymentFormComponent implements OnInit {
     constructor(
         private fb: FormBuilder,
         private ledgerService: LedgerService,
-        private snackBar: MatSnackBar,
+        private notificationService: NotificationService,
         public dialogRef: MatDialogRef<PaymentFormComponent>,
         @Inject(MAT_DIALOG_DATA) public data: { payment?: Payment }
     ) {
@@ -105,19 +104,15 @@ export class PaymentFormComponent implements OnInit {
 
         request$.subscribe({
             next: () => {
-                this.snackBar.open(
-                    `Payment ${this.isEditMode ? 'updated' : 'created'} successfully`,
-                    'Close',
-                    { duration: 3000, panelClass: ['success-snackbar'], verticalPosition: 'top', horizontalPosition: 'end' }
+                this.notificationService.showSuccess(
+                    `Payment ${this.isEditMode ? 'updated' : 'created'} successfully`
                 );
                 this.dialogRef.close(true);
             },
             error: (error) => {
                 console.error('Error saving payment:', error);
-                this.snackBar.open(
-                    error.error?.detail || error.error?.message || 'Failed to save payment',
-                    'Close',
-                    { duration: 5000, panelClass: ['error-snackbar'], verticalPosition: 'top', horizontalPosition: 'end' }
+                this.notificationService.showError(
+                    error.error?.detail || error.error?.message || 'Failed to save payment'
                 );
                 this.isLoading = false;
             }

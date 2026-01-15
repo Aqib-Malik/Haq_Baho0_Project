@@ -1,0 +1,222 @@
+<div class="quotation-container">
+    <!-- Premium Compact Header -->
+    <div class="compact-header">
+        <div class="header-left">
+            <div class="icon-circle-small">
+                <mat-icon>request_quote</mat-icon>
+            </div>
+            <h1 class="page-title-compact">Quotations</h1>
+        </div>
+        <div class="header-right">
+            <!-- Company Filter -->
+            <mat-form-field class="company-field-compact" appearance="outline">
+                <mat-icon matPrefix>business</mat-icon>
+                <mat-select placeholder="All Companies" [value]="selectedCompanyId()"
+                    (selectionChange)="onCompanyFilterChange($event.value)">
+                    <mat-option [value]="null">All Companies</mat-option>
+                    @for (company of companies(); track company.id) {
+                    <mat-option [value]="company.id">{{ company.name }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <!-- Status Filter -->
+            <mat-form-field class="status-field-compact" appearance="outline">
+                <mat-icon matPrefix>filter_list</mat-icon>
+                <mat-select placeholder="All Status" [value]="selectedStatus()"
+                    (selectionChange)="onStatusFilterChange($event.value)">
+                    <mat-option [value]="null">All Status</mat-option>
+                    @for (status of statusOptions; track status.value) {
+                    <mat-option [value]="status.value">{{ status.label }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <!-- Add Button -->
+            <button mat-raised-button class="add-btn-compact" (click)="showAddForm()">
+                <mat-icon>add</mat-icon>
+                Add Quotation
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+    <div class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p class="loading-text">Loading quotations...</p>
+    </div>
+    }
+
+    <!-- Empty State -->
+    @else if (quotations().length === 0) {
+    <mat-card class="empty-state-card">
+        <div class="empty-state-content">
+            <div class="empty-icon-wrapper">
+                <mat-icon class="empty-icon">description</mat-icon>
+            </div>
+            <h2 class="empty-title">No Quotations Found</h2>
+            <p class="empty-text">
+                Get started by creating your first quotation. Track estimates, manage pricing, and generate professional
+                PDFs.
+            </p>
+            <button mat-raised-button class="empty-action-btn" (click)="showAddForm()">
+                <mat-icon>add</mat-icon>
+                Create Quotation
+            </button>
+        </div>
+    </mat-card>
+    }
+
+    <!-- Desktop Table View -->
+    @else {
+    <mat-card class="table-card hide-on-mobile">
+        <div class="table-header">
+            <div class="table-title-section">
+                <mat-icon class="table-icon">receipt_long</mat-icon>
+                <h2 class="table-title">Quotation List</h2>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table mat-table [dataSource]="quotations()" class="data-table">
+                <!-- Quotation Number Column -->
+                <ng-container matColumnDef="quotation_number">
+                    <th mat-header-cell *matHeaderCellDef>Quotation #</th>
+                    <td mat-cell *matCellDef="let quotation">
+                        <span class="quotation-number-badge">{{ quotation.quotation_number }}</span>
+                    </td>
+                </ng-container>
+
+                <!-- Date Column -->
+                <ng-container matColumnDef="quotation_date">
+                    <th mat-header-cell *matHeaderCellDef>Date</th>
+                    <td mat-cell *matCellDef="let quotation" class="date-cell">
+                        <div class="date-wrapper">
+                            <mat-icon class="mini-icon">calendar_today</mat-icon>
+                            {{ formatDate(quotation.quotation_date) }}
+                        </div>
+                    </td>
+                </ng-container>
+
+                <!-- Company Column -->
+                <ng-container matColumnDef="company_name">
+                    <th mat-header-cell *matHeaderCellDef>Company</th>
+                    <td mat-cell *matCellDef="let quotation">
+                        <div class="company-info">
+                            <div class="company-avatar"
+                                [style.background]="getAvatarColor(quotation.company_name || 'N/A')">
+                                {{ getInitials(quotation.company_name || 'N/A') }}
+                            </div>
+                            <span class="company-name">{{ quotation.company_name || 'N/A' }}</span>
+                        </div>
+                    </td>
+                </ng-container>
+
+                <!-- Total Amount Column -->
+                <ng-container matColumnDef="total_amount">
+                    <th mat-header-cell *matHeaderCellDef>Total Amount</th>
+                    <td mat-cell *matCellDef="let quotation">
+                        <span class="amount-badge">{{ formatCurrency(quotation.total_amount) }}</span>
+                    </td>
+                </ng-container>
+
+                <!-- Status Column -->
+                <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>Status</th>
+                    <td mat-cell *matCellDef="let quotation">
+                        <mat-chip [style.background-color]="getStatusColor(quotation.status)" class="status-chip">
+                            {{ getStatusLabel(quotation.status) }}
+                        </mat-chip>
+                    </td>
+                </ng-container>
+
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <td mat-cell *matCellDef="let quotation" class="actions-cell">
+                        <button mat-button class="action-btn-text download-btn" (click)="downloadPdf(quotation)"
+                            matTooltip="Download PDF">
+                            <mat-icon>download</mat-icon>
+                            PDF
+                        </button>
+                        <button mat-button class="action-btn-text edit-btn" (click)="showEditForm(quotation)"
+                            matTooltip="Edit">
+                            <mat-icon>edit</mat-icon>
+                            Edit
+                        </button>
+                        <button mat-button class="action-btn-text delete-btn" (click)="deleteQuotation(quotation)"
+                            matTooltip="Delete">
+                            <mat-icon>delete</mat-icon>
+                            Delete
+                        </button>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="quotation-row"></tr>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <mat-paginator [length]="totalQuotations()" [pageSize]="pageSize()" [pageIndex]="pageIndex()"
+            [pageSizeOptions]="[6, 12, 24, 50]" (page)="onPageChange($event)" showFirstLastButtons>
+        </mat-paginator>
+    </mat-card>
+
+    <!-- Mobile Card View -->
+    <div class="mobile-cards hide-on-desktop">
+        @for (quotation of quotations(); track quotation.id) {
+        <div class="mobile-quotation-card">
+            <div class="card-header-mobile">
+                <div class="header-top-row">
+                    <span class="quotation-number-badge">{{ quotation.quotation_number }}</span>
+                    <mat-chip [style.background-color]="getStatusColor(quotation.status)" class="status-chip-mobile">
+                        {{ getStatusLabel(quotation.status) }}
+                    </mat-chip>
+                </div>
+                <div class="date-wrapper-mobile">
+                    <mat-icon class="mini-icon">calendar_today</mat-icon>
+                    {{ formatDate(quotation.quotation_date) }}
+                </div>
+            </div>
+
+            <div class="card-body-mobile">
+                <div class="company-info-mobile">
+                    <div class="company-avatar small"
+                        [style.background]="getAvatarColor(quotation.company_name || 'N/A')">
+                        {{ getInitials(quotation.company_name || 'N/A') }}
+                    </div>
+                    <span class="company-name">{{ quotation.company_name || 'N/A' }}</span>
+                </div>
+
+                <div class="amount-section-mobile">
+                    <span class="amount-label">Total Amount</span>
+                    <span class="amount-badge">{{ formatCurrency(quotation.total_amount) }}</span>
+                </div>
+            </div>
+
+            <div class="card-actions-mobile">
+                <button mat-button class="mobile-action-btn download" (click)="downloadPdf(quotation)">
+                    <mat-icon>download</mat-icon>
+                    PDF
+                </button>
+                <button mat-button class="mobile-action-btn edit" (click)="showEditForm(quotation)">
+                    <mat-icon>edit</mat-icon>
+                    Edit
+                </button>
+                <button mat-button class="mobile-action-btn delete" (click)="deleteQuotation(quotation)">
+                    <mat-icon>delete</mat-icon>
+                    Delete
+                </button>
+            </div>
+        </div>
+        }
+
+        <!-- Mobile Pagination -->
+        <mat-paginator [length]="totalQuotations()" [pageSize]="pageSize()" [pageIndex]="pageIndex()"
+            [pageSizeOptions]="[6, 12, 24]" (page)="onPageChange($event)">
+        </mat-paginator>
+    </div>
+    }
+</div>

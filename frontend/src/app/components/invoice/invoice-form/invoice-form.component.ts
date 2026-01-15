@@ -9,9 +9,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { LedgerService } from '../../../services/ledger.service';
+import { NotificationService } from '../../../services/notification.service';
 import { Invoice } from '../../../models/invoice.model';
 import { Company } from '../../../models/company.model';
 
@@ -28,8 +28,7 @@ import { Company } from '../../../models/company.model';
         MatSelectModule,
         MatDatepickerModule,
         MatNativeDateModule,
-        MatIconModule,
-        MatSnackBarModule
+        MatIconModule
     ],
     templateUrl: './invoice-form.component.html',
     styleUrls: ['./invoice-form.component.css']
@@ -43,7 +42,7 @@ export class InvoiceFormComponent implements OnInit {
     constructor(
         private fb: FormBuilder,
         private ledgerService: LedgerService,
-        private snackBar: MatSnackBar,
+        private notificationService: NotificationService,
         public dialogRef: MatDialogRef<InvoiceFormComponent>,
         @Inject(MAT_DIALOG_DATA) public data: { invoice?: Invoice }
     ) {
@@ -95,19 +94,15 @@ export class InvoiceFormComponent implements OnInit {
 
         request$.subscribe({
             next: () => {
-                this.snackBar.open(
-                    `Invoice ${this.isEditMode ? 'updated' : 'created'} successfully`,
-                    'Close',
-                    { duration: 3000, panelClass: ['success-snackbar'], verticalPosition: 'top', horizontalPosition: 'end' }
+                this.notificationService.showSuccess(
+                    `Invoice ${this.isEditMode ? 'updated' : 'created'} successfully`
                 );
                 this.dialogRef.close(true);
             },
             error: (error) => {
                 console.error('Error saving invoice:', error);
-                this.snackBar.open(
-                    error.error?.detail || error.error?.message || 'Failed to save invoice',
-                    'Close',
-                    { duration: 5000, panelClass: ['error-snackbar'], verticalPosition: 'top', horizontalPosition: 'end' }
+                this.notificationService.showError(
+                    error.error?.detail || error.error?.message || 'Failed to save invoice'
                 );
                 this.isLoading = false;
             }

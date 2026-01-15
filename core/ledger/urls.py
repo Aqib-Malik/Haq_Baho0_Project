@@ -6,7 +6,8 @@ from rest_framework_simplejwt.views import (
 )
 from .views import (
     CompanyViewSet, InvoiceViewSet, PaymentViewSet, LedgerViewSet,
-    UserViewSet, RoleViewSet, PermissionViewSet
+    UserViewSet, RoleViewSet, PermissionViewSet,
+    TaxViewSet, InventoryItemViewSet, QuotationViewSet, QuotationItemViewSet
 )
 from .serializers import CustomTokenObtainPairSerializer
 
@@ -21,6 +22,11 @@ router.register(r'ledger', LedgerViewSet, basename='ledger')
 router.register(r'users', UserViewSet, basename='user')
 router.register(r'roles', RoleViewSet, basename='role')
 router.register(r'permissions', PermissionViewSet, basename='permission')
+# Quotation module routes
+router.register(r'taxes', TaxViewSet, basename='tax')
+router.register(r'inventory-items', InventoryItemViewSet, basename='inventory-item')
+router.register(r'quotations', QuotationViewSet, basename='quotation')
+router.register(r'quotation-items', QuotationItemViewSet, basename='quotation-item')
 
 urlpatterns = [
     path('api/', include(router.urls)),

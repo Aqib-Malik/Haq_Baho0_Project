@@ -8,7 +8,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -16,6 +15,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 import { LedgerService } from '../../services/ledger.service';
 import { AuthService } from '../../services/auth.service';
+import { NotificationService } from '../../services/notification.service';
 import { Company } from '../../models/company.model';
 import { CompanyLedgerResponse, LedgerEntry } from '../../models/ledger.model';
 import { InvoiceFormComponent } from '../invoice/invoice-form/invoice-form.component';
@@ -29,14 +29,13 @@ import { CompanyFormComponent } from '../company/company-form/company-form.compo
   imports: [
     CommonModule,
     FormsModule,
-    MatCardModule, // Card
+    MatCardModule,
     MatSelectModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule,
     MatTooltipModule,
     MatChipsModule,
     MatDatepickerModule,
@@ -63,7 +62,7 @@ export class LedgerComponent implements OnInit {
 
   constructor(
     private ledgerService: LedgerService,
-    private snackBar: MatSnackBar,
+    private notificationService: NotificationService,
     public authService: AuthService
   ) { }
 
@@ -100,7 +99,7 @@ export class LedgerComponent implements OnInit {
         this.filterCompanies(); // Initialize filtered list
         this.isLoadingCompanies.set(false);
         if (companies.length === 0) {
-          this.showError('No companies found. Please add companies via Django admin panel at http://localhost:8000/admin');
+          this.showError('No companies found. Please add companies via Django admin panel at https://haqbahoomianco.com/admin');
         }
       },
       error: (error) => {
@@ -288,21 +287,11 @@ export class LedgerComponent implements OnInit {
   }
 
   showSuccess(message: string): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 3000,
-      horizontalPosition: 'end',
-      verticalPosition: 'top',
-      panelClass: ['success-snackbar']
-    });
+    this.notificationService.showSuccess(message);
   }
 
   showError(message: string): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 5000,
-      horizontalPosition: 'end',
-      verticalPosition: 'top',
-      panelClass: ['error-snackbar']
-    });
+    this.notificationService.showError(message);
   }
 
   onStartDateChange(event: any): void {

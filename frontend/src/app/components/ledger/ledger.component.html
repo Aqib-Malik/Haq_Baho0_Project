@@ -19,7 +19,6 @@
     <mat-card-content class="compact-filters">
       <!-- Company Selector -->
       <mat-form-field appearance="outline" class="compact-field">
-        <mat-label>Select Company</mat-label>
         <mat-select [value]="selectedCompany()?.id" (selectionChange)="onCompanySelectionChange($event.value)"
           placeholder="Choose a company">
           <mat-option [value]="null">

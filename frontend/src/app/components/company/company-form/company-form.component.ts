@@ -7,9 +7,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { LedgerService } from '../../../services/ledger.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-company-form',
@@ -23,7 +23,6 @@ import { LedgerService } from '../../../services/ledger.service';
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatSnackBarModule,
     MatDialogModule
   ],
   templateUrl: './company-form.component.html',
@@ -33,7 +32,7 @@ export class CompanyFormComponent {
   private fb = inject(FormBuilder);
   private ledgerService = inject(LedgerService);
   private router = inject(Router);
-  private snackBar = inject(MatSnackBar);
+  private notificationService = inject(NotificationService);
   public dialogRef = inject(MatDialogRef<CompanyFormComponent>);
 
   companyForm: FormGroup = this.fb.group({
@@ -52,13 +51,8 @@ export class CompanyFormComponent {
       this.isLoading = true;
       this.ledgerService.createCompany(this.companyForm.value).subscribe({
         next: (company) => {
-          this.snackBar.open('Company added successfully!', 'Close', {
-            duration: 3000,
-            horizontalPosition: 'end',
-            verticalPosition: 'top',
-            panelClass: ['success-snackbar']
-          });
-          this.dialogRef.close(true); // Return true on success
+          this.notificationService.showSuccess('Company added successfully!');
+          this.dialogRef.close(true);
         },
         error: (error) => {
           console.error('Error adding company:', error);
@@ -67,12 +61,7 @@ export class CompanyFormComponent {
           if (error.error && error.error.name) {
             errorMessage = `Error: ${error.error.name[0]}`;
           }
-          this.snackBar.open(errorMessage, 'Close', {
-            duration: 5000,
-            horizontalPosition: 'end',
-            verticalPosition: 'top',
-            panelClass: ['error-snackbar']
-          });
+          this.notificationService.showError(errorMessage);
         }
       });
     } else {

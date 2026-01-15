@@ -30,8 +30,8 @@ export class UserDialogComponent implements OnInit {
     userForm: FormGroup;
     roles: any[] = [];
     isEditMode: boolean = false;
-    apiUrl = 'http://127.0.0.1:8000/api/users/';
-    rolesUrl = 'http://127.0.0.1:8000/api/roles/';
+    apiUrl = 'https://haqbahoomianco.com/api/users/';
+    rolesUrl = 'https://haqbahoomianco.com/api/roles/';
 
     constructor(
         private fb: FormBuilder,

@@ -31,7 +31,7 @@ import { NotificationService } from '../../../services/notification.service';
 export class UserManagementComponent implements OnInit {
     displayedColumns: string[] = ['username', 'email', 'firstName', 'lastName', 'roles', 'actions'];
     dataSource: any[] = [];
-    apiUrl = 'http://127.0.0.1:8000/api/users/';
+    apiUrl = 'https://haqbahoomianco.com/api/users/';
     loading = false;
 
     constructor(

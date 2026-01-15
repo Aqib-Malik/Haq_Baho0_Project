@@ -30,6 +30,18 @@ export const routes: Routes = [
                 loadComponent: () => import('./components/payment/payment.component').then(m => m.PaymentComponent)
             },
             {
+                path: 'quotations',
+                loadComponent: () => import('./components/quotation/quotation.component').then(m => m.QuotationComponent)
+            },
+            {
+                path: 'quotations/new',
+                loadComponent: () => import('./components/quotation/quotation-form/quotation-form.component').then(m => m.QuotationFormComponent)
+            },
+            {
+                path: 'quotations/edit/:id',
+                loadComponent: () => import('./components/quotation/quotation-form/quotation-form.component').then(m => m.QuotationFormComponent)
+            },
+            {
                 path: 'add-company',
                 loadComponent: () => import('./components/company/company-form/company-form.component').then(m => m.CompanyFormComponent)
             },

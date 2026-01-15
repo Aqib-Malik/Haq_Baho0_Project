@@ -1,0 +1,247 @@
+<div class="form-container">
+    <div class="form-header">
+        <div class="header-content">
+            <div class="icon-circle">
+                <mat-icon>{{ isEditMode() ? 'edit' : 'add' }}</mat-icon>
+            </div>
+            <div class="header-text">
+                <h1 class="form-title">{{ isEditMode() ? 'Edit Quotation' : 'Create Quotation' }}</h1>
+                <p class="form-subtitle">{{ isEditMode() ? 'Update quotation details and items' : 'Fill in the details
+                    to create a new quotation' }}</p>
+            </div>
+        </div>
+    </div>
+
+    <form [formGroup]="quotationForm" (ngSubmit)="onSubmit()" class="quotation-form">
+        <!-- Basic Information Section -->
+        <div class="form-section">
+            <h2 class="section-title">
+                <mat-icon>business</mat-icon>
+                Basic Information
+            </h2>
+            <div class="form-grid">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Company</mat-label>
+                    <mat-icon matPrefix>business</mat-icon>
+                    <mat-select formControlName="company" required>
+                        @for (company of companies(); track company.id) {
+                        <mat-option [value]="company.id">{{ company.name }}</mat-option>
+                        }
+                    </mat-select>
+                    <mat-error>Company is required</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Quotation Date</mat-label>
+                    <mat-icon matPrefix>calendar_today</mat-icon>
+                    <input matInput [matDatepicker]="quotationDatePicker" formControlName="quotation_date" required>
+                    <mat-datepicker-toggle matSuffix [for]="quotationDatePicker"></mat-datepicker-toggle>
+                    <mat-datepicker #quotationDatePicker></mat-datepicker>
+                    <mat-error>Quotation date is required</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Valid Until</mat-label>
+                    <mat-icon matPrefix>event</mat-icon>
+                    <input matInput [matDatepicker]="validUntilPicker" formControlName="valid_until">
+                    <mat-datepicker-toggle matSuffix [for]="validUntilPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #validUntilPicker></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Status</mat-label>
+                    <mat-icon matPrefix>flag</mat-icon>
+                    <mat-select formControlName="status">
+                        @for (status of statusOptions; track status.value) {
+                        <mat-option [value]="status.value">{{ status.label }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+            </div>
+        </div>
+
+        <!-- Items Section -->
+        <div class="form-section items-section">
+            <div class="section-header-with-action">
+                <h2 class="section-title">
+                    <mat-icon>shopping_cart</mat-icon>
+                    Items
+                </h2>
+                <button mat-raised-button type="button" class="add-item-btn" (click)="addItem()">
+                    <mat-icon>add</mat-icon>
+                    Add Item
+                </button>
+            </div>
+
+            <div formArrayName="items" class="items-list">
+                @for (item of items.controls; track $index; let i = $index) {
+                <div [formGroupName]="i" class="item-card">
+                    <div class="item-header">
+                        <span class="item-number">#{{ i + 1 }}</span>
+                        <button mat-icon-button type="button" class="remove-btn" (click)="removeItem(i)"
+                            [disabled]="items.length === 1" matTooltip="Remove item">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+
+                    <div class="item-content">
+                        <!-- Manual Entry Toggle -->
+                        <div class="toggle-section">
+                            <mat-slide-toggle formControlName="use_manual"
+                                (change)="toggleManualEntry(i, $event.checked)">
+                                Manual Entry
+                            </mat-slide-toggle>
+                        </div>
+
+                        <!-- Inventory Item Selection (if not manual) -->
+                        @if (!item.get('use_manual')?.value) {
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Select from Inventory</mat-label>
+                            <mat-icon matPrefix>inventory_2</mat-icon>
+                            <mat-select formControlName="inventory_item"
+                                (selectionChange)="onInventoryItemSelected(i, $event.value)">
+                                <mat-option [value]="null">-- Select Item --</mat-option>
+                                @for (invItem of inventoryItems(); track invItem.id) {
+                                <mat-option [value]="invItem.id">{{ invItem.name }} (Rs {{ invItem.unit_price }}/{{
+                                    invItem.unit }})</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                        }
+
+                        <!-- Item Details -->
+                        <div class="item-grid">
+                            <mat-form-field appearance="outline" class="item-name-field">
+                                <mat-label>Item Name</mat-label>
+                                <mat-icon matPrefix>label</mat-icon>
+                                <input matInput formControlName="item_name" required>
+                                <mat-error>Item name is required</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Description</mat-label>
+                                <textarea matInput formControlName="description" rows="2"></textarea>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline">
+                                <mat-label>Quantity</mat-label>
+                                <input matInput type="number" formControlName="quantity" required min="0.01"
+                                    step="0.01">
+                                <mat-error>Quantity is required</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline">
+                                <mat-label>Unit Price</mat-label>
+                                <span matPrefix>Rs&nbsp;</span>
+                                <input matInput type="number" formControlName="unit_price" required min="0" step="0.01">
+                                <mat-error>Unit price is required</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline">
+                                <mat-label>Unit</mat-label>
+                                <input matInput formControlName="unit" required>
+                                <mat-error>Unit is required</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline">
+                                <mat-label>Machine Cost (Optional)</mat-label>
+                                <span matPrefix>Rs&nbsp;</span>
+                                <input matInput type="number" formControlName="machine_cost" min="0" step="0.01">
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Item Subtotal -->
+                        <div class="item-subtotal">
+                            <span class="subtotal-label">Item Subtotal:</span>
+                            <span class="subtotal-amount">{{ formatCurrency(getItemSubtotal(i)) }}</span>
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+
+        <!-- Calculation Section -->
+        <div class="form-section calculation-section">
+            <h2 class="section-title">
+                <mat-icon>calculate</mat-icon>
+                Calculations
+            </h2>
+
+            <div class="calculation-grid">
+                <mat-form-field appearance="outline">
+                    <mat-label>Tax</mat-label>
+                    <mat-icon matPrefix>receipt</mat-icon>
+                    <mat-select formControlName="tax">
+                        <mat-option [value]="null">No Tax</mat-option>
+                        @for (tax of taxes(); track tax.id) {
+                        <mat-option [value]="tax.id">{{ tax.name }} ({{ tax.rate }}%)</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Discount Type</mat-label>
+                    <mat-icon matPrefix>local_offer</mat-icon>
+                    <mat-select formControlName="discount_type">
+                        <mat-option value="percentage">Percentage</mat-option>
+                        <mat-option value="fixed">Fixed Amount</mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Discount Value</mat-label>
+                    <span matPrefix>{{ quotationForm.get('discount_type')?.value === 'percentage' ? '%' : 'Rs'
+                        }}&nbsp;</span>
+                    <input matInput type="number" formControlName="discount_value" min="0" step="0.01">
+                </mat-form-field>
+            </div>
+
+            <!-- Totals Display -->
+            <div class="totals-display">
+                <div class="total-row">
+                    <span class="total-label">Subtotal:</span>
+                    <span class="total-value">{{ formatCurrency(subtotal()) }}</span>
+                </div>
+                <div class="total-row">
+                    <span class="total-label">Tax ({{ getSelectedTaxRate() }}%):</span>
+                    <span class="total-value">{{ formatCurrency(taxAmount()) }}</span>
+                </div>
+                <div class="total-row">
+                    <span class="total-label">Discount:</span>
+                    <span class="total-value discount">- {{ formatCurrency(discountAmount()) }}</span>
+                </div>
+                <div class="total-row grand-total">
+                    <span class="total-label">Total Amount:</span>
+                    <span class="total-value">{{ formatCurrency(totalAmount()) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="form-section">
+            <h2 class="section-title">
+                <mat-icon>notes</mat-icon>
+                Notes / Terms & Conditions
+            </h2>
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Add notes or terms and conditions</mat-label>
+                <textarea matInput formControlName="notes" rows="4"
+                    placeholder="Enter any additional notes, terms, or conditions..."></textarea>
+            </mat-form-field>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button mat-raised-button type="button" class="cancel-btn" (click)="onCancel()" [disabled]="isLoading()">
+                <mat-icon>close</mat-icon>
+                Cancel
+            </button>
+            <button mat-raised-button type="submit" class="submit-btn"
+                [disabled]="isLoading() || quotationForm.invalid">
+                <mat-icon>{{ isEditMode() ? 'save' : 'add' }}</mat-icon>
+                {{ isEditMode() ? 'Update Quotation' : 'Create Quotation' }}
+            </button>
+        </div>
+    </form>
+</div>
