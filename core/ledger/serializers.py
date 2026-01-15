@@ -185,13 +185,23 @@ class QuotationItemSerializer(serializers.ModelSerializer):
         model = QuotationItem
         fields = '__all__'
         read_only_fields = ['subtotal']
+        extra_kwargs = {
+            'quotation': {'required': False}  # Not required for nested creation
+        }
     
     def validate(self, data):
         # Ensure either inventory_item or manual item_name is provided
         if not data.get('inventory_item') and not data.get('item_name'):
-            raise serializers.ValidationError(
-                "Either inventory_item or item_name must be provided"
-            )
+            raise serializers.ValidationError("Either inventory_item or item_name must be provided")
+        
+        # If inventory_item is selected, auto-populate fields
+        if data.get('inventory_item') and not data.get('item_name'):
+            data['item_name'] = data['inventory_item'].name
+            if not data.get('unit_price'):
+                data['unit_price'] = data['inventory_item'].unit_price
+            if not data.get('unit'):
+                data['unit'] = data['inventory_item'].unit
+        
         return data
 
 
