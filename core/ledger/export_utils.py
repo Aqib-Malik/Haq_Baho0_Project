@@ -180,7 +180,7 @@ def export_ledger_pdf(company, start_date=None, end_date=None):
     summary_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#3949ab')),
         ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#5c6bc0')),
-        ('TEXTCOLOR', (0, 0), (-1, -1), colors.whitesmoke),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.white),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
         ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
