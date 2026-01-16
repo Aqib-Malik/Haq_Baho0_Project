@@ -222,13 +222,14 @@ class QuotationListSerializer(serializers.ModelSerializer):
     company_name = serializers.ReadOnlyField(source='company.name')
     tax_name = serializers.ReadOnlyField(source='tax.name')
     item_count = serializers.SerializerMethodField()
+    items = QuotationItemSerializer(many=True, read_only=True)
     
     class Meta:
         model = Quotation
         fields = [
             'id', 'quotation_number', 'company', 'company_name', 
             'quotation_date', 'valid_until', 'total_amount', 'status',
-            'tax_name', 'item_count', 'created_at', 'updated_at'
+            'tax_name', 'item_count', 'items', 'created_at', 'updated_at'
         ]
     
     def get_item_count(self, obj):
