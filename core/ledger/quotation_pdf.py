@@ -2,179 +2,189 @@ from django.http import HttpResponse
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib import colors
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 from reportlab.pdfgen import canvas
 from io import BytesIO
 from decimal import Decimal
+import os
 
 
 def generate_quotation_pdf(quotation):
-    """Generate PDF for a quotation"""
+    """Generate PDF for a quotation matching the company format"""
     # Create the HttpResponse object with PDF headers
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="quotation_{quotation.quotation_number}.pdf"'
     
     # Create the PDF object using BytesIO buffer
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=30, leftMargin=30,
-                           topMargin=30, bottomMargin=30)
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=40, leftMargin=40,
+                           topMargin=40, bottomMargin=60)
     
     # Container for the 'Flowable' objects
     elements = []
     
     # Define styles
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'CustomTitle',
+    
+    # Company header style
+    company_name_style = ParagraphStyle(
+        'CompanyName',
         parent=styles['Heading1'],
-        fontSize=24,
-        textColor=colors.HexColor('#667eea'),
-        spaceAfter=30,
+        fontSize=28,
+        textColor=colors.black,
+        spaceAfter=2,
         alignment=TA_CENTER,
-        fontName='Helvetica-Bold'
+        fontName='Helvetica-Bold',
+        leading=32
     )
     
-    heading_style = ParagraphStyle(
-        'CustomHeading',
-        parent=styles['Heading2'],
-        fontSize=14,
-        textColor=colors.HexColor('#0f172a'),
-        spaceAfter=12,
-        fontName='Helvetica-Bold'
-    )
-    
-    normal_style = ParagraphStyle(
-        'CustomNormal',
+    company_subtitle_style = ParagraphStyle(
+        'CompanySubtitle',
         parent=styles['Normal'],
         fontSize=10,
-        textColor=colors.HexColor('#334155'),
+        textColor=colors.black,
+        spaceAfter=20,
+        alignment=TA_LEFT,
+        fontName='Helvetica'
     )
     
-    # Title
-    title = Paragraph(f"<b>QUOTATION</b>", title_style)
-    elements.append(title)
-    elements.append(Spacer(1, 12))
+    date_style = ParagraphStyle(
+        'DateStyle',
+        parent=styles['Normal'],
+        fontSize=10,
+        textColor=colors.black,
+        alignment=TA_RIGHT,
+        fontName='Helvetica'
+    )
     
-    # Quotation details
-    details_data = [
-        ['Quotation #:', quotation.quotation_number, 'Date:', quotation.quotation_date.strftime('%d %b, %Y')],
-        ['Company:', quotation.company.name, 'Valid Until:', quotation.valid_until.strftime('%d %b, %Y') if quotation.valid_until else 'N/A'],
-        ['Status:', quotation.get_status_display(), '', ''],
+    subject_style = ParagraphStyle(
+        'SubjectStyle',
+        parent=styles['Normal'],
+        fontSize=11,
+        textColor=colors.black,
+        spaceAfter=10,
+        alignment=TA_LEFT,
+        fontName='Helvetica-Bold'
+    )
+    
+    quotation_heading_style = ParagraphStyle(
+        'QuotationHeading',
+        parent=styles['Heading2'],
+        fontSize=16,
+        textColor=colors.black,
+        spaceAfter=10,
+        alignment=TA_CENTER,
+        fontName='Helvetica-Bold',
+        leading=20
+    )
+    
+    item_title_style = ParagraphStyle(
+        'ItemTitle',
+        parent=styles['Normal'],
+        fontSize=11,
+        textColor=colors.black,
+        spaceAfter=8,
+        alignment=TA_LEFT,
+        fontName='Helvetica-Bold',
+        underline=True
+    )
+    
+    item_desc_style = ParagraphStyle(
+        'ItemDesc',
+        parent=styles['Normal'],
+        fontSize=10,
+        textColor=colors.black,
+        spaceAfter=4,
+        alignment=TA_LEFT,
+        fontName='Helvetica',
+        leftIndent=20
+    )
+    
+    footer_style = ParagraphStyle(
+        'FooterStyle',
+        parent=styles['Normal'],
+        fontSize=9,
+        textColor=colors.white,
+        alignment=TA_CENTER,
+        fontName='Helvetica'
+    )
+    
+    # Header with company name
+    header_data = [
+        [Paragraph('<b>HAQ BAHOO MIAN & COMPANY</b>', company_name_style)],
     ]
-    
-    details_table = Table(details_data, colWidths=[1.5*inch, 2.5*inch, 1.5*inch, 2*inch])
-    details_table.setStyle(TableStyle([
-        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('FONTNAME', (2, 0), (2, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#334155')),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+    header_table = Table(header_data, colWidths=[7*inch])
+    header_table.setStyle(TableStyle([
+        ('LINEBELOW', (0, 0), (-1, 0), 2, colors.black),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
     ]))
-    
-    elements.append(details_table)
-    elements.append(Spacer(1, 20))
-    
-    # Items heading
-    items_heading = Paragraph("<b>Items</b>", heading_style)
-    elements.append(items_heading)
+    elements.append(header_table)
     elements.append(Spacer(1, 10))
     
-    # Items table
-    items_data = [['#', 'Item', 'Qty', 'Unit', 'Rate (Rs)', 'Amount (Rs)']]
-    
-    for idx, item in enumerate(quotation.items.all(), 1):
-        items_data.append([
-            str(idx),
-            f"{item.item_name}\n{item.description if item.description else ''}",
-            str(item.quantity),
-            item.unit,
-            f"{float(item.unit_price):,.2f}",
-            f"{float(item.subtotal):,.2f}"
-        ])
-    
-    items_table = Table(items_data, colWidths=[0.5*inch, 3*inch, 0.8*inch, 0.8*inch, 1.2*inch, 1.2*inch])
-    items_table.setStyle(TableStyle([
-        # Header
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 10),
-        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-        
-        # Body
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 9),
-        ('ALIGN', (0, 1), (0, -1), 'CENTER'),
-        ('ALIGN', (2, 1), (-1, -1), 'RIGHT'),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        
-        # Grid
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')]),
-        
-        # Padding
-        ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-        ('LEFTPADDING', (0, 0), (-1, -1), 6),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
-    ]))
-    
-    elements.append(items_table)
+    # Subtitle and Date row
+    subtitle_date_data = [
+        [Paragraph('SULTANIA FEED MILL', company_subtitle_style), 
+         Paragraph(f'DATE  {quotation.quotation_date.strftime("%d/%m/%Y")}', date_style)]
+    ]
+    subtitle_date_table = Table(subtitle_date_data, colWidths=[4*inch, 3*inch])
+    elements.append(subtitle_date_table)
     elements.append(Spacer(1, 20))
     
-    # Totals section
-    totals_data = [
-        ['Subtotal:', f"Rs {float(quotation.subtotal):,.2f}"],
+    # Subject and Quotation heading
+    subject_quotation_data = [
+        [Paragraph('SUBJECT', subject_style), 
+         Paragraph('<b>Q U O T A T I O N</b>', quotation_heading_style)]
     ]
+    subject_quotation_table = Table(subject_quotation_data, colWidths=[1.5*inch, 5.5*inch])
+    elements.append(subject_quotation_table)
+    elements.append(Spacer(1, 15))
     
-    if quotation.tax:
-        totals_data.append([
-            f'Tax ({quotation.tax.name} @ {quotation.tax.rate}%):', 
-            f"Rs {float(quotation.tax_amount):,.2f}"
-        ])
-    
-    if quotation.discount_value > 0:
-        discount_label = f'Discount ({quotation.discount_value}%)' if quotation.discount_type == 'percentage' else 'Discount'
-        totals_data.append([
-            discount_label,
-            f"- Rs {float(quotation.discount_amount):,.2f}"
-        ])
-    
-    totals_data.append(['', ''])  # Separator
-    totals_data.append([
-        '<b>Total Amount:</b>',
-        f"<b>Rs {float(quotation.total_amount):,.2f}</b>"
-    ])
-    
-    totals_table = Table(totals_data, colWidths=[5.5*inch, 1.5*inch])
-    totals_table.setStyle(TableStyle([
-        ('FONTNAME', (0, 0), (-1, -2), 'Helvetica'),
-        ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 11),
-        ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
-        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
-        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#334155')),
-        ('LINEABOVE', (0, -1), (-1, -1), 2, colors.HexColor('#667eea')),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-    ]))
-    
-    elements.append(totals_table)
-    
-    # Notes section
-    if quotation.notes:
-        elements.append(Spacer(1, 20))
-        notes_heading = Paragraph("<b>Notes / Terms & Conditions</b>", heading_style)
-        elements.append(notes_heading)
+    # Items section
+    for idx, item in enumerate(quotation.items.all(), 1):
+        # Item title with rate
+        item_title = Paragraph(f'<i>FOR {item.item_name.upper()}</i>', item_title_style)
+        elements.append(item_title)
         elements.append(Spacer(1, 8))
-        notes_text = Paragraph(quotation.notes.replace('\n', '<br/>'), normal_style)
-        elements.append(notes_text)
+        
+        # Item description
+        if item.description:
+            desc_lines = item.description.split('\n')
+            for line_idx, line in enumerate(desc_lines, 1):
+                desc_para = Paragraph(f'{line_idx}. {line}', item_desc_style)
+                elements.append(desc_para)
+        
+        # Rate aligned to right
+        rate_data = [
+            ['', f'RATE', f'{float(item.subtotal):,.0f}/-']
+        ]
+        rate_table = Table(rate_data, colWidths=[4*inch, 1.5*inch, 1.5*inch])
+        rate_table.setStyle(TableStyle([
+            ('ALIGN', (1, 0), (-1, 0), 'RIGHT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ]))
+        elements.append(rate_table)
+        elements.append(Spacer(1, 15))
+    
+    # Total
+    total_data = [
+        ['TOTAL', f'{float(quotation.total_amount):,.0f}/-']
+    ]
+    total_table = Table(total_data, colWidths=[5.5*inch, 1.5*inch])
+    total_table.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (0, 0), 'LEFT'),
+        ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('LINEABOVE', (0, 0), (-1, 0), 1, colors.black),
+        ('TOPPADDING', (0, 0), (-1, 0), 10),
+    ]))
+    elements.append(total_table)
     
     # Build PDF
-    doc.build(elements)
+    doc.build(elements, onFirstPage=add_footer, onLaterPages=add_footer)
     
     # Get the value of the BytesIO buffer and write it to the response
     pdf = buffer.getvalue()
@@ -182,3 +192,26 @@ def generate_quotation_pdf(quotation):
     response.write(pdf)
     
     return response
+
+
+def add_footer(canvas, doc):
+    """Add footer to each page"""
+    canvas.saveState()
+    
+    # Blue footer bar
+    canvas.setFillColor(colors.HexColor('#1e3a8a'))
+    canvas.rect(0, 0, A4[0], 60, fill=True, stroke=False)
+    
+    # Footer text
+    canvas.setFillColor(colors.white)
+    canvas.setFont('Helvetica', 9)
+    
+    # Address
+    canvas.drawCentredString(A4[0]/2, 35, 
+                            'Near Lohlianwali Nahr Opp Railway Line G.T Road Gujranwla')
+    
+    # Email and phone
+    canvas.drawString(80, 20, '✉ Haqbahoomianco mpany@Gmail.com')
+    canvas.drawString(A4[0] - 200, 20, '📞 +92 321 319 6814')
+    
+    canvas.restoreState()
