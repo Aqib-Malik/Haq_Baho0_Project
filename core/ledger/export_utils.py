@@ -178,16 +178,15 @@ def export_ledger_pdf(company, start_date=None, end_date=None):
     ]
     summary_table = Table(summary_data, colWidths=[3 * inch, 3 * inch])
     summary_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#3949ab')),
-        ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#5c6bc0')),
-        ('TEXTCOLOR', (0, 0), (-1, -1), colors.white),
+        ('BACKGROUND', (0, 0), (-1, -1), colors.white),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
         ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, -1), 11),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
         ('TOPPADDING', (0, 0), (-1, -1), 10),
-        ('GRID', (0, 0), (-1, -1), 1, colors.white),
+        ('GRID', (0, 0), (-1, -1), 1, colors.grey),
     ]))
     elements.append(summary_table)
     elements.append(Spacer(1, 0.3 * inch))
