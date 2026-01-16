@@ -228,7 +228,7 @@ class QuotationListSerializer(serializers.ModelSerializer):
         model = Quotation
         fields = [
             'id', 'quotation_number', 'company', 'company_name', 
-            'quotation_date', 'valid_until', 'total_amount', 'status',
+            'quotation_date', 'valid_until', 'subtotal', 'tax_amount', 'discount_amount', 'total_amount', 'status',
             'tax_name', 'item_count', 'items', 'created_at', 'updated_at'
         ]
     
