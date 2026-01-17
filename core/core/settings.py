@@ -15,11 +15,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-+pxk(8)b$3k2c0n%)yz#hfjk7jh&oti9)l0#s@eki8gc!7gzxh'
 DEBUG = False
 ALLOWED_HOSTS = [
-    'haqbahoomianco.com',
-    'localhost',
-    '127.0.0.1',
-    'haqbahoomianco.com',
-    'www.haqbahoomianco.com',
+    "13.61.5.28",
+    "haqbahoomianco.com",
+    "www.haqbahoomianco.com",
+    "localhost",
+    "127.0.0.1",
 ]
 
 
