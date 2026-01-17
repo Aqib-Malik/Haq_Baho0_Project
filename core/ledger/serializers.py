@@ -176,6 +176,12 @@ class InventoryItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = InventoryItem
         fields = '__all__'
+        read_only_fields = ['created_by', 'updated_by', 'created_at', 'updated_at', 'deleted']
+
+    def validate_sku(self, value):
+        if value == "":
+            return None
+        return value
 
 
 class QuotationItemSerializer(serializers.ModelSerializer):
