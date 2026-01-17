@@ -1,0 +1,163 @@
+<div class="dialog-container">
+    <!-- Header -->
+    <div class="dialog-header">
+        <div class="title-wrapper">
+            <div class="icon-circle">
+                <mat-icon>{{ isEditMode ? 'edit_note' : 'post_add' }}</mat-icon>
+            </div>
+            <div>
+                <h2 class="dialog-title">{{ isEditMode ? 'Edit Quotation' : 'New Quotation' }}</h2>
+                <p class="dialog-subtitle">{{ isEditMode ? 'Update details' : 'Create a new quotation' }}</p>
+            </div>
+        </div>
+        <button mat-icon-button class="close-btn" (click)="onCancel()" type="button">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <!-- Content -->
+    <div class="dialog-content">
+        <form [formGroup]="quotationForm" (ngSubmit)="onSubmit()">
+
+            <!-- Top Grid: Client & Terms -->
+            <div class="top-grid">
+                <!-- Client Section -->
+                <div class="form-group">
+                    <span class="section-label">Client Details</span>
+                    <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+                        <mat-select formControlName="company" placeholder="Select Client / Company" required>
+                            @for (company of companies; track company.id) {
+                            <mat-option [value]="company.id">{{ company.name }}</mat-option>
+                            }
+                        </mat-select>
+                        <mat-icon matPrefix>business</mat-icon>
+                        <mat-error *ngIf="quotationForm.get('company')?.hasError('required')">Required</mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Terms Section -->
+                <div class="form-group">
+                    <span class="section-label">Terms & Schedule</span>
+                    <div class="dates-grid">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                            <mat-label>Issue Date</mat-label>
+                            <input matInput [matDatepicker]="issuePicker" formControlName="quotation_date" required>
+                            <mat-datepicker-toggle matSuffix [for]="issuePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #issuePicker></mat-datepicker>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                            <mat-label>Valid Until</mat-label>
+                            <input matInput [matDatepicker]="validPicker" formControlName="valid_until">
+                            <mat-datepicker-toggle matSuffix [for]="validPicker"></mat-datepicker-toggle>
+                            <mat-datepicker #validPicker></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="meta-grid">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                            <mat-label>Tax</mat-label>
+                            <mat-select formControlName="tax">
+                                <mat-option [value]="null">No Tax</mat-option>
+                                @for (tax of taxes(); track tax.id) {
+                                <mat-option [value]="tax.id">{{ tax.name }} ({{ tax.rate }}%)</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                            <mat-label>Status</mat-label>
+                            <mat-select formControlName="status">
+                                @for (status of statusOptions; track status.value) {
+                                <mat-option [value]="status.value">{{ status.label }}</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Line Items Section -->
+            <div class="items-section">
+                <div class="items-header">
+                    <span class="section-label">Line Items</span>
+                    <button mat-stroked-button type="button" class="add-btn" (click)="addItem()">
+                        <mat-icon>add</mat-icon> Add Item
+                    </button>
+                </div>
+
+                @if (items.length > 0) {
+                <div class="items-list">
+                    @for (item of items.controls; track $index; let i = $index) {
+                    <div class="item-row">
+                        <div class="item-main">
+                            <span class="item-index">{{ i + 1 }}</span>
+                            <div class="item-details">
+                                <span class="item-name">{{ item.get('item_name')?.value }}</span>
+                                <span class="item-meta">
+                                    {{ item.get('quantity')?.value }} {{ item.get('unit')?.value }} x {{
+                                    formatCurrency(item.get('unit_price')?.value) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="item-total">
+                            {{ formatCurrency(getItemSubtotal(i)) }}
+                        </div>
+                        <div class="item-actions">
+                            <button mat-icon-button class="action-btn edit" (click)="editItem(i)" type="button">
+                                <mat-icon>edit</mat-icon>
+                            </button>
+                            <button mat-icon-button class="action-btn delete" (click)="removeItem(i)" type="button">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                    }
+                </div>
+                } @else {
+                <div class="empty-state" (click)="addItem()">
+                    <mat-icon>post_add</mat-icon>
+                    <span>No items added. Click to add.</span>
+                </div>
+                }
+            </div>
+
+            <!-- Bottom Section -->
+            <div class="bottom-grid">
+                <div class="notes-section">
+                    <span class="section-label">Notes / Terms</span>
+                    <mat-form-field appearance="outline" class="full-width textarea-field" subscriptSizing="dynamic">
+                        <textarea matInput formControlName="notes" rows="3"
+                            placeholder="Payment terms, delivery schedule..."></textarea>
+                    </mat-form-field>
+                </div>
+
+                <div class="totals-section">
+                    <div class="total-row">
+                        <span class="label">Subtotal</span>
+                        <span class="value">{{ formatCurrency(getSubtotal()) }}</span>
+                    </div>
+                    @if (getSelectedTaxRate() !== '0') {
+                    <div class="total-row">
+                        <span class="label">Tax ({{ getSelectedTaxRate() }}%)</span>
+                        <span class="value">{{ formatCurrency(getTaxAmount()) }}</span>
+                    </div>
+                    }
+                    <div class="divider"></div>
+                    <div class="total-row grand-total">
+                        <span class="label">Total Amount</span>
+                        <span class="value">{{ formatCurrency(getTotal()) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dialog-actions">
+                <button mat-button class="btn-cancel" type="button" (click)="onCancel()">Cancel</button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="isLoading()">
+                    <mat-icon>save</mat-icon>
+                    {{ isLoading() ? 'Saving...' : (isEditMode ? 'Update' : 'Save Quotation') }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

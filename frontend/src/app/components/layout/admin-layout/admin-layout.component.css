@@ -35,6 +35,7 @@
     gap: 12px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     margin-bottom: 16px;
+    position: relative;
 }
 
 .brand-logo {
@@ -51,6 +52,32 @@
     letter-spacing: 0.5px;
     color: white;
     margin: 0;
+    flex: 1;
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle-btn {
+    color: rgba(255, 255, 255, 0.7) !important;
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+    transition: all 0.3s ease;
+}
+
+.sidebar-toggle-btn mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+}
+
+.sidebar-toggle-btn:hover {
+    background: rgba(255, 215, 64, 0.15) !important;
+    color: #ffd740 !important;
+    transform: scale(1.1);
+}
+
+.sidebar-toggle-btn:hover mat-icon {
+    color: #ffd740 !important;
 }
 
 /* Nav List & Items */

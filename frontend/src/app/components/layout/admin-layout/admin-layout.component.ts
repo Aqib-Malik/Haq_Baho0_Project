@@ -10,6 +10,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
 
@@ -26,7 +27,8 @@ import { NotificationService } from '../../../services/notification.service';
         MatButtonModule,
         MatMenuModule,
         MatExpansionModule,
-        MatDividerModule
+        MatDividerModule,
+        MatTooltipModule
     ],
     templateUrl: './admin-layout.component.html',
     styleUrls: ['./admin-layout.component.css']
@@ -74,7 +76,13 @@ export class AdminLayoutComponent {
 
     isSidebarOpen = true;
 
-    toggleSidebar() {
-        this.isSidebarOpen = !this.isSidebarOpen;
+    toggleSidebar(drawer?: any) {
+        if (this.isHandset && drawer) {
+            // On mobile, close the drawer overlay
+            drawer.close();
+        } else {
+            // On desktop, toggle the sidebar state
+            this.isSidebarOpen = !this.isSidebarOpen;
+        }
     }
 }

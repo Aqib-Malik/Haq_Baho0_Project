@@ -8,12 +8,10 @@
 
 .dialog-header {
   padding: 16px 24px;
-  /* Squeezed padding */
   border-bottom: 1px solid #e2e8f0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* Center align items */
   background: white;
   position: sticky;
   top: 0;
@@ -27,15 +25,15 @@
 }
 
 .icon-circle {
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  /* Blue for Quote Items */
   width: 42px;
-  /* Squeezed size */
   height: 42px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
   color: white;
 }
 
@@ -47,7 +45,6 @@
 
 .dialog-title {
   font-size: 20px;
-  /* Slightly smaller */
   font-weight: 700;
   color: #1e293b;
   margin: 0;
@@ -72,17 +69,20 @@
 /* Dialog Content */
 .dialog-content {
   padding: 24px;
-  /* Squeezed */
   overflow-y: auto;
+}
+
+.search-wrapper {
+  margin-bottom: 20px;
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  /* Squeezed gap */
+  gap: 16px 24px;
 }
 
+/* Full Width Items */
 .full-width {
   grid-column: 1 / -1;
 }
@@ -92,7 +92,6 @@ mat-form-field {
   width: 100%;
 }
 
-/* Standard Inputs - Restore Custom Look */
 mat-form-field ::ng-deep .mat-mdc-text-field-wrapper {
   background-color: #f8fafc !important;
   border-radius: 12px !important;
@@ -103,33 +102,28 @@ mat-form-field ::ng-deep .mat-mdc-text-field-wrapper {
   align-items: center;
 }
 
-/* Height for non-textarea */
 mat-form-field:not(.textarea-field) ::ng-deep .mat-mdc-text-field-wrapper {
   height: 48px !important;
 }
 
-/* Hover Effect */
 mat-form-field ::ng-deep .mat-mdc-text-field-wrapper:hover {
   background-color: white !important;
   border-color: #cbd5e1;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
-/* Focus Effect */
 mat-form-field.mat-focused ::ng-deep .mat-mdc-text-field-wrapper {
   background-color: white !important;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Remove default Angular outlines */
 mat-form-field ::ng-deep .mdc-notched-outline__leading,
 mat-form-field ::ng-deep .mdc-notched-outline__notch,
 mat-form-field ::ng-deep .mdc-notched-outline__trailing {
   border: none !important;
 }
 
-/* Infix alignment */
 mat-form-field ::ng-deep .mat-mdc-form-field-infix {
   padding-top: 0 !important;
   padding-bottom: 0 !important;
@@ -138,39 +132,7 @@ mat-form-field ::ng-deep .mat-mdc-form-field-infix {
   align-items: center;
 }
 
-
-
-/* Invalid State - Red Border */
-mat-form-field.mat-form-field-invalid ::ng-deep .mat-mdc-text-field-wrapper {
-  border-color: #ef4444 !important;
-  border-width: 1px !important;
-  /* Keep 1px or 2px depending on preference, sticking to 1px to avoid layout shift or 2px for emphasis. Let's start with 1px color change. User wanted 'Red Validation'. */
-  box-shadow: 0 0 0 1px #ef4444 !important;
-  /* Emulate 2px border without layout shift */
-}
-
-/* Textarea Specifics - Override for auto height */
-mat-form-field.textarea-field ::ng-deep .mat-mdc-text-field-wrapper {
-  height: auto !important;
-  padding-top: 12px !important;
-  padding-bottom: 12px !important;
-  align-items: flex-start;
-  /* Align wrapper items to top for textarea */
-}
-
-mat-form-field.textarea-field ::ng-deep .mat-mdc-form-field-infix {
-  min-height: unset !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-}
-
-mat-form-field.textarea-field textarea {
-  min-height: 80px;
-  padding: 0;
-  margin: 0;
-}
-
-/* Fix Icon Alignment for Inputs */
+/* Icons */
 mat-form-field:not(.textarea-field) mat-icon[matPrefix] {
   margin-right: 12px;
   color: #94a3b8;
@@ -180,17 +142,70 @@ mat-form-field:not(.textarea-field) mat-icon[matPrefix] {
   height: 100%;
 }
 
-/* Fix Icon Alignment for Textarea */
 mat-form-field.textarea-field mat-icon[matPrefix] {
   margin-right: 12px;
   color: #94a3b8;
   display: flex !important;
   align-items: flex-start;
-  /* Align to top */
   padding-top: 2px;
-  /* Slight offset to match text baseline */
   height: 100%;
 }
+
+/* Invalid State */
+mat-form-field.mat-form-field-invalid ::ng-deep .mat-mdc-text-field-wrapper {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 1px #ef4444 !important;
+}
+
+/* Textarea Override */
+mat-form-field.textarea-field ::ng-deep .mat-mdc-text-field-wrapper {
+  height: auto !important;
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+  align-items: flex-start;
+}
+
+mat-form-field.textarea-field ::ng-deep .mat-mdc-form-field-infix {
+  min-height: unset !important;
+}
+
+mat-form-field.textarea-field textarea {
+  min-height: 60px;
+  padding: 0;
+  margin: 0;
+}
+
+.currency-prefix {
+  color: #64748b;
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-right: 4px;
+}
+
+/* Subtotal Field */
+.subtotal-display {
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  border-radius: 12px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  color: #065f46;
+}
+
+.subtotal-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.subtotal-value {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
 
 /* Actions */
 .dialog-actions {
@@ -198,36 +213,51 @@ mat-form-field.textarea-field mat-icon[matPrefix] {
   justify-content: flex-end;
   gap: 16px;
   padding-top: 16px;
-  /* Squeezed */
   margin-top: 16px;
-  /* Squeezed */
   border-top: 1px solid #f1f5f9;
 }
 
 .dialog-actions button {
   padding: 0 24px;
   height: 40px;
-  /* Squeezed button height */
   border-radius: 10px;
   font-weight: 600;
 }
 
 .dialog-actions button[color="primary"] {
   color: white !important;
-  /* Ensure white text */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Dropdown Option Styling */
+::ng-deep .mat-mdc-option .mdc-list-item__primary-text {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  gap: 12px;
+}
+
+.opt-name {
+  font-weight: 500;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  font-size: 14px;
+}
+
+.opt-price {
+  color: #059669;
+  font-size: 13px;
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 @media (max-width: 600px) {
   .form-grid {
     grid-template-columns: 1fr;
-  }
-
-  .dialog-header {
-    padding: 20px;
-  }
-
-  .dialog-content {
-    padding: 20px;
   }
 }

@@ -24,6 +24,9 @@
           <mat-error *ngIf="companyForm.get('name')?.hasError('required')">
             Company name is required
           </mat-error>
+          <mat-error *ngIf="companyForm.get('name')?.hasError('maxlength')">
+            Name cannot exceed 200 characters
+          </mat-error>
         </mat-form-field>
 
         <!-- Contact Person -->
@@ -36,6 +39,9 @@
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <input matInput formControlName="gstin" placeholder="GSTIN" autocomplete="off">
           <mat-icon matPrefix>confirmation_number</mat-icon>
+          <mat-error *ngIf="companyForm.get('gstin')?.hasError('maxlength')">
+            GSTIN cannot exceed 15 characters
+          </mat-error>
         </mat-form-field>
 
         <!-- Email -->
@@ -64,7 +70,7 @@
         <button mat-stroked-button type="button" (click)="goBack()" [disabled]="isLoading">
           Cancel
         </button>
-        <button mat-raised-button color="primary" type="submit" [disabled]="companyForm.invalid || isLoading">
+        <button mat-raised-button color="primary" type="submit" [disabled]="isLoading">
           <mat-icon>save</mat-icon>
           {{ isLoading ? 'Saving...' : 'Save Company' }}
         </button>

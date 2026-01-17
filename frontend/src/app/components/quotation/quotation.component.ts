@@ -1,5 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
@@ -12,7 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatChipsModule } from '@angular/material/chips';
-import { Router } from '@angular/router';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 import { QuotationService } from '../../services/quotation.service';
 import { LedgerService } from '../../services/ledger.service';
@@ -20,6 +21,8 @@ import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import { Company } from '../../models/company.model';
 import { Quotation } from '../../models/quotation.model';
+import { QuotationFormDialogComponent } from './quotation-form-dialog/quotation-form-dialog.component';
+import { QuotationDetailDialogComponent } from './quotation-detail-dialog/quotation-detail-dialog.component';
 
 @Component({
     selector: 'app-quotation',
@@ -37,7 +40,8 @@ import { Quotation } from '../../models/quotation.model';
         MatTooltipModule,
         MatTableModule,
         MatPaginatorModule,
-        MatChipsModule
+        MatChipsModule,
+        MatDialogModule
     ],
     templateUrl: './quotation.component.html',
     styleUrl: './quotation.component.css'
@@ -64,13 +68,14 @@ export class QuotationComponent implements OnInit {
         { value: 'expired', label: 'Expired' }
     ];
 
-    displayedColumns: string[] = ['quotation_number', 'quotation_date', 'company_name', 'total_amount', 'status', 'actions'];
+    displayedColumns: string[] = ['quotation_number', 'quotation_date', 'company_name', 'items', 'subtotal', 'tax_amount', 'total_amount', 'status', 'actions'];
 
     constructor(
         private quotationService: QuotationService,
         private ledgerService: LedgerService,
         private notificationService: NotificationService,
         public authService: AuthService,
+        private dialog: MatDialog,
         private router: Router
     ) { }
 
@@ -140,11 +145,41 @@ export class QuotationComponent implements OnInit {
     }
 
     showAddForm(): void {
-        this.router.navigate(['/quotations/new']);
+        const dialogRef = this.dialog.open(QuotationFormDialogComponent, {
+            width: '90vw',
+            maxWidth: '1200px',
+            maxHeight: '90vh',
+            disableClose: false,
+            data: { quotation: null, companies: this.companies() }
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                this.loadQuotations();
+            }
+        });
     }
 
     showEditForm(quotation: Quotation): void {
-        this.router.navigate(['/quotations/edit', quotation.id]);
+        const dialogRef = this.dialog.open(QuotationFormDialogComponent, {
+            width: '90vw',
+            maxWidth: '1200px',
+            maxHeight: '90vh',
+            disableClose: false,
+            data: { quotation: quotation, companies: this.companies() }
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                this.loadQuotations();
+            }
+        });
+    }
+
+    showDetail(quotation: Quotation): void {
+        const company = this.companies().find(c => c.id === quotation.company);
+        // Navigate to the print view page
+        this.router.navigate(['/quotations', quotation.id, 'view']);
     }
 
     async deleteQuotation(quotation: Quotation): Promise<void> {

@@ -103,13 +103,41 @@
                 <ng-container matColumnDef="company_name">
                     <th mat-header-cell *matHeaderCellDef>Company</th>
                     <td mat-cell *matCellDef="let quotation">
-                        <div class="company-info">
-                            <div class="company-avatar"
-                                [style.background]="getAvatarColor(quotation.company_name || 'N/A')">
-                                {{ getInitials(quotation.company_name || 'N/A') }}
-                            </div>
-                            <span class="company-name">{{ quotation.company_name || 'N/A' }}</span>
+                        <span class="company-name">{{ quotation.company_name || 'N/A' }}</span>
+                    </td>
+                </ng-container>
+
+                <!-- Items Column -->
+                <ng-container matColumnDef="items">
+                    <th mat-header-cell *matHeaderCellDef>Items</th>
+                    <td mat-cell *matCellDef="let quotation">
+                        <div class="items-list">
+                            @if (quotation.items && quotation.items.length > 0) {
+                            @for (item of quotation.items; track $index) {
+                            <span class="item-name-chip">{{ item.item_name }}</span>
+                            }
+                            } @else if (quotation.item_count && quotation.item_count > 0) {
+                            <span class="item-count-badge">{{ quotation.item_count }} item(s)</span>
+                            } @else {
+                            <span class="no-items">No items</span>
+                            }
                         </div>
+                    </td>
+                </ng-container>
+
+                <!-- Subtotal Column -->
+                <ng-container matColumnDef="subtotal">
+                    <th mat-header-cell *matHeaderCellDef>Subtotal</th>
+                    <td mat-cell *matCellDef="let quotation">
+                        <span class="amount-badge-subtle">{{ formatCurrency(quotation.subtotal) }}</span>
+                    </td>
+                </ng-container>
+
+                <!-- Tax Column -->
+                <ng-container matColumnDef="tax_amount">
+                    <th mat-header-cell *matHeaderCellDef>Tax</th>
+                    <td mat-cell *matCellDef="let quotation">
+                        <span class="amount-badge-subtle">{{ formatCurrency(quotation.tax_amount) }}</span>
                     </td>
                 </ng-container>
 
@@ -125,9 +153,9 @@
                 <ng-container matColumnDef="status">
                     <th mat-header-cell *matHeaderCellDef>Status</th>
                     <td mat-cell *matCellDef="let quotation">
-                        <mat-chip [style.background-color]="getStatusColor(quotation.status)" class="status-chip">
+                        <span class="status-badge" [style.background-color]="getStatusColor(quotation.status)">
                             {{ getStatusLabel(quotation.status) }}
-                        </mat-chip>
+                        </span>
                     </td>
                 </ng-container>
 
@@ -135,26 +163,24 @@
                 <ng-container matColumnDef="actions">
                     <th mat-header-cell *matHeaderCellDef>Actions</th>
                     <td mat-cell *matCellDef="let quotation" class="actions-cell">
-                        <button mat-button class="action-btn-text download-btn" (click)="downloadPdf(quotation)"
-                            matTooltip="Download PDF">
+                        <button mat-icon-button class="action-icon-btn"
+                            (click)="$event.stopPropagation(); downloadPdf(quotation)" matTooltip="Download PDF">
                             <mat-icon>download</mat-icon>
-                            PDF
                         </button>
-                        <button mat-button class="action-btn-text edit-btn" (click)="showEditForm(quotation)"
-                            matTooltip="Edit">
+                        <button mat-icon-button class="action-icon-btn"
+                            (click)="$event.stopPropagation(); showEditForm(quotation)" matTooltip="Edit">
                             <mat-icon>edit</mat-icon>
-                            Edit
                         </button>
-                        <button mat-button class="action-btn-text delete-btn" (click)="deleteQuotation(quotation)"
-                            matTooltip="Delete">
+                        <button mat-icon-button class="action-icon-btn delete"
+                            (click)="$event.stopPropagation(); deleteQuotation(quotation)" matTooltip="Delete">
                             <mat-icon>delete</mat-icon>
-                            Delete
                         </button>
                     </td>
                 </ng-container>
 
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="quotation-row"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="quotation-row clickable-row"
+                    (click)="showDetail(row)"></tr>
             </table>
         </div>
 
@@ -167,13 +193,13 @@
     <!-- Mobile Card View -->
     <div class="mobile-cards hide-on-desktop">
         @for (quotation of quotations(); track quotation.id) {
-        <div class="mobile-quotation-card">
+        <div class="mobile-quotation-card" (click)="showDetail(quotation)">
             <div class="card-header-mobile">
                 <div class="header-top-row">
                     <span class="quotation-number-badge">{{ quotation.quotation_number }}</span>
-                    <mat-chip [style.background-color]="getStatusColor(quotation.status)" class="status-chip-mobile">
+                    <span class="status-badge-mobile" [style.background-color]="getStatusColor(quotation.status)">
                         {{ getStatusLabel(quotation.status) }}
-                    </mat-chip>
+                    </span>
                 </div>
                 <div class="date-wrapper-mobile">
                     <mat-icon class="mini-icon">calendar_today</mat-icon>
@@ -183,10 +209,6 @@
 
             <div class="card-body-mobile">
                 <div class="company-info-mobile">
-                    <div class="company-avatar small"
-                        [style.background]="getAvatarColor(quotation.company_name || 'N/A')">
-                        {{ getInitials(quotation.company_name || 'N/A') }}
-                    </div>
                     <span class="company-name">{{ quotation.company_name || 'N/A' }}</span>
                 </div>
 
@@ -197,17 +219,17 @@
             </div>
 
             <div class="card-actions-mobile">
-                <button mat-button class="mobile-action-btn download" (click)="downloadPdf(quotation)">
+                <button mat-icon-button class="mobile-action-icon"
+                    (click)="$event.stopPropagation(); downloadPdf(quotation)">
                     <mat-icon>download</mat-icon>
-                    PDF
                 </button>
-                <button mat-button class="mobile-action-btn edit" (click)="showEditForm(quotation)">
+                <button mat-icon-button class="mobile-action-icon"
+                    (click)="$event.stopPropagation(); showEditForm(quotation)">
                     <mat-icon>edit</mat-icon>
-                    Edit
                 </button>
-                <button mat-button class="mobile-action-btn delete" (click)="deleteQuotation(quotation)">
+                <button mat-icon-button class="mobile-action-icon delete"
+                    (click)="$event.stopPropagation(); deleteQuotation(quotation)">
                     <mat-icon>delete</mat-icon>
-                    Delete
                 </button>
             </div>
         </div>

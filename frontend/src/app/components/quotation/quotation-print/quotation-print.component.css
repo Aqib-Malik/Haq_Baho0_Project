@@ -1,0 +1,382 @@
+/* Global Vars & Reset */
+:host {
+    display: block;
+    background-color: #525659;
+    /* Browser gray background */
+    min-height: 100vh;
+    padding: 20px 0;
+    font-family: 'Times New Roman', Times, serif;
+    /* Matching the print look */
+}
+
+/* Page Container (A4) */
+.page {
+    background: white;
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto 20px auto;
+    padding: 10mm 15mm;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* Header */
+.doc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 5mm;
+    position: relative;
+}
+
+.logo-section .logo {
+    height: 80px;
+    /* Adjust based on actual logo aspect ratio */
+    width: auto;
+}
+
+.header-text {
+    flex: 1;
+    text-align: center;
+    padding: 0 20px;
+}
+
+.company-name {
+    font-size: 24pt;
+    font-weight: 900;
+    margin: 0;
+    color: #2c2727;
+    /* Dark print color */
+    text-transform: uppercase;
+    font-family: 'Impact', 'Arial Black', sans-serif;
+    /* Trying to match that bold compressed font */
+    letter-spacing: 1px;
+}
+
+.company-subtitle {
+    font-size: 10pt;
+    font-weight: bold;
+    margin: 5px 0 0 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.header-date {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-family: 'Arial', sans-serif;
+    font-size: 10pt;
+    font-weight: bold;
+}
+
+.divider-line {
+    border-top: 3px solid #1a1a1a;
+    border-bottom: 1px solid #1a1a1a;
+    height: 3px;
+    margin-bottom: 10mm;
+}
+
+/* Subject */
+.subject-section {
+    margin-bottom: 15mm;
+    padding-left: 10mm;
+}
+
+.subject-row {
+    display: flex;
+    font-weight: bold;
+    font-size: 12pt;
+    font-family: 'Arial', sans-serif;
+}
+
+.subject-row .label {
+    width: 100px;
+}
+
+.subject-row .value {
+    text-decoration: underline;
+    letter-spacing: 2px;
+}
+
+/* Items */
+.items-content {
+    flex: 1;
+    font-family: 'Arial', sans-serif;
+    padding: 0 10mm;
+}
+
+.item-block {
+    margin-bottom: 10mm;
+}
+
+.item-header {
+    margin-bottom: 5px;
+}
+
+.item-title {
+    font-weight: bold;
+    text-decoration: underline;
+    text-transform: uppercase;
+    font-size: 11pt;
+}
+
+.specs-text {
+    white-space: pre-wrap;
+    font-family: 'Arial', sans-serif;
+    font-size: 11pt;
+    margin: 5px 0 0 15px;
+    /* Indent */
+    line-height: 1.4;
+}
+
+.item-pricing {
+    display: flex;
+    justify-content: flex-end;
+    gap: 50px;
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+.total-section {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20mm;
+    padding-top: 5mm;
+    font-weight: bold;
+    font-size: 12pt;
+    padding-left: 10mm;
+    padding-right: 10mm;
+}
+
+/* Terms Page */
+.page-break-before {
+    page-break-before: always;
+}
+
+.terms-title {
+    text-decoration: underline;
+    font-weight: bold;
+    font-size: 12pt;
+    text-transform: uppercase;
+    margin-bottom: 10mm;
+    font-family: 'Arial', sans-serif;
+}
+
+.terms-text {
+    white-space: pre-wrap;
+    font-family: 'Arial', sans-serif;
+    font-size: 11pt;
+    line-height: 1.5;
+    margin-left: 5mm;
+}
+
+/* Closing */
+.closing-section {
+    margin-top: 30mm;
+    padding-left: 10mm;
+}
+
+.thank-you {
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 20mm;
+}
+
+.signature-box {
+    text-align: right;
+    padding-right: 20mm;
+}
+
+.yours-faithfully {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.company-sign {
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 25mm;
+}
+
+.sign-line {
+    font-family: 'Brush Script MT', cursive;
+    font-size: 18pt;
+    color: #1e3a8a;
+    /* Blue ink signature color */
+}
+
+/* Footer */
+.doc-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+}
+
+.footer-bar {
+    height: 3px;
+    background-color: #1e3a8a;
+    /* Dark Blue from logo */
+    margin-bottom: 5px;
+    margin-left: 10mm;
+    margin-right: 10mm;
+}
+
+.footer-content {
+    background-color: #e5e7eb;
+    /* Light gray bg for footer text area? No, image looks like white bg but blue text maybe. I'll stick to simple text for now */
+    text-align: center;
+    padding-bottom: 10mm;
+    font-family: 'Impact', sans-serif;
+    color: #374151;
+}
+
+.address {
+    font-weight: bold;
+    font-size: 10pt;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    color: #1f2937;
+}
+
+.contact-info {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    align-items: center;
+    font-weight: bold;
+    font-size: 11pt;
+}
+
+.email-box,
+.phone-box {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.icon {
+    font-size: 16pt;
+    color: #2563eb;
+    /* Blue icons */
+}
+
+/* Loading */
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: white;
+}
+
+/* Action Bar */
+.action-bar {
+    width: 210mm;
+    margin: 0 auto 20px auto;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* Print Overrides */
+@media print {
+    :host {
+        background: white;
+        padding: 0;
+    }
+
+    .hide-on-print {
+        display: none !important;
+    }
+
+    .page {
+        margin: 0;
+        box-shadow: none;
+        width: 100%;
+        min-height: auto;
+        padding: 0;
+        /* Let browser handling margins or force custom */
+    }
+
+    .page-break-before {
+        page-break-before: always;
+        margin-top: 0;
+    }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 900px) {
+    :host {
+        padding: 10px;
+        background: #f1f5f9;
+    }
+
+    .action-bar {
+        width: 100%;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .page {
+        width: 100%;
+        min-height: auto;
+        padding: 15px;
+        /* Reduced padding for mobile */
+        margin-bottom: 20px;
+    }
+
+    /* Scaling font sizes for mobile if needed */
+    .company-name {
+        font-size: 18pt;
+        /* Smaller on mobile */
+    }
+
+    .header-text {
+        padding: 0 10px;
+    }
+
+    .header-date {
+        font-size: 9pt;
+    }
+
+    .items-content {
+        padding: 0 5px;
+    }
+
+    .doc-footer {
+        position: relative;
+        /* Not absolute on mobile to avoid overlap */
+        margin-top: 40px;
+    }
+
+    .item-pricing {
+        gap: 20px;
+    }
+
+    .total-section {
+        margin-top: 10mm;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .signature-box {
+        padding-right: 0;
+        text-align: left;
+        margin-top: 30px;
+    }
+
+    .sign-line {
+        font-size: 14pt;
+    }
+
+    .contact-info {
+        flex-direction: column;
+        gap: 5px;
+        font-size: 10pt;
+    }
+}

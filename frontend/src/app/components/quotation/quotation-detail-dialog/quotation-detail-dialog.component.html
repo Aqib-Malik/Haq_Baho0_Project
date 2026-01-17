@@ -1,0 +1,187 @@
+<div class="detail-container">
+    <!-- Floating Close Button -->
+    <button mat-icon-button class="close-btn" (click)="close()" matTooltip="Close">
+        <mat-icon>close</mat-icon>
+    </button>
+
+    <!-- Header Section -->
+    <div class="doc-header">
+        <div class="header-content">
+            <div class="header-left">
+                <span class="doc-type-label">Quotation</span>
+                <h1 class="doc-number">{{ quotation.quotation_number }}</h1>
+                <div class="status-wrapper">
+                    <span class="status-badge" [class]="quotation.status">
+                        {{ getStatusLabel(quotation.status) }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div class="date-group">
+                    <span class="date-label">Date Issued</span>
+                    <span class="date-value">{{ formatDate(quotation.quotation_date) }}</span>
+                </div>
+                @if (quotation.valid_until) {
+                <div class="date-group valid-until">
+                    <span class="date-label">Valid Until</span>
+                    <span class="date-value">{{ formatDate(quotation.valid_until) }}</span>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Scrollable Body -->
+    <div class="doc-body">
+        <!-- Client / Bill To Section -->
+        <div class="client-section">
+            <span class="section-label">Bill To</span>
+            @if (company) {
+            <div class="client-card">
+                <div class="client-icon-box">
+                    <mat-icon>business</mat-icon>
+                </div>
+                <div class="client-info">
+                    <h2 class="client-name">{{ company.name }}</h2>
+                    <div class="client-meta">
+                        @if (company.email) {
+                        <div class="meta-row">
+                            <mat-icon>email</mat-icon>
+                            <span>{{ company.email }}</span>
+                        </div>
+                        }
+                        @if (company.phone) {
+                        <div class="meta-row">
+                            <mat-icon>phone</mat-icon>
+                            <span>{{ company.phone }}</span>
+                        </div>
+                        }
+                        @if (company.address) {
+                        <div class="meta-row">
+                            <mat-icon>location_on</mat-icon>
+                            <span>{{ company.address }}</span>
+                        </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            } @else {
+            <div class="client-card">
+                <div class="client-icon-box">
+                    <mat-icon>business</mat-icon>
+                </div>
+                <div class="client-info">
+                    <h2 class="client-name">{{ quotation.company_name || 'Unknown Company' }}</h2>
+                </div>
+            </div>
+            }
+        </div>
+
+        <!-- Items Table -->
+        <div class="items-table-container">
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Item Description</th>
+                        <th class="text-center col-qty">Qty</th>
+                        <th class="text-right col-rate">Rate</th>
+                        <th class="text-right col-amount">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (item of quotation.items; track $index) {
+                    <tr>
+                        <td>
+                            <div class="item-main">{{ item.item_name }}</div>
+                            @if (item.description) {
+                            <div class="item-desc">{{ item.description }}</div>
+                            }
+                        </td>
+                        <td class="text-center numeric-cell">
+                            {{ formatNumber(item.quantity) }} {{ item.unit }}
+                        </td>
+                        <td class="text-right numeric-cell">
+                            {{ formatCurrency(item.unit_price) }}
+                        </td>
+                        <td class="text-right numeric-cell total-cell">
+                            {{ formatCurrency(item.subtotal) }}
+                        </td>
+                    </tr>
+                    }
+                    @if (!quotation.items || quotation.items.length === 0) {
+                    <tr>
+                        <td colspan="4" class="text-center" style="padding: 40px; color: #94a3b8; font-style: italic;">
+                            No items included in this quotation.
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Summary Grid (Notes + Totals) -->
+        <div class="summary-grid">
+            <!-- Left: Notes -->
+            <div class="notes-wrapper">
+                @if (quotation.notes) {
+                <div class="notes-container">
+                    <div class="notes-label">
+                        Notes / Terms
+                    </div>
+                    <p class="notes-content">{{ quotation.notes }}</p>
+                </div>
+                }
+            </div>
+
+            <!-- Right: Totals -->
+            <div class="totals-container">
+                <div class="calc-row">
+                    <span class="calc-label">Subtotal</span>
+                    <span class="calc-value">{{ formatCurrency(quotation.subtotal) }}</span>
+                </div>
+
+                @if (quotation.discount_amount && quotation.discount_amount !== '0.00') {
+                <div class="calc-row discount">
+                    <span class="calc-label">
+                        Discount
+                        @if (quotation.discount_type === 'percentage') {
+                        ({{ quotation.discount_value }}%)
+                        }
+                    </span>
+                    <span class="calc-value">- {{ formatCurrency(quotation.discount_amount) }}</span>
+                </div>
+                }
+
+                @if (quotation.tax_amount && quotation.tax_amount !== '0.00') {
+                <div class="calc-row">
+                    <span class="calc-label">
+                        Tax @if(quotation.tax_name) { <span style="font-size:0.8em; opacity:0.8">({{ quotation.tax_name
+                            }})</span> }
+                    </span>
+                    <span class="calc-value">+ {{ formatCurrency(quotation.tax_amount) }}</span>
+                </div>
+                }
+
+                <div class="calc-divider"></div>
+
+                <div class="calc-row final-total">
+                    <span class="calc-label">Total</span>
+                    <span class="calc-value">{{ formatCurrency(quotation.total_amount) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="doc-footer">
+        <button mat-button class="action-btn btn-secondary" (click)="edit()">
+            <mat-icon style="margin-right:8px;">edit</mat-icon>
+            Edit Quotation
+        </button>
+        <button mat-raised-button class="action-btn btn-primary" (click)="downloadPdf()">
+            <mat-icon style="margin-right:8px;">download</mat-icon>
+            Download PDF
+        </button>
+    </div>
+</div>

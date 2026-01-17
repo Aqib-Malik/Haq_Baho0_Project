@@ -1,215 +1,200 @@
 <div class="invoice-container">
-  <!-- Compact Header & Filters -->
+  <!-- Premium Compact Header -->
   <div class="compact-header">
     <div class="header-left">
       <div class="icon-circle-small">
         <mat-icon>receipt_long</mat-icon>
       </div>
-      <div>
-        <h1 class="page-title-compact">Invoices</h1>
-      </div>
+      <h1 class="page-title-compact">Invoices</h1>
     </div>
-
     <div class="header-right">
-      <mat-form-field appearance="outline" class="company-field-compact" subscriptSizing="dynamic">
-        <mat-select [value]="selectedCompanyId()" (selectionChange)="onCompanyFilterChange($event.value)"
-          placeholder="Filter by Company">
+      <!-- Company Filter -->
+      <mat-form-field class="company-field-compact" appearance="outline">
+        <mat-icon matPrefix>business</mat-icon>
+        <mat-select placeholder="All Companies" [value]="selectedCompanyId()"
+          (selectionChange)="onCompanyFilterChange($event.value)">
           <mat-option [value]="null">All Companies</mat-option>
           @for (company of companies(); track company.id) {
-          <mat-option [value]="company.id">
-            {{ company.name }}
-          </mat-option>
+          <mat-option [value]="company.id">{{ company.name }}</mat-option>
           }
         </mat-select>
-        <mat-icon matPrefix>business</mat-icon>
       </mat-form-field>
 
+      <!-- Add Button -->
       @if (authService.hasPermission('add_invoice')) {
-      <button mat-raised-button color="primary" (click)="showAddForm()" class="add-btn-compact">
+      <button mat-raised-button class="add-btn-compact" (click)="showAddForm()">
         <mat-icon>add</mat-icon>
-        New Invoice
+        Add Invoice
       </button>
       }
     </div>
   </div>
 
-  <!-- Loading Spinner -->
+  <!-- Loading State -->
   @if (isLoading()) {
   <div class="loading-container">
-    <mat-spinner diameter="60"></mat-spinner>
+    <mat-spinner diameter="50"></mat-spinner>
     <p class="loading-text">Loading invoices...</p>
   </div>
   }
 
-  <!-- Invoices Table -->
-  @if (!isLoading() && invoices().length > 0) {
-  <mat-card class="table-card">
-    <mat-card-header class="table-header">
-      <div class="table-header-content">
-        <div class="table-title-section">
-          <mat-icon class="table-icon">list</mat-icon>
-          <mat-card-title class="table-title">Invoices ({{ invoices().length }})</mat-card-title>
-        </div>
+  <!-- Empty State -->
+  @else if (invoices().length === 0) {
+  <mat-card class="empty-state-card">
+    <div class="empty-state-content">
+      <div class="empty-icon-wrapper">
+        <mat-icon class="empty-icon">description</mat-icon>
       </div>
-    </mat-card-header>
-    <mat-card-content class="table-content">
-      <div class="table-wrapper">
-        <div class="table-container hide-on-mobile">
-          <!-- Table logic ... -->
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Invoice Number</th>
-                <th>Date</th>
-                <th>Company</th>
-                <th class="text-right">Amount</th>
-                <th>Description</th>
-                <th>Reference</th>
-                <th class="text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (invoice of invoices(); track invoice.id; let i = $index) {
-              <tr class="invoice-row">
-                <!-- ... rows ... -->
-                <td class="invoice-number-cell">
-                  <span class="invoice-number-badge">#{{ invoice.invoice_number }}</span>
-                </td>
-                <td class="date-cell">
-                  <div class="date-wrapper">
-                    <mat-icon class="mini-icon">calendar_today</mat-icon>
-                    {{ formatDate(invoice.invoice_date) }}
-                  </div>
-                </td>
-                <td class="company-cell">
-                  @if (invoice.company_name) {
-                  <div class="company-info">
-                    <div class="company-avatar" [style.background]="getAvatarColor(invoice.company_name)">
-                      {{ getInitials(invoice.company_name) }}
-                    </div>
-                    <span class="company-name">{{ invoice.company_name }}</span>
-                  </div>
-                  } @else {
-                  <span class="no-company">N/A</span>
-                  }
-                </td>
-                <td class="text-right amount-cell">
-                  <span class="amount-badge">{{ formatCurrency(invoice.amount) }}</span>
-                </td>
-                <td class="description-cell">
-                  <span class="truncate-text" [matTooltip]="invoice.description || ''">
-                    {{ invoice.description || '-' }}
-                  </span>
-                </td>
-                <td>
-                  <span class="reference-text">{{ invoice.reference || '-' }}</span>
-                </td>
-                <td class="text-center actions-cell">
-                  @if (authService.hasPermission('change_invoice')) {
-                  <button class="action-btn-text edit-btn" (click)="showEditForm(invoice)">
-                    <mat-icon>edit</mat-icon>
-                    Edit
-                  </button>
-                  }
-                  @if (authService.hasPermission('delete_invoice')) {
-                  <button class="action-btn-text delete-btn" (click)="deleteInvoice(invoice)">
-                    <mat-icon>delete</mat-icon>
-                    Delete
-                  </button>
-                  }
-                </td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Mobile Card View -->
-        <div class="mobile-cards hide-on-desktop">
-          @for (invoice of invoices(); track invoice.id) {
-          <div class="mobile-invoice-card">
-            <div class="card-header-mobile">
-              <div class="header-top-row">
-                <span class="invoice-number-badge">#{{ invoice.invoice_number }}</span>
-                <span class="amount-badge">{{ formatCurrency(invoice.amount) }}</span>
-              </div>
-              <div class="date-wrapper-mobile">
-                <mat-icon class="mini-icon">calendar_today</mat-icon>
-                {{ formatDate(invoice.invoice_date) }}
-              </div>
-            </div>
-
-            <div class="card-body-mobile">
-              @if (invoice.company_name) {
-              <div class="company-info-mobile">
-                <div class="company-avatar small" [style.background]="getAvatarColor(invoice.company_name)">
-                  {{ getInitials(invoice.company_name) }}
-                </div>
-                <span class="company-name">{{ invoice.company_name }}</span>
-              </div>
-              } @else {
-              <span class="no-company">No Company</span>
-              }
-
-              @if (invoice.description) {
-              <p class="mobile-description">{{ invoice.description }}</p>
-              }
-
-              @if (invoice.reference) {
-              <p class="mobile-reference">Ref: {{ invoice.reference }}</p>
-              }
-            </div>
-
-            <div class="card-actions-mobile">
-              @if (authService.hasPermission('change_invoice')) {
-              <button class="mobile-action-btn edit" (click)="showEditForm(invoice)">
-                <mat-icon>edit</mat-icon>
-                Edit
-              </button>
-              }
-              @if (authService.hasPermission('delete_invoice')) {
-              <button class="mobile-action-btn delete" (click)="deleteInvoice(invoice)">
-                <mat-icon>delete</mat-icon>
-                Delete
-              </button>
-              }
-            </div>
-          </div>
-          }
-        </div>
-        <mat-paginator [length]="totalInvoices()" [pageSize]="pageSize()" [pageSizeOptions]="[6, 10, 25, 50]"
-          [pageIndex]="pageIndex()" (page)="onPageChange($event)" showFirstLastButtons
-          aria-label="Select page of invoices">
-        </mat-paginator>
-      </div>
-    </mat-card-content>
+      <h2 class="empty-title">No Invoices Found</h2>
+      <p class="empty-text">
+        No invoices found. Click "Add Invoice" to create your first invoice.
+      </p>
+      @if (authService.hasPermission('add_invoice')) {
+      <button mat-raised-button class="empty-action-btn" (click)="showAddForm()">
+        <mat-icon>add</mat-icon>
+        Create Invoice
+      </button>
+      }
+    </div>
   </mat-card>
   }
 
-  <!-- Empty State -->
-  @if (!isLoading() && invoices().length === 0) {
-  <mat-card class="empty-state-card">
-    <mat-card-content>
-      <div class="empty-state-content">
-        <div class="empty-icon-wrapper">
-          <mat-icon class="empty-icon">receipt_long</mat-icon>
+  <!-- Desktop Table View -->
+  @else {
+  <mat-card class="table-card hide-on-mobile">
+    <div class="table-header">
+      <div class="table-title-section">
+        <mat-icon class="table-icon">receipt_long</mat-icon>
+        <h2 class="table-title">Invoice List</h2>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table mat-table [dataSource]="invoices()" class="data-table">
+        <!-- Invoice Number Column -->
+        <ng-container matColumnDef="invoice_number">
+          <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+          <td mat-cell *matCellDef="let invoice">
+            <span class="quotation-number-badge">{{ invoice.invoice_number }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Date Column -->
+        <ng-container matColumnDef="invoice_date">
+          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <td mat-cell *matCellDef="let invoice" class="date-cell">
+            <div class="date-wrapper">
+              <mat-icon class="mini-icon">calendar_today</mat-icon>
+              {{ formatDate(invoice.invoice_date) }}
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Company Column -->
+        <ng-container matColumnDef="company_name">
+          <th mat-header-cell *matHeaderCellDef>Company</th>
+          <td mat-cell *matCellDef="let invoice">
+            <span class="company-name">{{ invoice.company_name || 'N/A' }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Amount Column -->
+        <ng-container matColumnDef="amount">
+          <th mat-header-cell *matHeaderCellDef>Amount</th>
+          <td mat-cell *matCellDef="let invoice">
+            <span class="amount-badge">{{ formatCurrency(invoice.amount) }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Description Column -->
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>Description</th>
+          <td mat-cell *matCellDef="let invoice">
+            <span class="truncate-text" [matTooltip]="invoice.description || ''">
+              {{ invoice.description || '-' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Reference Column -->
+        <ng-container matColumnDef="reference">
+          <th mat-header-cell *matHeaderCellDef>Reference</th>
+          <td mat-cell *matCellDef="let invoice">
+            <span class="reference-text">{{ invoice.reference || '-' }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let invoice" class="actions-cell">
+            @if (authService.hasPermission('change_invoice')) {
+            <button mat-icon-button class="action-icon-btn" (click)="showEditForm(invoice)" matTooltip="Edit">
+              <mat-icon>edit</mat-icon>
+            </button>
+            }
+            @if (authService.hasPermission('delete_invoice')) {
+            <button mat-icon-button class="action-icon-btn delete" (click)="deleteInvoice(invoice)" matTooltip="Delete">
+              <mat-icon>delete</mat-icon>
+            </button>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="invoice-row"></tr>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <mat-paginator [length]="totalInvoices()" [pageSize]="pageSize()" [pageIndex]="pageIndex()"
+      [pageSizeOptions]="[6, 12, 24, 50]" (page)="onPageChange($event)" showFirstLastButtons>
+    </mat-paginator>
+  </mat-card>
+
+  <!-- Mobile Card View -->
+  <div class="mobile-cards hide-on-desktop">
+    @for (invoice of invoices(); track invoice.id) {
+    <div class="mobile-invoice-card">
+      <div class="card-header-mobile">
+        <div class="header-top-row">
+          <span class="quotation-number-badge">{{ invoice.invoice_number }}</span>
+          <span class="amount-badge">{{ formatCurrency(invoice.amount) }}</span>
         </div>
-        <h2 class="empty-title">No Invoices Found</h2>
-        <p class="empty-text">
-          @if (selectedCompanyId()) {
-          No invoices found for the selected company. Click "Add Invoice" to create one.
-          } @else {
-          No invoices found. Click "Add Invoice" to create your first invoice.
-          }
-        </p>
-        @if (authService.hasPermission('add_invoice')) {
-        <button mat-raised-button color="primary" (click)="showAddForm()" class="empty-action-btn">
-          <mat-icon>add</mat-icon>
-          Add Invoice
+        <div class="date-wrapper-mobile">
+          <mat-icon class="mini-icon">calendar_today</mat-icon>
+          {{ formatDate(invoice.invoice_date) }}
+        </div>
+      </div>
+
+      <div class="card-body-mobile">
+        <div class="company-info-mobile">
+          <span class="company-name">{{ invoice.company_name || 'N/A' }}</span>
+        </div>
+        @if (invoice.description) {
+        <div style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">{{ invoice.description }}</div>
+        }
+      </div>
+
+      <div class="card-actions-mobile">
+        @if (authService.hasPermission('change_invoice')) {
+        <button mat-icon-button class="mobile-action-icon" (click)="showEditForm(invoice)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        }
+        @if (authService.hasPermission('delete_invoice')) {
+        <button mat-icon-button class="mobile-action-icon delete" (click)="deleteInvoice(invoice)">
+          <mat-icon>delete</mat-icon>
         </button>
         }
       </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
+    }
+
+    <!-- Mobile Pagination -->
+    <mat-paginator [length]="totalInvoices()" [pageSize]="pageSize()" [pageIndex]="pageIndex()"
+      [pageSizeOptions]="[6, 12, 24]" (page)="onPageChange($event)">
+    </mat-paginator>
+  </div>
   }
 </div>

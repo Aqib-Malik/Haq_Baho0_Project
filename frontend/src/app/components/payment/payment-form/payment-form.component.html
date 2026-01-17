@@ -38,6 +38,9 @@
                     <mat-error *ngIf="paymentForm.get('payment_number')?.hasError('required')">
                         Payment number is required
                     </mat-error>
+                    <mat-error *ngIf="paymentForm.get('payment_number')?.hasError('maxlength')">
+                        Max 50 characters allowed
+                    </mat-error>
                 </mat-form-field>
 
                 <!-- Payment Date -->
@@ -68,7 +71,7 @@
                 <mat-form-field appearance="outline" subscriptSizing="dynamic">
                     <input matInput type="number" formControlName="amount" placeholder="Amount" autocomplete="off"
                         min="0" required>
-                    <mat-icon matPrefix>currency_rupee</mat-icon>
+                    <span matPrefix class="currency-prefix">Rs&nbsp;</span>
                     <mat-error *ngIf="paymentForm.get('amount')?.hasError('required')">
                         Amount is required
                     </mat-error>
@@ -96,7 +99,7 @@
                 <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="isLoading">
                     Cancel
                 </button>
-                <button mat-raised-button color="primary" type="submit" [disabled]="paymentForm.invalid || isLoading">
+                <button mat-raised-button color="primary" type="submit" [disabled]="isLoading">
                     <mat-icon>save</mat-icon>
                     {{ isLoading ? 'Saving...' : (isEditMode ? 'Update Payment' : 'Create Payment') }}
                 </button>

@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
     providedIn: 'root'
 })
 export class AuthService {
-    private apiUrl = 'https://haqbahoomianco.com/api';
+    private apiUrl = 'http://13.61.5.28/api';
     private currentUserSubject: BehaviorSubject<any>;
     public currentUser: Observable<any>;
 

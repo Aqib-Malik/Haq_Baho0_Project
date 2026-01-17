@@ -42,8 +42,16 @@ export const routes: Routes = [
                 loadComponent: () => import('./components/quotation/quotation-form/quotation-form.component').then(m => m.QuotationFormComponent)
             },
             {
+                path: 'quotations/:id/view',
+                loadComponent: () => import('./components/quotation/quotation-print/quotation-print.component').then(m => m.QuotationPrintComponent)
+            },
+            {
                 path: 'add-company',
                 loadComponent: () => import('./components/company/company-form/company-form.component').then(m => m.CompanyFormComponent)
+            },
+            {
+                path: 'inventory',
+                loadComponent: () => import('./components/inventory/inventory.component').then(m => m.InventoryComponent)
             },
             // Admin Routes
             {

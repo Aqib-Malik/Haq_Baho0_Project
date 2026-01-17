@@ -99,7 +99,7 @@ export class LedgerComponent implements OnInit {
         this.filterCompanies(); // Initialize filtered list
         this.isLoadingCompanies.set(false);
         if (companies.length === 0) {
-          this.showError('No companies found. Please add companies via Django admin panel at https://haqbahoomianco.com/admin');
+          this.showError('No companies found. Please add companies via Django admin panel at http://13.61.5.28/admin');
         }
       },
       error: (error) => {

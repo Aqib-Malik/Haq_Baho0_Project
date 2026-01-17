@@ -1,0 +1,113 @@
+<div class="inventory-container">
+    <!-- Premium Compact Header -->
+    <div class="compact-header">
+        <div class="header-left">
+            <div class="icon-circle-small">
+                <mat-icon>inventory_2</mat-icon>
+            </div>
+            <h1 class="page-title-compact">Inventory</h1>
+        </div>
+        <div class="header-right">
+            <!-- Search Filter -->
+            <mat-form-field class="search-field-compact" appearance="outline" subscriptSizing="dynamic">
+                <mat-icon matPrefix>search</mat-icon>
+                <input matInput [formControl]="searchControl" placeholder="Find by name...">
+                <button *ngIf="searchControl.value" matSuffix mat-icon-button (click)="searchControl.setValue('')">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </mat-form-field>
+
+            <!-- Add Button -->
+            <button mat-raised-button class="add-btn-compact" (click)="openInventoryDialog()">
+                <mat-icon>add</mat-icon>
+                Add Item
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+    <div class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p class="loading-text">Loading inventory...</p>
+    </div>
+    }
+
+    <!-- Empty State -->
+    @else if (items().length === 0) {
+    <mat-card class="empty-state-card">
+        <div class="empty-state-content">
+            <div class="empty-icon-wrapper">
+                <mat-icon class="empty-icon">inventory_2</mat-icon>
+            </div>
+            <h2 class="empty-title">No Items Found</h2>
+            <p class="empty-text">
+                Start by adding items to your inventory. Track products, services, and manage your stock efficiently.
+            </p>
+            <button mat-raised-button class="empty-action-btn" (click)="openInventoryDialog()">
+                <mat-icon>add</mat-icon>
+                Add First Item
+            </button>
+        </div>
+    </mat-card>
+    }
+
+    <!-- Desktop Table View -->
+    <!-- Desktop & Mobile Unified Card View -->
+    @else {
+    <div class="inventory-grid">
+        @for (item of items(); track item.id) {
+        <mat-card class="inventory-card">
+            <div class="card-content">
+                <!-- Header: Name & Price -->
+                <div class="card-header-row">
+                    <div class="item-identity">
+                        <span class="item-name">{{ item.name }}</span>
+                        <span class="item-id">ID: #{{ item.id }}</span>
+                    </div>
+                    <span class="price-badge">{{ formatCurrency(item.unit_price) }}</span>
+                </div>
+
+                <!-- Meta Info: Category & Unit -->
+                <div class="card-meta-row">
+                    <div class="meta-badges">
+                        @if (item.category) {
+                        <span class="category-badge">
+                            <mat-icon>category</mat-icon>
+                            {{ item.category }}
+                        </span>
+                        }
+                        <span class="unit-badge">
+                            <mat-icon>straighten</mat-icon>
+                            {{ item.unit }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Description Block -->
+                <div class="description-block">
+                    <p class="desc-text">{{ item.description || 'No description available.' }}</p>
+                </div>
+
+                <!-- Actions Footer -->
+                <div class="card-actions">
+                    <div class="action-buttons">
+                        <button mat-stroked-button class="edit-btn" (click)="openInventoryDialog(item)">
+                            <mat-icon>edit</mat-icon> Edit
+                        </button>
+                        <button mat-stroked-button class="delete-btn" (click)="confirmDelete(item)">
+                            <mat-icon>delete</mat-icon> Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </mat-card>
+        }
+    </div>
+
+    <!-- Pagination -->
+    <mat-paginator [length]="totalItems()" [pageSize]="pageSize" [pageIndex]="pageIndex"
+        [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons class="custom-paginator">
+    </mat-paginator>
+    }
+</div>

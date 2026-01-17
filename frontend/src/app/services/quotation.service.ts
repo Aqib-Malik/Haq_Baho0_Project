@@ -15,7 +15,7 @@ interface PaginatedResponse<T> {
     providedIn: 'root'
 })
 export class QuotationService {
-    private apiUrl = 'https://haqbahoomianco.com/api';
+    private apiUrl = 'http://13.61.5.28/api';
 
     constructor(private http: HttpClient) { }
 

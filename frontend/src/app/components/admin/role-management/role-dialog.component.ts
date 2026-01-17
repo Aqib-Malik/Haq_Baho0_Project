@@ -34,8 +34,8 @@ export class RoleDialogComponent implements OnInit {
     filteredPermissions: any[] = [];
     selectedPermissionIds: number[] = [];
     isEditMode: boolean = false;
-    apiUrl = 'https://haqbahoomianco.com/api/roles/';
-    permissionsUrl = 'https://haqbahoomianco.com/api/permissions/';
+    apiUrl = 'http://13.61.5.28/api/roles/';
+    permissionsUrl = 'http://13.61.5.28/api/permissions/';
 
     constructor(
         private fb: FormBuilder,

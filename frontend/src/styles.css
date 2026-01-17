@@ -179,6 +179,14 @@ mat-icon {
   border-width: 2px !important;
 }
 
+/* Invalid State - Red Border */
+.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__trailing {
+  border-color: #ef4444 !important;
+  border-width: 2px !important;
+}
+
 /* Select Dropdown Improvements */
 .mat-mdc-select-arrow-wrapper {
   transform: translateY(-50%);
@@ -656,6 +664,55 @@ mat-error {
 }
 
 /* Ensure the form field expands to fit the error */
-.mat-mdc-form-field {
-  display: block !important;
+
+/* Ensure SweetAlert2 is always on top of Material Dialogs */
+/* Ensure SweetAlert2 is always on top of Material Dialogs */
+.swal2-container {
+  z-index: 2147483647 !important;
+  /* Max z-index */
+}
+
+/* --- Global Print Fixes --- */
+@media print {
+
+  /* Hide standard layout elements */
+  .sidenav,
+  .mat-drawer,
+  .mat-toolbar,
+  .sidebar-toggle-btn,
+  .brand-header,
+  mat-sidenav,
+  mat-toolbar,
+  app-sidebar,
+  app-header {
+    display: none !important;
+  }
+
+  /* Reset layout containers */
+  body,
+  html,
+  .sidenav-container,
+  .mat-drawer-container,
+  .mat-sidenav-content,
+  .content-container {
+    height: auto !important;
+    width: 100% !important;
+    overflow: visible !important;
+    position: static !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  /* Ensure the print component content is visible */
+  .print-container {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  /* Hide everything else if not inside print-container */
+  body>*:not(app-root) {
+    display: none !important;
+  }
 }

@@ -6,6 +6,10 @@
         <div class="brand-header">
             <img src="assets/images/logo.jpeg" alt="Logo" class="brand-logo">
             <div class="brand-name">Haq Bahoo Mian</div>
+            <button mat-icon-button class="sidebar-toggle-btn" (click)="toggleSidebar(drawer)"
+                matTooltip="Collapse sidebar" matTooltipPosition="right">
+                <mat-icon>chevron_left</mat-icon>
+            </button>
         </div>
 
         <mat-nav-list>
@@ -52,7 +56,7 @@
                     </mat-panel-title>
                 </mat-expansion-panel-header>
                 <mat-nav-list class="sub-menu">
-                    <a mat-list-item (click)="showComingSoon('Inventory List')">
+                    <a mat-list-item routerLink="/inventory" routerLinkActive="active-link">
                         <mat-icon matListItemIcon>list</mat-icon>
                         <div matListItemTitle>Items List</div>
                     </a>

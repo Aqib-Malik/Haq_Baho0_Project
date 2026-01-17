@@ -1,0 +1,145 @@
+<div class="print-container" *ngIf="!isLoading() && quotation(); else loading">
+    <!-- Action Bar -->
+    <div class="action-bar hide-on-print">
+        <button mat-raised-button color="primary" (click)="downloadPdf()">
+            <mat-icon>print</mat-icon> Print / Download PDF
+        </button>
+    </div>
+
+    <!-- Paper Page 1: Items -->
+    <div class="page a4-page">
+        <!-- Header -->
+        <header class="doc-header">
+            <div class="logo-section">
+                <img src="assets/images/logo.jpeg" alt="Haq Bahoo Logo" class="logo">
+            </div>
+            <div class="header-text">
+                <h1 class="company-name">HAQ BAHOO MIAN & COMPANY</h1>
+                <p class="company-subtitle">SULTANIA FEED MILL</p>
+            </div>
+            <div class="header-date">
+                <span class="date-label">DATE</span>
+                <span class="date-value">{{ formatDate(quotation()?.quotation_date) }}</span>
+            </div>
+        </header>
+
+        <div class="divider-line"></div>
+
+        <!-- Subject -->
+        <div class="subject-section">
+            <div class="subject-row">
+                <span class="label">SUBJECT</span>
+                <span class="value">QUOTATION</span>
+            </div>
+            <!-- Optional Sub-subject if we had it, for now using company name/project logic or static placeholder if requested -->
+            <div class="subject-sub-row" *ngIf="quotation()?.notes?.includes('subject:')">
+                <!-- If I parsed subject from notes, I'd put it here. For now, general layout. -->
+            </div>
+        </div>
+
+        <!-- Items Content -->
+        <div class="items-content">
+            <!-- PADDLE MIXER Example Style Header if relevant, otherwise straight listing -->
+
+            <div class="item-block" *ngFor="let item of quotation()?.items; let i = index">
+                <div class="item-header">
+                    <span class="item-title">{{ item.item_name }}</span>
+                    <!-- Description as numbered list if multiline -->
+                    <div class="item-specs" *ngIf="item.description">
+                        <!-- Simple whitespace preserve for now -->
+                        <pre class="specs-text">{{ item.description }}</pre>
+                    </div>
+                </div>
+
+                <div class="item-pricing">
+                    <span class="rate-label">RATE</span>
+                    <span class="rate-value">{{ formatCurrency(item.unit_price) }}</span>
+                </div>
+            </div>
+
+            <!-- Grand Total Section mimics the first image bottom -->
+            <div class="total-section">
+                <span class="total-label">TOTAL</span>
+                <span class="total-value">{{ formatCurrency(quotation()?.total_amount) }}</span>
+            </div>
+        </div>
+
+        <!-- Footer Bar -->
+        <footer class="doc-footer">
+            <div class="footer-bar"></div>
+            <div class="footer-content">
+                <p class="address">Near Lohianwali Nahr Opp Railway Line G.T Road Gujranwala</p>
+                <div class="contact-info">
+                    <div class="email-box">
+                        <span class="icon">✉</span>
+                        <span>Haqbahoomiancompany@Gmail.Com</span>
+                    </div>
+                    <div class="phone-box">
+                        <span class="icon">✆</span>
+                        <span>+92 321 319 6814</span>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Paper Page 2: Terms (Only if specific Terms exist or always if per design requirement) -->
+    <div class="page a4-page page-break-before">
+        <!-- Header Repeat -->
+        <header class="doc-header">
+            <div class="logo-section">
+                <img src="assets/images/logo.jpeg" alt="Haq Bahoo Logo" class="logo">
+            </div>
+            <div class="header-text">
+                <h1 class="company-name">HAQ BAHOO MIAN & COMPANY</h1>
+            </div>
+        </header>
+
+        <div class="divider-line"></div>
+
+        <div class="terms-content">
+            <h2 class="terms-title">GENERAL TERMS & CONDITION</h2>
+
+            <div class="terms-list">
+                <!-- If notes are just text, verify how to split. For now, preserving whitespace. -->
+                <pre class="terms-text">{{ quotation()?.notes }}</pre>
+            </div>
+
+            <div class="closing-section">
+                <p class="thank-you">THANKING YOU.</p>
+
+                <div class="signature-box">
+                    <p class="yours-faithfully">Yours faithfully,</p>
+                    <p class="company-sign">HAQ BAHOO MIAN & COMPANY</p>
+                    <div class="sign-line">
+                        <span>Signature _________________</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Bar Repeat -->
+        <footer class="doc-footer">
+            <div class="footer-bar"></div>
+            <div class="footer-content">
+                <p class="address">Near Lohianwali Nahr Opp Railway Line G.T Road Gujranwala</p>
+                <div class="contact-info">
+                    <div class="email-box">
+                        <span class="icon">✉</span>
+                        <span>Haqbahoomiancompany@Gmail.Com</span>
+                    </div>
+                    <div class="phone-box">
+                        <span class="icon">✆</span>
+                        <span>+92 321 319 6814</span>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<ng-template #loading>
+    <div class="loading-container">
+        <mat-spinner></mat-spinner>
+    </div>
+</ng-template>

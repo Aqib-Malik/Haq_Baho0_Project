@@ -51,6 +51,30 @@ export class NotificationService {
             }
         });
     }
+    /**
+     * Show an info toast notification
+     */
+    showInfo(message: string): void {
+        Swal.fire({
+            icon: 'info',
+            title: 'Info',
+            text: message,
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 5000,
+            timerProgressBar: true,
+            background: '#ffffff',
+            color: '#1e293b',
+            iconColor: '#3b82f6',
+            customClass: {
+                popup: 'animated fadeInDown faster'
+            }
+        });
+    }
+
+    /**
+     * Show an error toast notification
 
     /**
      * Show a detailed error dialog

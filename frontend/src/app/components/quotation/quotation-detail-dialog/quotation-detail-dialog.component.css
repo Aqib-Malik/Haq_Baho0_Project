@@ -1,0 +1,472 @@
+/* Main Container */
+.detail-container {
+    padding: 0;
+    position: relative;
+    background: #ffffff;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Inter', 'Roboto', 'Helvetica Neue', sans-serif;
+    color: #1e293b;
+    overflow: hidden;
+    /* Prevent double scrollbars */
+}
+
+/* Close Button - enhanced positioning and style */
+.close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 20;
+    color: #64748b;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    transform: rotate(90deg);
+}
+
+/* Header Section */
+.doc-header {
+    flex-shrink: 0;
+    padding: 32px 40px;
+    background: linear-gradient(to right, #f8fafc, #ffffff);
+    border-bottom: 1px solid #e2e8f0;
+    position: relative;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-right: 40px;
+    /* Space for close button */
+}
+
+.header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.doc-type-label {
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #94a3b8;
+}
+
+.doc-number {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+.status-wrapper {
+    margin-top: 8px;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Refined Status Colors */
+.status-badge.draft {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.status-badge.sent {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+}
+
+.status-badge.accepted {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+}
+
+.status-badge.rejected {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.status-badge.expired {
+    background: #fff7ed;
+    color: #ea580c;
+    border: 1px solid #fed7aa;
+}
+
+.header-right {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 4px;
+}
+
+.date-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.date-label {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+}
+
+.date-value {
+    font-size: 1rem;
+    color: #334155;
+    font-weight: 500;
+}
+
+.date-group.valid-until .date-value {
+    color: #d97706;
+}
+
+/* Content Body */
+.doc-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 40px;
+    background: #ffffff;
+}
+
+/* Bill To Section - Cleaner Design */
+.section-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #94a3b8;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.client-section {
+    margin-bottom: 48px;
+}
+
+.client-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 0;
+}
+
+.client-icon-box {
+    width: 48px;
+    height: 48px;
+    background: #f1f5f9;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+.client-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.client-name {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.client-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.meta-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.meta-row mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: #94a3b8;
+}
+
+/* Table Design */
+.items-table-container {
+    margin-bottom: 40px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.items-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.items-table th {
+    background: #f8fafc;
+    padding: 16px 24px;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.items-table td {
+    padding: 16px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    vertical-align: top;
+}
+
+.items-table tr:last-child td {
+    border-bottom: none;
+}
+
+.item-main {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+}
+
+.item-desc {
+    font-size: 0.85rem;
+    color: #64748b;
+    line-height: 1.4;
+}
+
+.col-qty {
+    width: 15%;
+    white-space: nowrap;
+}
+
+.col-rate {
+    width: 20%;
+    white-space: nowrap;
+}
+
+.col-amount {
+    width: 20%;
+    white-space: nowrap;
+}
+
+.numeric-cell {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.9rem;
+}
+
+.total-cell {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Totals & Notes Area */
+.summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 48px;
+}
+
+/* Notes */
+.notes-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 24px;
+}
+
+.notes-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.notes-content {
+    font-size: 0.95rem;
+    color: #334155;
+    line-height: 1.6;
+    margin: 0;
+    white-space: pre-line;
+}
+
+/* Calculations */
+.totals-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.calc-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    color: #64748b;
+}
+
+.calc-value {
+    font-weight: 500;
+    color: #334155;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.calc-row.discount .calc-label,
+.calc-row.discount .calc-value {
+    color: #10b981;
+}
+
+.calc-divider {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 8px 0;
+}
+
+.calc-row.final-total {
+    margin-top: 4px;
+    align-items: baseline;
+}
+
+.final-total .calc-label {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.final-total .calc-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+/* Footer Actions */
+.doc-footer {
+    flex-shrink: 0;
+    padding: 24px 40px;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+}
+
+.action-btn {
+    height: 48px;
+    padding: 0 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.btn-secondary {
+    border: 1px solid #cbd5e1;
+    color: #475569;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .doc-header {
+        padding: 24px;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .header-content {
+        padding-right: 0;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+    }
+
+    .header-right {
+        text-align: left;
+        align-items: flex-start;
+        padding-top: 0;
+    }
+
+    .doc-body {
+        padding: 24px;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+
+    .totals-container {
+        border-top: 1px solid #e2e8f0;
+        padding-top: 24px;
+    }
+
+    .doc-footer {
+        padding: 20px;
+        flex-direction: column-reverse;
+        /* Stack buttons, primary on top */
+    }
+
+    .action-btn {
+        width: 100%;
+    }
+}

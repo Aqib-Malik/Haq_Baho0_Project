@@ -232,7 +232,7 @@
     -webkit-backdrop-filter: blur(30px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.6);
     border-radius: 28px !important;
-    padding: 3rem 2.75rem !important;
+    padding: 2rem 2rem !important;
     box-shadow:
         0 30px 60px -12px rgba(0, 0, 0, 0.3),
         0 0 0 1px rgba(255, 255, 255, 0.2),
@@ -268,18 +268,18 @@
 /* Header Section */
 .brand-header {
     text-align: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .logo-circle {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     background: white;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 1.5rem;
+    margin: 0 auto 1rem;
     box-shadow:
         0 10px 30px -5px rgba(251, 191, 36, 0.4),
         0 0 0 4px rgba(251, 191, 36, 0.1);
@@ -345,10 +345,10 @@
 }
 
 h1 {
-    font-size: 2.25rem;
+    font-size: 1.8rem;
     font-weight: 800;
     color: #0f172a;
-    margin: 0 0 0.5rem;
+    margin: 0 0 0.25rem;
     letter-spacing: -0.025em;
     background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%);
     -webkit-background-clip: text;
@@ -379,7 +379,7 @@ h1 {
 
 /* Form Group Spacing */
 .form-group {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
 }
 
 /* Enhanced Form Fields */
@@ -462,10 +462,10 @@ h1 {
 /* Premium Submit Button */
 .submit-btn {
     width: 100%;
-    height: 56px;
+    height: 48px;
     font-size: 1.125rem;
     font-weight: 600;
-    margin-top: 1.5rem;
+    margin-top: 1rem;
     border-radius: 14px !important;
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e3a8a 100%) !important;
     color: white !important;
@@ -583,7 +583,7 @@ h1 {
 
 /* Footer */
 .footer {
-    margin-top: 2rem;
+    margin-top: 1.5rem;
     text-align: center;
     color: rgba(255, 255, 255, 0.85);
     font-size: 0.9rem;

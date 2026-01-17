@@ -18,7 +18,7 @@ interface PaginatedResponse<T> {
   providedIn: 'root'
 })
 export class LedgerService {
-  private apiUrl = 'https://haqbahoomianco.com/api'; // Django backend URL
+  private apiUrl = 'http://13.61.5.28/api'; // Django backend URL
 
   constructor(private http: HttpClient) { }
 

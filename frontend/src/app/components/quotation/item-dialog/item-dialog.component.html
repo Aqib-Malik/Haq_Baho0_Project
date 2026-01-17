@@ -1,0 +1,91 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="title-wrapper">
+      <div class="icon-circle">
+        <mat-icon>add_shopping_cart</mat-icon>
+      </div>
+      <div>
+        <h2 class="dialog-title">{{ isEditMode ? 'Edit Item' : 'Add Quotation Item' }}</h2>
+        <p class="dialog-subtitle">Select from inventory or enter details</p>
+      </div>
+    </div>
+    <button mat-icon-button class="close-btn" (click)="onCancel()" type="button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-content">
+    <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+
+      <!-- Inventory Search - Distinct Section -->
+      <div class="search-wrapper">
+        <mat-form-field appearance="outline" class="full-width search-field" subscriptSizing="dynamic">
+          <mat-icon matPrefix>search</mat-icon>
+          <mat-select formControlName="inventory_item" (selectionChange)="onInventoryItemSelected($event.value)"
+            placeholder="Search inventory to auto-fill...">
+            <mat-option [value]="null">-- Manual Entry --</mat-option>
+            @for (invItem of inventoryItems(); track invItem.id) {
+            <mat-option [value]="invItem.id">
+              <span class="opt-name">{{ invItem.name }}</span>
+              <span class="opt-price"> - Rs {{ invItem.unit_price }}</span>
+            </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="form-grid">
+        <!-- Name (Full Width) -->
+        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+          <input matInput formControlName="item_name" placeholder="Item Name / Service Title" required>
+          <mat-icon matPrefix>description</mat-icon>
+          <mat-error *ngIf="itemForm.get('item_name')?.hasError('required')">Required</mat-error>
+        </mat-form-field>
+
+        <!-- Qty -->
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <input matInput type="number" formControlName="quantity" min="1" placeholder="Quantity">
+          <mat-icon matPrefix>numbers</mat-icon>
+        </mat-form-field>
+
+        <!-- Unit -->
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-select formControlName="unit" placeholder="Unit">
+            @for (u of units; track u.value) {
+            <mat-option [value]="u.value">{{ u.label }}</mat-option>
+            }
+          </mat-select>
+          <mat-icon matPrefix>straighten</mat-icon>
+        </mat-form-field>
+
+        <!-- Unit Price -->
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <span matPrefix class="currency-prefix">Rs&nbsp;</span>
+          <input matInput type="number" formControlName="unit_price" min="0" placeholder="Unit Price">
+        </mat-form-field>
+
+        <!-- Subtotal (Read Only) -->
+        <div class="subtotal-display">
+          <span class="subtotal-label">Total</span>
+          <span class="subtotal-value">{{ formatCurrency(getSubtotal()) }}</span>
+        </div>
+
+        <!-- Description (Full Width) -->
+        <mat-form-field appearance="outline" class="full-width textarea-field" subscriptSizing="dynamic">
+          <textarea matInput formControlName="description" rows="2"
+            placeholder="Description / Specifications..."></textarea>
+          <mat-icon matPrefix>notes</mat-icon>
+        </mat-form-field>
+
+      </div>
+
+      <div class="dialog-actions">
+        <button mat-stroked-button type="button" (click)="onCancel()">Cancel</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="itemForm.invalid">
+          <mat-icon>add</mat-icon>
+          {{ isEditMode ? 'Update Item' : 'Add Item' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
