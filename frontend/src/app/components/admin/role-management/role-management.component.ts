@@ -12,6 +12,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { finalize } from 'rxjs/operators';
 import { NotificationService } from '../../../services/notification.service';
 
+import { environment } from '../../../../environments/environment';
+
 @Component({
     selector: 'app-role-management',
     standalone: true,
@@ -31,7 +33,7 @@ import { NotificationService } from '../../../services/notification.service';
 export class RoleManagementComponent implements OnInit {
     displayedColumns: string[] = ['name', 'permissions', 'actions'];
     dataSource: any[] = [];
-    apiUrl = 'http://13.61.5.28/api/roles/';
+    apiUrl = `${environment.apiUrl}/roles/`;
     loading = false;
 
     constructor(

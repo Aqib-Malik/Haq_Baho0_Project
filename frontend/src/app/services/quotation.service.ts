@@ -11,11 +11,13 @@ interface PaginatedResponse<T> {
     results?: T[];
 }
 
+import { environment } from '../../environments/environment';
+
 @Injectable({
     providedIn: 'root'
 })
 export class QuotationService {
-    private apiUrl = 'http://13.61.5.28/api';
+    private apiUrl = environment.apiUrl;
 
     constructor(private http: HttpClient) { }
 

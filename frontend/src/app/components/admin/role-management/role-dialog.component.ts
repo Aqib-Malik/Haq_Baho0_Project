@@ -11,6 +11,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { HttpClient } from '@angular/common/http';
 import { NotificationService } from '../../../services/notification.service';
 
+import { environment } from '../../../../environments/environment';
+
 @Component({
     selector: 'app-role-dialog',
     standalone: true,
@@ -34,8 +36,8 @@ export class RoleDialogComponent implements OnInit {
     filteredPermissions: any[] = [];
     selectedPermissionIds: number[] = [];
     isEditMode: boolean = false;
-    apiUrl = 'http://13.61.5.28/api/roles/';
-    permissionsUrl = 'http://13.61.5.28/api/permissions/';
+    apiUrl = `${environment.apiUrl}/roles/`;
+    permissionsUrl = `${environment.apiUrl}/permissions/`;
 
     constructor(
         private fb: FormBuilder,

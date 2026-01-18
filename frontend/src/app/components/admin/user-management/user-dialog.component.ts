@@ -10,6 +10,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { HttpClient } from '@angular/common/http';
 import { NotificationService } from '../../../services/notification.service';
 
+import { environment } from '../../../../environments/environment';
+
 @Component({
     selector: 'app-user-dialog',
     standalone: true,
@@ -30,8 +32,8 @@ export class UserDialogComponent implements OnInit {
     userForm: FormGroup;
     roles: any[] = [];
     isEditMode: boolean = false;
-    apiUrl = 'http://13.61.5.28/api/users/';
-    rolesUrl = 'http://13.61.5.28/api/roles/';
+    apiUrl = `${environment.apiUrl}/users/`;
+    rolesUrl = `${environment.apiUrl}/roles/`;
 
     constructor(
         private fb: FormBuilder,

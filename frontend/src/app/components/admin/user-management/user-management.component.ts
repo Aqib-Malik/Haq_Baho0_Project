@@ -12,6 +12,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { finalize } from 'rxjs/operators';
 import { NotificationService } from '../../../services/notification.service';
 
+import { environment } from '../../../../environments/environment';
+
 @Component({
     selector: 'app-user-management',
     standalone: true,
@@ -31,7 +33,7 @@ import { NotificationService } from '../../../services/notification.service';
 export class UserManagementComponent implements OnInit {
     displayedColumns: string[] = ['username', 'email', 'firstName', 'lastName', 'roles', 'actions'];
     dataSource: any[] = [];
-    apiUrl = 'http://13.61.5.28/api/users/';
+    apiUrl = `${environment.apiUrl}/users/`;
     loading = false;
 
     constructor(

@@ -14,11 +14,13 @@ interface PaginatedResponse<T> {
   results?: T[];
 }
 
+import { environment } from '../../environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
 export class LedgerService {
-  private apiUrl = 'http://13.61.5.28/api'; // Django backend URL
+  private apiUrl = environment.apiUrl; // Django backend URL
 
   constructor(private http: HttpClient) { }
 
