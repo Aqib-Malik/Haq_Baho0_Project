@@ -1,6 +1,7 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from .models import Invoice, Payment, LedgerEntry
+
+from .models import Invoice, Payment, LedgerEntry, StockTransaction
 
 
 @receiver(post_save, sender=Invoice)
@@ -94,3 +95,43 @@ def create_ledger_entry_for_payment(sender, instance, created, **kwargs):
 def delete_ledger_entry_for_payment(sender, instance, **kwargs):
     """Delete ledger entry when payment is deleted"""
     LedgerEntry.objects.filter(payment=instance).delete()
+
+
+@receiver(post_save, sender=StockTransaction)
+def update_stock_on_transaction(sender, instance, created, **kwargs):
+    """
+    Update InventoryItem stock_quantity when a StockTransaction is created.
+    Note: Editing transactions is not fully supported for stock updates to avoid complexity.
+    It is recommended to delete and recreate transactions for corrections.
+    """
+    if created:
+        item = instance.item
+        # Ensure stock_quantity is not None
+        if item.stock_quantity is None:
+            item.stock_quantity = 0
+            
+        qty = instance.base_quantity
+        
+        if instance.transaction_type in ['receipt', 'return', 'adjustment']:
+            item.stock_quantity += qty
+        elif instance.transaction_type == 'issue':
+            item.stock_quantity -= qty
+            
+        item.save()
+
+
+@receiver(post_delete, sender=StockTransaction)
+def reverse_stock_on_delete(sender, instance, **kwargs):
+    """Reverse stock update when a StockTransaction is deleted."""
+    item = instance.item
+    if item.stock_quantity is None:
+        item.stock_quantity = 0
+        
+    qty = instance.base_quantity
+    
+    if instance.transaction_type in ['receipt', 'return', 'adjustment']:
+        item.stock_quantity -= qty
+    elif instance.transaction_type == 'issue':
+        item.stock_quantity += qty
+        
+    item.save()

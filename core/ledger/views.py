@@ -7,16 +7,21 @@ from django.db.models import Sum
 from datetime import datetime
 from decimal import Decimal
 
-from .models import Company, Invoice, Payment, LedgerEntry, Tax, InventoryItem, Quotation, QuotationItem
 from .serializers import (
     CompanySerializer, InvoiceSerializer, PaymentSerializer,
     LedgerEntrySerializer, LedgerEntryWithBalanceSerializer,
     CompanyLedgerSummarySerializer,
     UserSerializer, RoleSerializer, PermissionSerializer,
     TaxSerializer, InventoryItemSerializer, QuotationSerializer,
-    QuotationListSerializer, QuotationDetailSerializer, QuotationItemSerializer
+    QuotationListSerializer, QuotationDetailSerializer, QuotationItemSerializer,
+    UnitSerializer, LocationSerializer, BatchSerializer, StockTransactionSerializer
 )
 from django.contrib.auth.models import User, Group, Permission
+from .models import (
+    Company, Invoice, Payment, LedgerEntry, Tax, 
+    InventoryItem, Quotation, QuotationItem,
+    Unit, Location, Batch, StockTransaction
+)
 from .export_utils import export_ledger_pdf, export_ledger_excel
 
 
@@ -294,6 +299,59 @@ class InventoryItemViewSet(AuditMixin, viewsets.ModelViewSet):
         categories = InventoryItem.objects.values_list('category', flat=True).distinct()
         categories = [cat for cat in categories if cat]  # Filter out None/empty
         return Response(categories)
+
+
+class UnitViewSet(AuditMixin, viewsets.ModelViewSet):
+    """ViewSet for Unit CRUD operations"""
+    queryset = Unit.objects.all()
+    serializer_class = UnitSerializer
+    permission_classes = [IsAuthenticated, CustomDjangoModelPermissions]
+    
+    def get_queryset(self):
+        queryset = Unit.objects.all()
+        # Ensure base units are loaded if needed
+        return queryset
+
+
+class LocationViewSet(AuditMixin, viewsets.ModelViewSet):
+    """ViewSet for Location CRUD operations"""
+    queryset = Location.objects.all()
+    serializer_class = LocationSerializer
+    permission_classes = [IsAuthenticated, CustomDjangoModelPermissions]
+
+
+class BatchViewSet(AuditMixin, viewsets.ModelViewSet):
+    """ViewSet for Batch CRUD operations"""
+    queryset = Batch.objects.all()
+    serializer_class = BatchSerializer
+    permission_classes = [IsAuthenticated, CustomDjangoModelPermissions]
+    
+    def get_queryset(self):
+        queryset = Batch.objects.all()
+        item_id = self.request.query_params.get('item', None)
+        if item_id:
+            queryset = queryset.filter(item_id=item_id)
+        return queryset
+
+
+class StockTransactionViewSet(AuditMixin, viewsets.ModelViewSet):
+    """ViewSet for StockTransaction CRUD operations"""
+    queryset = StockTransaction.objects.all()
+    serializer_class = StockTransactionSerializer
+    permission_classes = [IsAuthenticated, CustomDjangoModelPermissions]
+
+    def get_queryset(self):
+        queryset = StockTransaction.objects.all()
+        item_id = self.request.query_params.get('item', None)
+        if item_id:
+            queryset = queryset.filter(item_id=item_id)
+            
+        transaction_type = self.request.query_params.get('type', None)
+        if transaction_type:
+            queryset = queryset.filter(transaction_type=transaction_type)
+            
+        return queryset
+
 
 
 class QuotationViewSet(AuditMixin, viewsets.ModelViewSet):

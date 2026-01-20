@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import Company, Invoice, Payment, LedgerEntry, Tax, InventoryItem, Quotation, QuotationItem
+from .models import (
+    Company, Invoice, Payment, LedgerEntry, Tax, 
+    InventoryItem, Quotation, QuotationItem,
+    Unit, Location, Batch, StockTransaction
+)
 
 
 @admin.register(Company)
@@ -120,8 +124,8 @@ class TaxAdmin(admin.ModelAdmin):
 
 @admin.register(InventoryItem)
 class InventoryItemAdmin(admin.ModelAdmin):
-    list_display = ('name', 'unit_price', 'unit', 'category', 'stock_quantity', 'sku', 'created_at')
-    list_filter = ('category', 'created_at')
+    list_display = ('name', 'unit_price', 'unit', 'base_unit', 'category', 'stock_quantity', 'min_stock_level', 'sku')
+    list_filter = ('category', 'created_at', 'base_unit')
     search_fields = ('name', 'description', 'sku', 'category')
     readonly_fields = ('created_at', 'updated_at')
     fieldsets = (
@@ -130,6 +134,57 @@ class InventoryItemAdmin(admin.ModelAdmin):
         }),
         ('Pricing & Stock', {
             'fields': ('unit_price', 'unit', 'stock_quantity')
+        }),
+        ('Inventory Settings', {
+            'fields': ('base_unit', 'min_stock_level', 'reorder_level', 'default_location', 'batch_tracking')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(Unit)
+class UnitAdmin(admin.ModelAdmin):
+    list_display = ('name', 'code', 'base_unit', 'conversion_factor', 'created_at')
+    search_fields = ('name', 'code')
+    readonly_fields = ('created_at', 'updated_at')
+
+
+@admin.register(Location)
+class LocationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'code', 'parent', 'created_at')
+    search_fields = ('name', 'code')
+    list_filter = ('parent',)
+    readonly_fields = ('created_at', 'updated_at')
+
+
+@admin.register(Batch)
+class BatchAdmin(admin.ModelAdmin):
+    list_display = ('batch_number', 'item', 'manufacturing_date', 'expiry_date', 'created_at')
+    list_filter = ('item', 'expiry_date')
+    search_fields = ('batch_number', 'item__name')
+    readonly_fields = ('created_at', 'updated_at')
+
+
+@admin.register(StockTransaction)
+class StockTransactionAdmin(admin.ModelAdmin):
+    list_display = ('transaction_date', 'transaction_type', 'item', 'quantity', 'unit', 'batch', 'location', 'created_at')
+    list_filter = ('transaction_type', 'transaction_date', 'item', 'location')
+    search_fields = ('reference_number', 'item__name', 'batch__batch_number')
+    readonly_fields = ('base_quantity', 'created_at', 'updated_at')
+    autocomplete_fields = ['item', 'unit', 'batch', 'location']
+    
+    fieldsets = (
+        ('Transaction Info', {
+            'fields': ('transaction_date', 'transaction_type', 'reference_number')
+        }),
+        ('Item Details', {
+            'fields': ('item', 'quantity', 'unit', 'base_quantity')
+        }),
+        ('Tracking', {
+            'fields': ('batch', 'location', 'notes')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),

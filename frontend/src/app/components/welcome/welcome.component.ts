@@ -29,8 +29,8 @@ export class WelcomeComponent implements OnInit {
     quickActions = [
         { title: 'Company Ledger', icon: 'account_balance', route: '/ledger', description: 'Manage company financial records' },
         { title: 'Invoices', icon: 'receipt', route: '/invoices', description: 'Create and manage invoices' },
-        { title: 'Stock Receipt', icon: 'add_shopping_cart', action: 'stock', description: 'Manage inventory stock' },
-        { title: 'Employees', icon: 'badge', action: 'employee', description: 'HR and employee management' }
+        { title: 'Stock Receipt', icon: 'inventory_2', route: '/inventory', description: 'Manage inventory stock' },
+        { title: 'Employees', icon: 'badge', route: '/admin/users', description: 'HR and employee management' }
     ];
 
     constructor(

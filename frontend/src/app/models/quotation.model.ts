@@ -9,6 +9,57 @@ export interface Tax {
     updated_at: string;
 }
 
+
+export interface Unit {
+    id: number;
+    name: string;
+    code: string;
+    base_unit?: number; // ID
+    conversion_factor: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Location {
+    id: number;
+    name: string;
+    code?: string;
+    parent?: number; // ID
+    description?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Batch {
+    id: number;
+    item: number;
+    batch_number: string;
+    manufacturing_date?: string;
+    expiry_date?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface StockTransaction {
+    id: number;
+    item: number;
+    item_name?: string;
+    transaction_type: 'receipt' | 'issue' | 'return' | 'adjustment';
+    quantity: string;
+    unit: number;
+    unit_name?: string;
+    base_quantity: string;
+    batch?: number;
+    batch_number?: string;
+    location?: number;
+    location_name?: string;
+    transaction_date: string;
+    reference_number?: string;
+    notes?: string;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface InventoryItem {
     id: number;
     name: string;
@@ -18,6 +69,16 @@ export interface InventoryItem {
     category?: string;
     stock_quantity?: string;
     sku?: string;
+
+    // New fields
+    base_unit?: number;
+    base_unit_name?: string;
+    min_stock_level: string;
+    reorder_level: string;
+    default_location?: number;
+    default_location_name?: string;
+    batch_tracking: boolean;
+
     created_at: string;
     updated_at: string;
 }

@@ -1,0 +1,19 @@
+ssh -i ~/Downloads/django-key.pem ubuntu@13.61.5.28 "
+cd ~/Haq_Baho0_Project &&
+source venv/bin/activate &&
+git pull origin main &&
+cd core &&
+pip install -r ../requirements.txt &&
+python manage.py makemigrations &&
+python manage.py migrate &&
+python manage.py collectstatic --noinput &&
+sudo systemctl restart gunicorn &&
+sudo systemctl reload nginx
+"
+
+
+
+
+npx ng build --configuration production && \
+scp -i ~/Downloads/django-key.pem -r dist/frontend/browser ubuntu@13.61.5.28:/home/ubuntu/ && \
+ssh -i ~/Downloads/django-key.pem ubuntu@13.61.5.28 "sudo rm -rf /var/www/haq_baho_frontend/* && sudo mv /home/ubuntu/browser/* /var/www/haq_baho_frontend/ && sudo chown -R www-data:www-data /var/www/haq_baho_frontend && sudo chmod -R 755 /var/www/haq_baho_frontend && sudo systemctl reload nginx"

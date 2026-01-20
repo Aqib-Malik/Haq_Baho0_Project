@@ -449,3 +449,116 @@
         display: none !important;
     }
 }
+
+/* ===== TABS & TRANSACTIONS ===== */
+::ng-deep .inventory-tabs .mat-mdc-tab-body-wrapper {
+    margin-top: 1.5rem;
+}
+
+/* Blue Icon for Transactions */
+.blue-icon {
+    background: #0f172a;
+    /* Keep dark theme or change to #3b82f6 for distinct look */
+}
+
+/* Stock Badge */
+.stock-badge {
+    background: #f0f9ff;
+    color: #0284c7;
+    border: 1px solid #e0f2fe;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.stock-badge mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+.stock-badge.low-stock {
+    background: #fef2f2;
+    color: #ef4444;
+    border-color: #fee2e2;
+}
+
+/* Table Styles */
+.table-container {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.custom-table {
+    width: 100%;
+}
+
+.custom-table th.mat-header-cell {
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 16px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.custom-table td.mat-cell {
+    padding: 16px;
+    color: #1e293b;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.item-name-cell {
+    display: block;
+    font-weight: 500;
+}
+
+.batch-info {
+    display: block;
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+/* Transaction Type Badges */
+.type-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.type-badge.receipt {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.type-badge.issue {
+    background: #fff1f2;
+    color: #e11d48;
+}
+
+.type-badge.return {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.type-badge.adjustment {
+    background: #fdf4ff;
+    color: #c026d3;
+}
+
+.negative-qty {
+    color: #e11d48;
+    font-weight: 500;
+}

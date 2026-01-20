@@ -2,7 +2,11 @@ from rest_framework import serializers
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import Company, Invoice, Payment, LedgerEntry, Tax, InventoryItem, Quotation, QuotationItem
+from .models import (
+    Company, Invoice, Payment, LedgerEntry, Tax, 
+    InventoryItem, Quotation, QuotationItem,
+    Unit, Location, Batch, StockTransaction
+)
 
 # --- Existing Serializers ---
 
@@ -172,7 +176,39 @@ class TaxSerializer(serializers.ModelSerializer):
         return data
 
 
+
+class UnitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Unit
+        fields = '__all__'
+
+class LocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Location
+        fields = '__all__'
+
+class BatchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Batch
+        fields = '__all__'
+
+class StockTransactionSerializer(serializers.ModelSerializer):
+    item_name = serializers.ReadOnlyField(source='item.name')
+    unit_name = serializers.ReadOnlyField(source='unit.name')
+    location_name = serializers.ReadOnlyField(source='location.name')
+    batch_number = serializers.ReadOnlyField(source='batch.batch_number')
+
+    class Meta:
+        model = StockTransaction
+        fields = '__all__'
+        read_only_fields = ['base_quantity', 'created_by', 'updated_by', 'created_at', 'updated_at', 'deleted']
+
 class InventoryItemSerializer(serializers.ModelSerializer):
+    unit_name = serializers.ReadOnlyField(source='unit.name') # Basic unit name (legacy string field in model, wait, model has unit CharField still, but now also base_unit ForeignKey)
+    # The model still has `unit` CharField. 
+    base_unit_name = serializers.ReadOnlyField(source='base_unit.name')
+    location_name = serializers.ReadOnlyField(source='default_location.name')
+
     class Meta:
         model = InventoryItem
         fields = '__all__'
@@ -182,6 +218,7 @@ class InventoryItemSerializer(serializers.ModelSerializer):
         if value == "":
             return None
         return value
+
 
 
 class QuotationItemSerializer(serializers.ModelSerializer):

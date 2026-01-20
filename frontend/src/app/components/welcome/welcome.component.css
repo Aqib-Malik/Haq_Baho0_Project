@@ -195,13 +195,13 @@
 /* Content Container */
 .welcome-content {
     width: 100%;
-    max-width: 1400px;
+    max-width: 1200px;
     z-index: 2;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border-radius: 24px;
-    padding: 2.5rem;
+    border-radius: 20px;
+    padding: 2rem;
     box-shadow:
         0 10px 30px -10px rgba(0, 0, 0, 0.1),
         0 0 0 1px rgba(0, 0, 0, 0.05);
@@ -270,8 +270,8 @@
 
 .logo-wrapper {
     position: relative;
-    width: 120px;
-    height: 120px;
+    width: 80px;
+    height: 80px;
 }
 
 .logo-glow {
@@ -298,8 +298,8 @@
 }
 
 .welcome-logo {
-    width: 120px;
-    height: 120px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     object-fit: cover;
     box-shadow:
@@ -337,7 +337,7 @@
 }
 
 .greeting {
-    font-size: 3.5rem;
+    font-size: 3rem;
     font-weight: 800;
     line-height: 1.2;
     margin: 0;
@@ -404,20 +404,20 @@
 /* Module Grid */
 .module-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem;
     padding: 0;
     width: 100%;
 }
 
 .module-card {
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border-radius: 24px;
-    padding: 2rem;
+    border-radius: 20px;
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 1.25rem;
+    gap: 1rem;
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     border: 2px solid rgba(241, 245, 249, 0.8);
@@ -463,8 +463,8 @@
 }
 
 .card-icon-wrapper {
-    width: 70px;
-    height: 70px;
+    width: 50px;
+    height: 50px;
     border-radius: 20px;
     background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
     color: #fbbf24;
@@ -510,9 +510,9 @@
 }
 
 .card-icon-wrapper mat-icon {
-    font-size: 32px;
-    width: 32px;
-    height: 32px;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
     position: relative;
     z-index: 1;
 }
@@ -522,8 +522,8 @@
 }
 
 .card-content h3 {
-    margin: 0 0 8px 0;
-    font-size: 1.375rem;
+    margin: 0 0 6px 0;
+    font-size: 1.15rem;
     font-weight: 700;
     color: #0f172a;
     letter-spacing: -0.01em;
@@ -536,15 +536,15 @@
 
 .card-content p {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     color: #64748b;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 .card-action {
     position: absolute;
-    bottom: 1.5rem;
-    right: 1.5rem;
+    bottom: 1rem;
+    right: 1rem;
     width: 36px;
     height: 36px;
     border-radius: 50%;

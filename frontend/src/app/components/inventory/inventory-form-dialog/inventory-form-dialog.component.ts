@@ -9,10 +9,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { QuotationService } from '../../../services/quotation.service';
 import { NotificationService } from '../../../services/notification.service';
-import { InventoryItem } from '../../../models/quotation.model';
+import { InventoryItem, Unit, Location } from '../../../models/quotation.model';
 
 @Component({
     selector: 'app-inventory-form-dialog',
@@ -27,7 +29,10 @@ import { InventoryItem } from '../../../models/quotation.model';
         MatIconModule,
         MatSelectModule,
         MatTooltipModule,
-        MatAutocompleteModule
+        MatTooltipModule,
+        MatAutocompleteModule,
+        MatTabsModule,
+        MatCheckboxModule
     ],
     templateUrl: './inventory-form-dialog.component.html',
     styleUrl: './inventory-form-dialog.component.css'
@@ -49,6 +54,10 @@ export class InventoryFormDialogComponent implements OnInit {
         { value: 'hr', label: 'Hour (hr)' }
     ];
 
+    // Dynamic Units and Locations from Backend
+    unitsList = signal<Unit[]>([]);
+    locationsList = signal<Location[]>([]);
+
     constructor(
         private fb: FormBuilder,
         private quotationService: QuotationService,
@@ -62,6 +71,8 @@ export class InventoryFormDialogComponent implements OnInit {
     ngOnInit(): void {
         this.initForm();
         this.loadCategories();
+        this.loadUnits();
+        this.loadLocations();
     }
 
     initForm(): void {
@@ -71,7 +82,14 @@ export class InventoryFormDialogComponent implements OnInit {
             unit_price: [this.data.item?.unit_price || 0, [Validators.required, Validators.min(0)]],
             unit: [this.data.item?.unit || 'pcs', Validators.required],
             category: [this.data.item?.category || ''],
-            sku: [this.data.item?.sku || ''] // Optional SKU
+            sku: [this.data.item?.sku || ''],
+
+            // New Inventory Fields
+            base_unit: [this.data.item?.base_unit || null],
+            min_stock_level: [this.data.item?.min_stock_level || 0, [Validators.min(0)]],
+            reorder_level: [this.data.item?.reorder_level || 0, [Validators.min(0)]],
+            default_location: [this.data.item?.default_location || null],
+            batch_tracking: [this.data.item?.batch_tracking || false]
         });
     }
 
@@ -81,6 +99,20 @@ export class InventoryFormDialogComponent implements OnInit {
                 this.categories.set(cats);
             },
             error: (err) => console.error('Error loading categories:', err)
+        });
+    }
+
+    loadUnits(): void {
+        this.quotationService.getUnits().subscribe({
+            next: (data) => this.unitsList.set(data),
+            error: (err) => console.error('Error loading units:', err)
+        });
+    }
+
+    loadLocations(): void {
+        this.quotationService.getLocations().subscribe({
+            next: (data) => this.locationsList.set(data),
+            error: (err) => console.error('Error loading locations:', err)
         });
     }
 

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Tax, InventoryItem, Quotation, QuotationItem } from '../models/quotation.model';
+import { Tax, InventoryItem, Quotation, QuotationItem, Unit, Location, Batch, StockTransaction } from '../models/quotation.model';
 
 interface PaginatedResponse<T> {
     count?: number;
@@ -84,6 +84,68 @@ export class QuotationService {
 
     getCategories(): Observable<string[]> {
         return this.http.get<string[]>(`${this.apiUrl}/inventory-items/categories/`);
+    }
+
+
+    // Units
+    getUnits(): Observable<Unit[]> {
+        return this.http.get<Unit[]>(`${this.apiUrl}/units/`);
+    }
+
+    // Locations
+    getLocations(): Observable<Location[]> {
+        return this.http.get<Location[]>(`${this.apiUrl}/locations/`);
+    }
+
+    // Batches
+    getBatches(itemId?: number): Observable<Batch[]> {
+        let params = new HttpParams();
+        if (itemId) {
+            params = params.set('item', itemId.toString());
+        }
+        return this.http.get<Batch[]>(`${this.apiUrl}/batches/`, { params });
+    }
+
+    // Stock Transactions
+    getStockTransactions(
+        itemId?: number,
+        type?: string,
+        page: number = 1,
+        pageSize: number = 10
+    ): Observable<{ results: StockTransaction[], count: number }> {
+        let params = new HttpParams()
+            .set('page', page.toString())
+            .set('page_size', pageSize.toString());
+
+        if (itemId) {
+            params = params.set('item', itemId.toString());
+        }
+        if (type) {
+            params = params.set('type', type);
+        }
+
+        return this.http.get<StockTransaction[] | PaginatedResponse<StockTransaction>>(`${this.apiUrl}/stock-transactions/`, { params }).pipe(
+            map((response) => {
+                if (response && typeof response === 'object' && 'results' in response) {
+                    const paginated = response as PaginatedResponse<StockTransaction>;
+                    return {
+                        results: paginated.results || [],
+                        count: paginated.count || 0
+                    };
+                }
+                if (Array.isArray(response)) {
+                    return {
+                        results: response as StockTransaction[],
+                        count: response.length
+                    };
+                }
+                return { results: [], count: 0 };
+            })
+        );
+    }
+
+    createStockTransaction(transaction: Partial<StockTransaction>): Observable<StockTransaction> {
+        return this.http.post<StockTransaction>(`${this.apiUrl}/stock-transactions/`, transaction);
     }
 
     // Quotation endpoints

@@ -200,6 +200,31 @@ mat-form-field.textarea-field mat-icon[matPrefix] {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
+.tab-content {
+    padding-top: 1rem;
+}
+
+.hint-text {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-top: 4px;
+    margin-left: 28px;
+    /* Align with checkbox text */
+}
+
+/* Tab Styles */
+::ng-deep .inventory-tabs .mat-mdc-tab-body-wrapper {
+    margin-top: 0.5rem;
+}
+
+::ng-deep .inventory-tabs .mat-mdc-tab-labels {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+::ng-deep .inventory-tabs .mat-mdc-tab-group {
+    font-family: 'Inter', sans-serif;
+}
+
 @media (max-width: 600px) {
     .form-grid {
         grid-template-columns: 1fr;

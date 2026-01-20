@@ -17,8 +17,13 @@ import Swal from 'sweetalert2';
 
 import { QuotationService } from '../../services/quotation.service';
 import { NotificationService } from '../../services/notification.service';
-import { InventoryItem } from '../../models/quotation.model';
+import { InventoryItem, StockTransaction } from '../../models/quotation.model';
 import { InventoryFormDialogComponent } from './inventory-form-dialog/inventory-form-dialog.component';
+import { StockTransactionDialogComponent } from './stock-transaction-dialog/stock-transaction-dialog.component';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 @Component({
     selector: 'app-inventory',
@@ -36,7 +41,12 @@ import { InventoryFormDialogComponent } from './inventory-form-dialog/inventory-
         MatChipsModule,
         MatCardModule,
         MatProgressSpinnerModule,
-        ReactiveFormsModule
+
+        ReactiveFormsModule,
+        MatTabsModule,
+        MatSelectModule,
+        MatDatepickerModule,
+        MatNativeDateModule
     ],
     templateUrl: './inventory.component.html',
     styleUrl: './inventory.component.css'
@@ -52,6 +62,15 @@ export class InventoryComponent implements OnInit {
     pageSize = 10;
     pageIndex = 0;
 
+    // Transactions State
+    transactions = signal<StockTransaction[]>([]);
+    totalTransactions = signal<number>(0);
+    transactionPageSize = 10;
+    transactionPageIndex = 0;
+    transactionTypeControl = new FormControl('');
+
+    selectedTabIndex = 0;
+
     constructor(
         private quotationService: QuotationService,
         private notificationService: NotificationService,
@@ -61,6 +80,12 @@ export class InventoryComponent implements OnInit {
     ngOnInit(): void {
         this.loadItems();
         this.setupSearch();
+
+        // Listen to transaction filter changes
+        this.transactionTypeControl.valueChanges.subscribe(() => {
+            this.transactionPageIndex = 0;
+            this.loadTransactions();
+        });
     }
 
     setupSearch(): void {
@@ -77,16 +102,10 @@ export class InventoryComponent implements OnInit {
         this.isLoading.set(true);
         const searchTerm = this.searchControl.value || '';
 
-        // Note: getInventoryItems currently returns array, ideally it would support serverside pagination
-        // For now, we'll fetch all and paginate/filter client side if needed, or update service later.
-        // However, looking at the service, it DOES accept params in `getInventoryItems` but return type might be simple array.
-        // The service implementation I saw mapped response to array.
-        // Let's assume for now filters are applied backend side via 'search' param.
-
         this.quotationService.getInventoryItems(searchTerm).subscribe({
             next: (data) => {
                 this.items.set(data);
-                this.totalItems.set(data.length); // If no pagination metadata, just use array length
+                this.totalItems.set(data.length);
                 this.isLoading.set(false);
             },
             error: (error) => {
@@ -95,6 +114,44 @@ export class InventoryComponent implements OnInit {
                 this.isLoading.set(false);
             }
         });
+    }
+
+    loadTransactions(): void {
+        this.isLoading.set(true);
+        const type = this.transactionTypeControl.value || undefined;
+
+        this.quotationService.getStockTransactions(undefined, type, this.transactionPageIndex + 1, this.transactionPageSize).subscribe({
+            next: (data) => {
+                this.transactions.set(data.results);
+                this.totalTransactions.set(data.count);
+                this.isLoading.set(false);
+            },
+            error: (err) => {
+                console.error('Error loading transactions:', err);
+                this.notificationService.showError('Failed to load transactions');
+                this.isLoading.set(false);
+            }
+        });
+    }
+
+    onTabChange(index: number): void {
+        this.selectedTabIndex = index;
+        if (index === 1 && this.transactions().length === 0) {
+            this.loadTransactions();
+        }
+    }
+
+    onPageChange(event: PageEvent): void {
+        this.pageIndex = event.pageIndex;
+        this.pageSize = event.pageSize;
+        // Client side pagination for items for now (as service returns full list mostly)
+        // If service supports server-side, call loadItems()
+    }
+
+    onTransactionPageChange(event: PageEvent): void {
+        this.transactionPageIndex = event.pageIndex;
+        this.transactionPageSize = event.pageSize;
+        this.loadTransactions();
     }
 
     openInventoryDialog(item?: InventoryItem): void {
@@ -145,5 +202,21 @@ export class InventoryComponent implements OnInit {
         const num = parseFloat(amount);
         if (isNaN(num)) return 'Rs 0.00';
         return `Rs ${num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    openTransactionDialog(): void {
+        const dialogRef = this.dialog.open(StockTransactionDialogComponent, {
+            width: '600px',
+            maxWidth: '95vw',
+            data: { type: 'receipt' } // Default to receipt
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                this.loadTransactions();
+                // Also reload items to show updated stock
+                this.loadItems();
+            }
+        });
     }
 }
