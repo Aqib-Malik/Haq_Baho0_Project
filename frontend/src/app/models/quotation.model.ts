@@ -56,6 +56,12 @@ export interface StockTransaction {
     transaction_date: string;
     reference_number?: string;
     notes?: string;
+
+    // For creating new batch during transaction
+    new_batch_number?: string;
+    new_batch_expiry?: string;
+    new_batch_mfg?: string;
+
     created_at: string;
     updated_at: string;
 }

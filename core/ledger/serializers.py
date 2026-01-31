@@ -198,10 +198,36 @@ class StockTransactionSerializer(serializers.ModelSerializer):
     location_name = serializers.ReadOnlyField(source='location.name')
     batch_number = serializers.ReadOnlyField(source='batch.batch_number')
 
+    # Fields for creating new batch on the fly
+    new_batch_number = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    new_batch_expiry = serializers.DateField(write_only=True, required=False, allow_null=True)
+    new_batch_mfg = serializers.DateField(write_only=True, required=False, allow_null=True)
+
     class Meta:
         model = StockTransaction
         fields = '__all__'
         read_only_fields = ['base_quantity', 'created_by', 'updated_by', 'created_at', 'updated_at', 'deleted']
+
+    def create(self, validated_data):
+        # Extract new batch data
+        new_batch_number = validated_data.pop('new_batch_number', None)
+        new_batch_expiry = validated_data.pop('new_batch_expiry', None)
+        new_batch_mfg = validated_data.pop('new_batch_mfg', None)
+
+        # If new batch info is provided, create the batch first
+        if new_batch_number:
+            item = validated_data.get('item')
+            batch, created = Batch.objects.get_or_create(
+                item=item,
+                batch_number=new_batch_number,
+                defaults={
+                    'expiry_date': new_batch_expiry,
+                    'manufacturing_date': new_batch_mfg
+                }
+            )
+            validated_data['batch'] = batch
+
+        return super().create(validated_data)
 
 class InventoryItemSerializer(serializers.ModelSerializer):
     unit_name = serializers.ReadOnlyField(source='unit.name') # Basic unit name (legacy string field in model, wait, model has unit CharField still, but now also base_unit ForeignKey)

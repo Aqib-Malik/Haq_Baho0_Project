@@ -1,8 +1,8 @@
-
-import { Component, Inject, OnInit, signal } from '@angular/core';
+import { Component, Inject, OnInit, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { forkJoin } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -40,7 +40,7 @@ import { InventoryItem, Unit, Location, Batch, StockTransaction } from '../../..
                     <mat-icon>receipt_long</mat-icon>
                 </div>
                 <div>
-                    <h2 class="dialog-title">New Stock Transaction</h2>
+                    <h2 class="dialog-title">{{ isEditMode ? 'Edit' : 'New' }} Stock Transaction</h2>
                     <p class="dialog-subtitle">Record movement of inventory</p>
                 </div>
             </div>
@@ -82,17 +82,16 @@ import { InventoryItem, Unit, Location, Batch, StockTransaction } from '../../..
                     <!-- Item Selection -->
                     <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
                         <mat-label>Item</mat-label>
-                        <mat-select formControlName="item" (selectionChange)="onItemSelect($event.value)">
-                            <mat-option>
-                                <ngx-mat-select-search [formControl]="itemFilterCtrl" placeholderLabel="Find item..." 
-                                    noEntriesFoundLabel="No item found"></ngx-mat-select-search>
-                            </mat-option>
-                             <!-- Simple Select for now, ideally autocomplete -->
+                        <input matInput [matAutocomplete]="auto" [formControl]="itemFilterCtrl" placeholder="Search item...">
+                        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayItemFn" 
+                            (optionSelected)="onAutocompleteSelect($event)">
                             @for (item of filteredItems(); track item.id) {
-                                <mat-option [value]="item.id">{{ item.name }} ({{item.stock_quantity}} {{item.unit}})</mat-option>
+                                <mat-option [value]="item">
+                                    {{ item.name }} ({{item.stock_quantity}} {{item.unit}})
+                                </mat-option>
                             }
-                        </mat-select>
-                        <mat-icon matPrefix>inventory_2</mat-icon>
+                        </mat-autocomplete>
+                        <mat-icon matSuffix>search</mat-icon>
                     </mat-form-field>
 
                     <!-- Quantity -->
@@ -113,31 +112,66 @@ import { InventoryItem, Unit, Location, Batch, StockTransaction } from '../../..
                         <mat-icon matPrefix>straighten</mat-icon>
                     </mat-form-field>
 
-                    <!-- Location -->
+                    <!-- Location (Autocomplete) -->
                     <mat-form-field appearance="outline" subscriptSizing="dynamic">
                         <mat-label>Location</mat-label>
-                        <mat-select formControlName="location">
+                        <input matInput [matAutocomplete]="locAuto" [formControl]="locationFilterCtrl" placeholder="Search location...">
+                        <mat-autocomplete #locAuto="matAutocomplete" [displayWith]="displayLocationFn"
+                             (optionSelected)="onLocationAutocompleteSelect($event)">
                             <mat-option [value]="null">-- Default --</mat-option>
-                            @for (loc of locations(); track loc.id) {
-                                <mat-option [value]="loc.id">{{ loc.name }}</mat-option>
+                            @for (loc of filteredLocations(); track loc.id) {
+                                <mat-option [value]="loc">{{ loc.name }}</mat-option>
                             }
-                        </mat-select>
+                        </mat-autocomplete>
                         <mat-icon matPrefix>place</mat-icon>
                     </mat-form-field>
 
                     <!-- Batch (if enabled) -->
                      @if (showBatchField()) {
-                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                            <mat-label>Batch / Lot</mat-label>
-                            <!-- Can be free text or selection of existing batches -->
-                            <mat-select formControlName="batch">
-                                <mat-option [value]="null">-- None --</mat-option>
-                                @for (b of itemBatches(); track b.id) {
-                                    <mat-option [value]="b.id">{{ b.batch_number }} (Exp: {{b.expiry_date}})</mat-option>
-                                }
-                            </mat-select>
-                            <mat-icon matPrefix>qr_code_2</mat-icon>
-                        </mat-form-field>
+                        <div class="batch-section">
+                            <div class="batch-header">
+                                <span class="section-label">Batch Details</span>
+                                <button mat-stroked-button color="primary" type="button" (click)="toggleNewBatch()" class="small-btn">
+                                    <mat-icon>{{ isNewBatch() ? 'list' : 'add' }}</mat-icon>
+                                    {{ isNewBatch() ? 'Select Existing' : 'New Batch' }}
+                                </button>
+                            </div>
+
+                            @if (!isNewBatch()) {
+                                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                    <mat-label>Batch / Lot</mat-label>
+                                    <mat-select formControlName="batch">
+                                        <mat-option [value]="null">-- None --</mat-option>
+                                        @for (b of itemBatches(); track b.id) {
+                                            <mat-option [value]="b.id">{{ b.batch_number }} (Exp: {{b.expiry_date}})</mat-option>
+                                        }
+                                    </mat-select>
+                                    <mat-icon matPrefix>qr_code_2</mat-icon>
+                                </mat-form-field>
+                            } @else {
+                                <div class="new-batch-grid">
+                                    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                        <mat-label>Batch Number*</mat-label>
+                                        <input matInput formControlName="new_batch_number">
+                                        <mat-icon matPrefix>tag</mat-icon>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                        <mat-label>Expiry Date</mat-label>
+                                        <input matInput [matDatepicker]="expPicker" formControlName="new_batch_expiry">
+                                        <mat-datepicker-toggle matIconSuffix [for]="expPicker"></mat-datepicker-toggle>
+                                        <mat-datepicker #expPicker></mat-datepicker>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                        <mat-label>Mfg Date</mat-label>
+                                        <input matInput [matDatepicker]="mfgPicker" formControlName="new_batch_mfg">
+                                        <mat-datepicker-toggle matIconSuffix [for]="mfgPicker"></mat-datepicker-toggle>
+                                        <mat-datepicker #mfgPicker></mat-datepicker>
+                                    </mat-form-field>
+                                </div>
+                            }
+                        </div>
                      }
 
                     <!-- Notes -->
@@ -153,39 +187,25 @@ import { InventoryItem, Unit, Location, Batch, StockTransaction } from '../../..
                     <button mat-stroked-button type="button" (click)="onCancel()">Cancel</button>
                     <button mat-raised-button color="primary" type="submit" [disabled]="isLoading()">
                         <mat-icon>save_alt</mat-icon>
-                        {{ isLoading() ? 'Saving...' : 'Record Transaction' }}
+                        {{ isLoading() ? 'Saving...' : (isEditMode ? 'Update Transaction' : 'Record Transaction') }}
                     </button>
                 </div>
             </form>
         </div>
     </div>
   `,
-    styles: [`
-    /* Reuse styles from inventory-form-dialog */
-    .dialog-container { display: flex; flex-direction: column; height: 100%; max-height: 90vh; }
-    .dialog-header { padding: 16px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: white; sticky: top; }
-    .title-wrapper { display: flex; gap: 16px; align-items: center; }
-    .icon-circle { background: linear-gradient(135deg, #0f172a, #334155); width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(15,23,42,0.2); color: white; }
-    .dialog-title { font-size: 20px; font-weight: 700; color: #1e293b; margin: 0; font-family: 'Inter', sans-serif; }
-    .dialog-subtitle { color: #64748b; font-size: 13px; margin: 2px 0 0 0; }
-    .close-btn { color: #94a3b8; }
-    .close-btn:hover { color: #ef4444; background: #fee2e2; }
-    .dialog-content { padding: 24px; overflow-y: auto; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
-    .full-width { grid-column: 1 / -1; }
-    .dialog-actions { display: flex; justify-content: flex-end; gap: 16px; padding-top: 16px; margin-top: 16px; border-top: 1px solid #f1f5f9; }
-    .dialog-actions button { padding: 0 24px; height: 40px; border-radius: 10px; font-weight: 600; }
-    mat-form-field { width: 100%; }
-    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
-  `]
+    styleUrls: ['./stock-transaction-dialog.component.css'],
+    encapsulation: ViewEncapsulation.None
 })
 export class StockTransactionDialogComponent implements OnInit {
     form!: FormGroup;
     isLoading = signal<boolean>(false);
+    isEditMode = false;
 
     items = signal<InventoryItem[]>([]);
     filteredItems = signal<InventoryItem[]>([]);
     locations = signal<Location[]>([]);
+    filteredLocations = signal<Location[]>([]);
     units = signal<Unit[]>([]);
     availableUnits = signal<Unit[]>([]);
     itemBatches = signal<Batch[]>([]);
@@ -193,22 +213,38 @@ export class StockTransactionDialogComponent implements OnInit {
     selectedItem: InventoryItem | null = null;
     showBatchField = signal<boolean>(false);
 
-    itemFilterCtrl = new FormControl('');
+    itemFilterCtrl = new FormControl<string | InventoryItem>('');
+    locationFilterCtrl = new FormControl<string | Location>('');
+    isNewBatch = signal<boolean>(false);
 
     constructor(
         private fb: FormBuilder,
         private quotationService: QuotationService,
         private notificationService: NotificationService,
         public dialogRef: MatDialogRef<StockTransactionDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: { type?: string }
-    ) { }
+        @Inject(MAT_DIALOG_DATA) public data: { type?: string, transaction?: StockTransaction }
+    ) {
+        this.isEditMode = !!data.transaction;
+    }
 
     ngOnInit(): void {
         this.initForm();
         this.loadInitialData();
 
-        this.itemFilterCtrl.valueChanges.subscribe((val: string | null) => {
-            this.filterItems(val || '');
+        this.itemFilterCtrl.valueChanges.subscribe((val: string | InventoryItem | null) => {
+            if (typeof val === 'string') {
+                this.filterItems(val);
+            } else if (!val) {
+                this.filterItems('');
+            }
+        });
+
+        this.locationFilterCtrl.valueChanges.subscribe((val: string | Location | null) => {
+            if (typeof val === 'string') {
+                this.filterLocations(val);
+            } else if (!val) {
+                this.filterLocations('');
+            }
         });
     }
 
@@ -222,22 +258,96 @@ export class StockTransactionDialogComponent implements OnInit {
             unit: [null, Validators.required],
             location: [null],
             batch: [null],
+
+            // New batch fields
+            new_batch_number: [''],
+            new_batch_expiry: [null],
+            new_batch_mfg: [null],
+
             notes: ['']
         });
     }
 
+    toggleNewBatch(): void {
+        this.isNewBatch.update(v => !v);
+        const isNew = this.isNewBatch();
+
+        if (isNew) {
+            this.form.get('batch')?.setValue(null);
+            this.form.get('batch')?.clearValidators();
+            this.form.get('new_batch_number')?.setValidators(Validators.required);
+        } else {
+            this.form.get('new_batch_number')?.setValue('');
+            this.form.get('new_batch_number')?.clearValidators();
+            this.form.get('new_batch_expiry')?.setValue(null);
+            this.form.get('new_batch_mfg')?.setValue(null);
+        }
+
+        this.form.get('batch')?.updateValueAndValidity();
+        this.form.get('new_batch_number')?.updateValueAndValidity();
+    }
+
     loadInitialData(): void {
-        this.quotationService.getInventoryItems().subscribe(items => {
-            this.items.set(items);
-            this.filteredItems.set(items);
-        });
+        // Use forkJoin to load all dependencies first
+        forkJoin({
+            items: this.quotationService.getInventoryItems(),
+            locations: this.quotationService.getLocations(),
+            units: this.quotationService.getUnits()
+        }).subscribe({
+            next: (result) => {
+                this.items.set(result.items);
+                this.filteredItems.set(result.items);
+                this.locations.set(result.locations);
+                this.filteredLocations.set(result.locations);
 
-        this.quotationService.getLocations().subscribe(locs => {
-            this.locations.set(locs);
-        });
+                console.log('Units loaded:', result.units);
+                this.units.set(result.units);
+                // Default to all units initially
+                this.availableUnits.set(result.units);
 
-        this.quotationService.getUnits().subscribe(units => {
-            this.units.set(units);
+                // If editing, patch the form
+                if (this.data.transaction) {
+                    this.patchTransactionData(this.data.transaction);
+                }
+            },
+            error: (err) => {
+                console.error('Error loading initial data', err);
+                this.notificationService.showError('Failed to load form data');
+            }
+        });
+    }
+
+    patchTransactionData(transaction: StockTransaction): void {
+        // Find the item
+        const item = this.items().find(i => i.id === transaction.item);
+        if (item) {
+            this.itemFilterCtrl.setValue(item); // Set autocomplete display
+            this.form.get('item')?.setValue(item.id);
+
+            // Trigger item selection logic (filtering units, batches)
+            this.onItemSelect(item.id);
+        }
+
+        // Find the location
+        if (transaction.location) {
+            const loc = this.locations().find(l => l.id === transaction.location);
+            if (loc) {
+                this.locationFilterCtrl.setValue(loc);
+            }
+        }
+
+        // Patch other fields
+        // Note: onItemSelect might override some fields (like unit/location) with defaults, 
+        // so we patch AFTER select to ensure transaction values take precedence
+        this.form.patchValue({
+            transaction_type: transaction.transaction_type,
+            transaction_date: new Date(transaction.transaction_date),
+            reference_number: transaction.reference_number,
+            quantity: transaction.quantity,
+            unit: transaction.unit,
+            location: transaction.location,
+            batch: transaction.batch,
+            notes: transaction.notes
         });
     }
 
@@ -248,22 +358,56 @@ export class StockTransactionDialogComponent implements OnInit {
         );
     }
 
+    filterLocations(search: string): void {
+        const term = search.toLowerCase();
+        this.filteredLocations.set(
+            this.locations().filter(l => l.name.toLowerCase().includes(term))
+        );
+    }
+
+    displayItemFn(item: InventoryItem): string {
+        return item ? item.name : '';
+    }
+
+    displayLocationFn(location: Location): string {
+        return location ? location.name : '';
+    }
+
+    onAutocompleteSelect(event: any): void {
+        const item: InventoryItem = event.option.value;
+        this.form.get('item')?.setValue(item.id);
+        this.onItemSelect(item.id);
+    }
+
+    onLocationAutocompleteSelect(event: any): void {
+        const location: Location = event.option.value;
+        this.form.get('location')?.setValue(location ? location.id : null);
+    }
+
     onItemSelect(itemId: number): void {
         const item = this.items().find(i => i.id === itemId);
         this.selectedItem = item || null;
+        console.log('Selected Item:', item);
+
+        // Reset new batch state when item changes
+        this.isNewBatch.set(false);
+        this.form.get('new_batch_number')?.clearValidators();
+        this.form.get('new_batch_number')?.updateValueAndValidity();
 
         if (item) {
             this.showBatchField.set(item.batch_tracking);
 
             const allUnits = this.units();
             if (item.base_unit) {
-                this.availableUnits.set(
-                    allUnits.filter(u => u.id === item.base_unit || u.base_unit === item.base_unit)
-                );
+                const filtered = allUnits.filter(u => u.id === item.base_unit || u.base_unit === item.base_unit);
+                this.availableUnits.set(filtered);
             } else {
                 this.availableUnits.set(allUnits);
             }
 
+            // Only set defaults if we are NOT in the middle of patching (simple heuristic)
+            // Or better: just set defaults. patchTransactionData will override them immediately after if called from load.
+            // When user manually selects, we want defaults.
             if (item.base_unit) {
                 this.form.get('unit')?.setValue(item.base_unit);
             }
@@ -275,7 +419,11 @@ export class StockTransactionDialogComponent implements OnInit {
             }
 
             if (item.default_location) {
-                this.form.get('location')?.setValue(item.default_location);
+                const defaultLoc = this.locations().find(l => l.id === item.default_location);
+                if (defaultLoc) {
+                    this.locationFilterCtrl.setValue(defaultLoc);
+                    this.form.get('location')?.setValue(item.default_location);
+                }
             }
         }
     }
@@ -295,14 +443,28 @@ export class StockTransactionDialogComponent implements OnInit {
             transaction_date: formattedDate
         };
 
-        this.quotationService.createStockTransaction(payload).subscribe({
+        // Format batch dates if present
+        if (this.isNewBatch()) {
+            if (data.new_batch_expiry) {
+                payload.new_batch_expiry = data.new_batch_expiry.toISOString().split('T')[0];
+            }
+            if (data.new_batch_mfg) {
+                payload.new_batch_mfg = data.new_batch_mfg.toISOString().split('T')[0];
+            }
+        }
+
+        const request$ = this.isEditMode && this.data.transaction
+            ? this.quotationService.updateStockTransaction(this.data.transaction.id, payload)
+            : this.quotationService.createStockTransaction(payload);
+
+        request$.subscribe({
             next: () => {
-                this.notificationService.showSuccess('Transaction recorded successfully');
+                this.notificationService.showSuccess(`Transaction ${this.isEditMode ? 'updated' : 'recorded'} successfully`);
                 this.dialogRef.close(true);
             },
             error: (err) => {
                 console.error(err);
-                this.notificationService.showError('Failed to record transaction');
+                this.notificationService.showError(`Failed to ${this.isEditMode ? 'update' : 'record'} transaction`);
                 this.isLoading.set(false);
             }
         });

@@ -1,0 +1,264 @@
+/* Dialog Styles */
+.dialog-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: 90vh;
+}
+
+.dialog-container .dialog-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.dialog-container .title-wrapper {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.dialog-container .icon-circle {
+    background: linear-gradient(135deg, #0f172a, #334155);
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+    color: white;
+}
+
+.dialog-container .icon-circle mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+}
+
+.dialog-container .dialog-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+.dialog-container .dialog-subtitle {
+    color: #64748b;
+    font-size: 13px;
+    margin: 2px 0 0 0;
+}
+
+.dialog-container .close-btn {
+    color: #94a3b8;
+}
+
+.dialog-container .close-btn:hover {
+    color: #ef4444;
+    background: #fee2e2;
+}
+
+/* Dialog Content */
+.dialog-container .dialog-content {
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.dialog-container .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.dialog-container .full-width {
+    grid-column: 1 / -1;
+}
+
+/* Form Fields - Scoped and Refined */
+.dialog-container mat-form-field {
+    width: 100%;
+}
+
+/* Target the wrapper for background and shape, but avoid breaking layout */
+.dialog-container mat-form-field .mat-mdc-text-field-wrapper {
+    background-color: #f8fafc !important;
+    border-radius: 12px !important;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+    padding-left: 12px !important;
+    /* Adjust padding to not double up with prefix */
+    padding-right: 12px !important;
+}
+
+
+.dialog-container mat-form-field:not(.textarea-field) .mat-mdc-text-field-wrapper {
+    height: 48px !important;
+    padding: 0 12px !important;
+    /* Move padding to wrapper for better click area */
+}
+
+/* Ensure the internal flex container aligns items properly */
+.dialog-container .mat-mdc-form-field-flex {
+    display: flex !important;
+    align-items: center !important;
+    height: 100%;
+}
+
+.dialog-container mat-form-field .mat-mdc-text-field-wrapper:hover {
+    background-color: white !important;
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.dialog-container mat-form-field.mat-focused .mat-mdc-text-field-wrapper {
+    background-color: white !important;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dialog-container .mdc-notched-outline__leading,
+.dialog-container .mdc-notched-outline__notch,
+.dialog-container .mdc-notched-outline__trailing {
+    border: none !important;
+    /* Hide original border since we use wrapper border */
+}
+
+/* Restore Infix to default block/inline behavior to let labels float correctly */
+.dialog-container .mat-mdc-form-field-infix {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    min-height: unset !important;
+    width: auto !important;
+    flex: 1;
+    /* Allow infix to take available space */
+    border-top: 0;
+    /* Remove default separation border */
+}
+
+/* Icons */
+.dialog-container mat-form-field mat-icon[matPrefix] {
+    margin-right: 12px;
+    /* Increase margin to avoid collision */
+    color: #94a3b8;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.dialog-container mat-form-field mat-icon[matSuffix] {
+    margin-left: 8px;
+    color: #94a3b8;
+    display: flex !important;
+    align-items: center;
+}
+
+/* Invalid State */
+.dialog-container mat-form-field.mat-form-field-invalid .mat-mdc-text-field-wrapper {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 1px #ef4444 !important;
+}
+
+/* Textarea Specifics */
+.dialog-container mat-form-field.textarea-field .mat-mdc-text-field-wrapper {
+    height: auto !important;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+}
+
+.dialog-container mat-form-field.textarea-field .mat-mdc-form-field-flex {
+    align-items: flex-start !important;
+}
+
+.dialog-container mat-form-field.textarea-field mat-icon[matPrefix] {
+    margin-top: 4px;
+    /* Align icon with first line of text */
+}
+
+.dialog-container mat-form-field.textarea-field textarea {
+    min-height: 60px;
+    padding: 0;
+    margin: 0;
+}
+
+/* Actions */
+.dialog-container .dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    padding-top: 16px;
+    margin-top: 16px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.dialog-container .dialog-actions button {
+    padding: 0 24px;
+    height: 40px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.dialog-container .dialog-actions button[color="primary"] {
+    color: white !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 600px) {
+    .dialog-container .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Batch Section Styles */
+.dialog-container .batch-section {
+    grid-column: 1 / -1;
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+}
+
+.dialog-container .batch-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.dialog-container .section-label {
+    font-weight: 600;
+    color: #475569;
+    font-size: 14px;
+}
+
+.dialog-container .small-btn {
+    height: 32px !important;
+    line-height: 32px !important;
+    font-size: 12px !important;
+    padding: 0 12px !important;
+}
+
+.dialog-container .small-btn mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+}
+
+.dialog-container .new-batch-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 600px) {
+    .dialog-container .new-batch-grid {
+        grid-template-columns: 1fr;
+    }
+}
