@@ -61,8 +61,8 @@
                         <!-- Display Unit -->
                         <mat-form-field appearance="outline" subscriptSizing="dynamic">
                             <mat-select formControlName="unit" placeholder="Display Unit">
-                                @for (u of units; track u.value) {
-                                <mat-option [value]="u.value">{{ u.label }}</mat-option>
+                                @for (u of unitsList(); track u.code) {
+                                <mat-option [value]="u.code">{{ u.name }} ({{ u.code }})</mat-option>
                                 }
                             </mat-select>
                             <mat-icon matPrefix>straighten</mat-icon>

@@ -44,16 +44,6 @@ export class InventoryFormDialogComponent implements OnInit {
 
     categories = signal<string[]>([]);
 
-    units = [
-        { value: 'pcs', label: 'Pieces (pcs)' },
-        { value: 'kg', label: 'Kilograms (kg)' },
-        { value: 'm', label: 'Meters (m)' },
-        { value: 'l', label: 'Liters (l)' },
-        { value: 'box', label: 'Box' },
-        { value: 'set', label: 'Set' },
-        { value: 'hr', label: 'Hour (hr)' }
-    ];
-
     // Dynamic Units and Locations from Backend
     unitsList = signal<Unit[]>([]);
     locationsList = signal<Location[]>([]);
