@@ -14,13 +14,13 @@ from .serializers import (
     UserSerializer, RoleSerializer, PermissionSerializer,
     TaxSerializer, InventoryItemSerializer, QuotationSerializer,
     QuotationListSerializer, QuotationDetailSerializer, QuotationItemSerializer,
-    UnitSerializer, LocationSerializer, BatchSerializer, StockTransactionSerializer
+    UnitSerializer, LocationSerializer, BatchSerializer, StockTransactionSerializer, ProjectSerializer
 )
 from django.contrib.auth.models import User, Group, Permission
 from .models import (
     Company, Invoice, Payment, LedgerEntry, Tax, 
     InventoryItem, Quotation, QuotationItem,
-    Unit, Location, Batch, StockTransaction
+    Unit, Location, Batch, StockTransaction, Project
 )
 from .export_utils import export_ledger_pdf, export_ledger_excel
 
@@ -55,6 +55,25 @@ class CompanyViewSet(AuditMixin, viewsets.ModelViewSet):
             serializer = self.get_serializer(companies, many=True)
             return Response(serializer.data)
         return Response([])
+
+
+class ProjectViewSet(AuditMixin, viewsets.ModelViewSet):
+    """ViewSet for Project/WorkOrder CRUD operations"""
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticated, CustomDjangoModelPermissions]
+    
+    def get_queryset(self):
+        queryset = Project.objects.all()
+        status_filter = self.request.query_params.get('status', None)
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+        
+        client_id = self.request.query_params.get('client', None)
+        if client_id:
+            queryset = queryset.filter(client_id=client_id)
+            
+        return queryset
 
 
 class InvoiceViewSet(AuditMixin, viewsets.ModelViewSet):

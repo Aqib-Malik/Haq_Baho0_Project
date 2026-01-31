@@ -273,6 +273,29 @@ class Batch(SoftDeleteMixin):
         return f"{self.item.name} - {self.batch_number}"
 
 
+class Project(SoftDeleteMixin):
+    """Project or Work Order for tracking material usage"""
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('completed', 'Completed'),
+        ('on_hold', 'On Hold'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    name = models.CharField(max_length=200)
+    client = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True, related_name='projects')
+    start_date = models.DateField(default=models.functions.Now)
+    end_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    description = models.TextField(blank=True, null=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} ({self.get_status_display()})"
+
+
 class StockTransaction(SoftDeleteMixin):
     """Record of stock movements (receipts, issues, returns)"""
     TRANSACTION_TYPES = [
@@ -293,6 +316,7 @@ class StockTransaction(SoftDeleteMixin):
     # Tracking details
     batch = models.ForeignKey(Batch, on_delete=models.SET_NULL, null=True, blank=True)
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True)
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='stock_transactions')
     
     transaction_date = models.DateField()
     reference_number = models.CharField(max_length=100, blank=True, null=True)

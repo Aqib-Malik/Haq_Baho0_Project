@@ -8,7 +8,7 @@ from .views import (
     CompanyViewSet, InvoiceViewSet, PaymentViewSet, LedgerViewSet,
     UserViewSet, RoleViewSet, PermissionViewSet,
     TaxViewSet, InventoryItemViewSet, QuotationViewSet, QuotationItemViewSet,
-    UnitViewSet, LocationViewSet, BatchViewSet, StockTransactionViewSet
+    UnitViewSet, LocationViewSet, BatchViewSet, StockTransactionViewSet, ProjectViewSet
 )
 from .serializers import CustomTokenObtainPairSerializer
 
@@ -17,6 +17,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 router = DefaultRouter()
 router.register(r'companies', CompanyViewSet, basename='company')
+router.register(r'projects', ProjectViewSet, basename='project')
 router.register(r'invoices', InvoiceViewSet, basename='invoice')
 router.register(r'payments', PaymentViewSet, basename='payment')
 router.register(r'ledger', LedgerViewSet, basename='ledger')
