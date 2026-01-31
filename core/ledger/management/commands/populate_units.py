@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from core.ledger.models import Unit
+from ledger.models import Unit
 
 class Command(BaseCommand):
     help = 'Populates the database with standard units of measurement'
