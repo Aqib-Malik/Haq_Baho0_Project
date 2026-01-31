@@ -26,6 +26,7 @@ ALLOWED_HOSTS = [
     "www.haqbahoomianco.com",
     "localhost",
     "127.0.0.1",
+    "16.170.24.40"
 ]
 
 
