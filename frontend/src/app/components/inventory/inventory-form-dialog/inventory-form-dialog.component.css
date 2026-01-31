@@ -153,14 +153,16 @@ mat-form-field.textarea-field textarea {
 
 /* Icons */
 mat-form-field mat-icon[matPrefix] {
-    margin-right: 12px;
+    margin-right: 12px !important;
     color: #94a3b8;
     align-self: center;
+    min-width: 24px;
+    width: 24px;
+    display: inline-block;
 }
 
 mat-form-field.textarea-field mat-icon[matPrefix] {
-    margin-top: 8px;
-    /* Push icon down slightly for textarea */
+    margin-top: 12px;
     align-self: flex-start;
 }
 
@@ -245,4 +247,68 @@ mat-form-field.textarea-field mat-icon[matPrefix] {
     .form-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Autocomplete Dropdown Styling */
+::ng-deep .mat-mdc-autocomplete-panel {
+    background: white !important;
+    border-radius: 12px !important;
+    padding: 6px !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid #e2e8f0 !important;
+    max-height: 250px !important;
+}
+
+::ng-deep .mat-mdc-option {
+    border-radius: 8px !important;
+    margin-bottom: 4px !important;
+    min-height: 48px !important;
+    /* Ensure good touch target */
+    padding: 0 16px !important;
+    transition: background-color 0.15s ease;
+}
+
+::ng-deep .mat-mdc-option:hover:not(.mat-mdc-option-disabled),
+::ng-deep .mat-mdc-option.mat-mdc-option-active {
+    background-color: #fce7f3 !important;
+    /* Light pink/red tint to match brand or just generic light gray */
+    /* Let's use a slate color for neutrality or the brand primary light */
+    background-color: #eff6ff !important;
+    /* blue-50 */
+}
+
+::ng-deep .mat-mdc-option .mdc-list-item__primary-text {
+    font-size: 14px !important;
+    color: #334155 !important;
+    font-weight: 500 !important;
+    line-height: 1.5 !important;
+}
+
+::ng-deep .mat-mdc-option .mat-pseudo-checkbox {
+    display: none !important;
+    /* Hide checkbox if it appears by mistake */
+}
+
+/* Specific Panel Fixes */
+::ng-deep .category-panel .mat-mdc-option {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    border-radius: 8px !important;
+    margin-bottom: 4px !important;
+    min-height: 48px !important;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
+}
+
+::ng-deep .category-panel .mat-mdc-option .mdc-list-item__primary-text {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
+    width: 100% !important;
+}
+
+::ng-deep .category-panel .mat-mdc-option:last-child {
+    margin-bottom: 0 !important;
 }

@@ -298,6 +298,50 @@
     height: 16px;
 }
 
+/* ===== ICON ACTION BUTTONS (For Tables) ===== */
+.actions-cell {
+    white-space: nowrap;
+    text-align: center;
+}
+
+.action-icon-btn {
+    width: 36px !important;
+    height: 36px !important;
+    margin: 0 4px !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+}
+
+.action-icon-btn:nth-child(1) {
+    color: #3b82f6 !important;
+    background: #eff6ff !important;
+}
+
+.action-icon-btn:nth-child(1):hover {
+    background: #dbeafe !important;
+    color: #2563eb !important;
+}
+
+.action-icon-btn.delete {
+    color: #ef4444 !important;
+    background: #fef2f2 !important;
+}
+
+.action-icon-btn.delete:hover {
+    background: #fee2e2 !important;
+    color: #dc2626 !important;
+}
+
+.action-icon-btn mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
 /* Pagination */
 .custom-paginator {
     margin-top: 20px;
@@ -450,9 +494,69 @@
     }
 }
 
-/* ===== TABS & TRANSACTIONS ===== */
+/* ===== MODERN TABS DESIGN ===== */
+::ng-deep .inventory-tabs .mat-mdc-tab-header {
+    background: white;
+    border-radius: 16px;
+    padding: 6px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f1f5f9;
+    margin-bottom: 24px;
+    display: inline-flex;
+    /* Make header hug content or just look distinct */
+    width: auto;
+    max-width: 100%;
+}
+
+::ng-deep .inventory-tabs .mat-mdc-tab-labels {
+    gap: 8px;
+}
+
+/* Individual Tab */
+::ng-deep .inventory-tabs .mdc-tab {
+    min-width: 160px !important;
+    height: 44px !important;
+    border-radius: 12px !important;
+    transition: all 0.2s ease-out;
+    opacity: 1 !important;
+    padding: 0 24px !important;
+}
+
+/* Tab Text */
+::ng-deep .inventory-tabs .mdc-tab__text-label {
+    font-family: 'Inter', sans-serif !important;
+    /* Ensure font consistency */
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    color: #64748b !important;
+    letter-spacing: 0.3px;
+    z-index: 2;
+}
+
+/* Active State - Pill Style */
+::ng-deep .inventory-tabs .mdc-tab--active {
+    background: #0f172a !important;
+    /* Dark Slate / Primary */
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+}
+
+::ng-deep .inventory-tabs .mdc-tab--active .mdc-tab__text-label {
+    color: white !important;
+}
+
+/* Hover State */
+::ng-deep .inventory-tabs .mdc-tab:hover:not(.mdc-tab--active) {
+    background: #f8fafc;
+}
+
+/* Hide Default Ink Bar / Underline */
+::ng-deep .inventory-tabs .mdc-tab-indicator {
+    display: none !important;
+}
+
 ::ng-deep .inventory-tabs .mat-mdc-tab-body-wrapper {
-    margin-top: 1.5rem;
+    margin-top: 1rem;
+    /* Reduced margin since header is contained */
 }
 
 /* Blue Icon for Transactions */

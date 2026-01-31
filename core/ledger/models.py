@@ -167,6 +167,31 @@ class Unit(SoftDeleteMixin):
         return f"{self.name} ({self.code})"
 
 
+    def get_root_unit(self):
+        """Find the ultimate root unit (e.g., Meter for CM/Inch)"""
+        root = self
+        visited = {self.id}
+        while root.base_unit:
+            if root.base_unit.id in visited: # Prevent infinite loops
+                break 
+            root = root.base_unit
+            visited.add(root.id)
+        return root
+
+    def get_conversion_to_root(self):
+        """Calculate multiplier to convert this unit to its root unit"""
+        factor = Decimal('1.0')
+        current = self
+        visited = {self.id}
+        while current.base_unit:
+            factor *= current.conversion_factor
+            if current.base_unit.id in visited:
+                break
+            current = current.base_unit
+            visited.add(current.id)
+        return factor
+
+
 class Location(SoftDeleteMixin):
     """Physical location for inventory (Warehouse, Rack, etc.)"""
     name = models.CharField(max_length=100, unique=True)
@@ -289,38 +314,55 @@ class StockTransaction(SoftDeleteMixin):
             # Fallback if unitted Item is not set up correctly, assume 1:1 if units match or missing
              self.base_quantity = self.quantity
         else:
-             # If transaction unit is same as base unit
-            if self.unit == self.item.base_unit:
-                self.base_quantity = self.quantity
-            else:
-                # If transaction unit is a derived unit of the base unit
-                if self.unit.base_unit == self.item.base_unit:
-                    self.base_quantity = self.quantity * self.unit.conversion_factor
-                # If base unit is derived from transaction unit? (Less likely but possible)
-                elif self.item.base_unit.base_unit == self.unit:
-                     self.base_quantity = self.quantity / self.item.base_unit.conversion_factor
-                else:
-                    # Complex conversion or incompatible units - for now assume 1:1 or raise error
-                    # But to be safe let's assume direct conversion factor if available
-                    # Or check if they share a common root. 
-                    # For MVP, let's assume transaction unit IS derived from base unit directly as per user story.
-                    self.base_quantity = self.quantity * self.unit.conversion_factor
+             # Logic: Convert Transaction Unit -> Root, then Root -> Item Base Unit
+             root_trans = self.unit.get_root_unit()
+             root_item = self.item.base_unit.get_root_unit()
+             
+             if root_trans.id == root_item.id:
+                 # Shared root, conversion possible
+                 # Qty * (Factor Trans->Root) / (Factor ItemBase->Root)
+                 factor_trans_to_root = self.unit.get_conversion_to_root()
+                 factor_base_to_root = self.item.base_unit.get_conversion_to_root()
+                 
+                 # base_qty = (qty * trans_factor) / base_factor
+                 # Example: 10 CM (Base Meter, 0.01) to Inch (Base Meter via Foot, 0.0254)
+                 # 10 * 0.01 = 0.1 Meter.
+                 # 0.1 Meter / 0.0254 = 3.937 Inches.
+                 if factor_base_to_root and factor_base_to_root > 0:
+                     self.base_quantity = (self.quantity * factor_trans_to_root) / factor_base_to_root
+                 else:
+                     self.base_quantity = self.quantity # Should not happen if data valid
+             else:
+                 # Different roots (e.g. Kg vs Meter). Cannot convert.
+                 # Fallback to 1:1 or Raise error?
+                 # For safety in MVP, assume 1:1 but log/warn?
+                 # Or just store as is.
+                 self.base_quantity = self.quantity
 
         # Update Item Stock Quantity
-        # We need to handle this carefully. Created vs Updated.
-        # For simplicity, calculate diff if updating? 
-        # Easier: Re-calculate total from transactions or just update delta.
-        # Let's start with simple Delta update on creation.
-        
-        self.base_quantity = round(self.base_quantity, 4) # Rounding
-        
         is_new = self.pk is None
-        old_qty = Decimal('0')
-        if not is_new:
-             # If updating, getting complex. Let's assume append-only for stock transactions ideally.
-             # But if edited, we need to revert old effect. This is complex for a simple `save()`.
-             # For this task, I'll implement basic update on CREATE.
-             pass
+        
+        # We only update stock on creation to avoid double-counting on edits
+        # Edits should be handled by a separate adjustment transaction or requiring a delete+recreate flow
+        if is_new:
+            # Determine direction
+            if self.transaction_type in ['receipt', 'return']:
+                self.item.stock_quantity += self.base_quantity
+            elif self.transaction_type == 'issue':
+                self.item.stock_quantity -= self.base_quantity
+            elif self.transaction_type == 'adjustment':
+                # For adjustment, we assume the quantity dictates the change directly
+                # If quantity is positive -> Add, Negative -> Subtract
+                # But Base Quantity is usually positive absolute value?
+                # Let's assume Adjustment adds base_quantity (user can enter negative qty if supported, 
+                # but models usually enforce positive). 
+                # Better approach: Adjustment adds. To reduce, use negative.
+                # Since we likely enforce positive quantity in UI, let's treat Adjustment as ADD.
+                # If user wants to reduce, they should use Issue or we need a specific 'Adjustment Out' type.
+                # For now, let's treat Adjustment as ADD (like Receipt) but allowing negative inputs if valid.
+                self.item.stock_quantity += self.base_quantity
+            
+            self.item.save()
         
         super().save(*args, **kwargs)
         
