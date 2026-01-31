@@ -9,7 +9,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatTabsModule } from '@angular/material/tabs';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { QuotationService } from '../../../services/quotation.service';
@@ -31,7 +30,6 @@ import { InventoryItem, Unit, Location } from '../../../models/quotation.model';
         MatTooltipModule,
         MatTooltipModule,
         MatAutocompleteModule,
-        MatTabsModule,
         MatCheckboxModule
     ],
     templateUrl: './inventory-form-dialog.component.html',
@@ -70,12 +68,12 @@ export class InventoryFormDialogComponent implements OnInit {
             name: [this.data.item?.name || '', [Validators.required, Validators.minLength(2)]],
             description: [this.data.item?.description || ''],
             unit_price: [this.data.item?.unit_price || 0, [Validators.required, Validators.min(0)]],
-            unit: [this.data.item?.unit || 'pcs', Validators.required],
+            unit: [this.data.item?.unit || ''], // Will be set by base_unit change
             category: [this.data.item?.category || ''],
             sku: [this.data.item?.sku || ''],
 
             // New Inventory Fields
-            base_unit: [this.data.item?.base_unit || null],
+            base_unit: [this.data.item?.base_unit || null, Validators.required],
             min_stock_level: [this.data.item?.min_stock_level || 0, [Validators.min(0)]],
             reorder_level: [this.data.item?.reorder_level || 0, [Validators.min(0)]],
             default_location: [this.data.item?.default_location || null],
@@ -106,6 +104,14 @@ export class InventoryFormDialogComponent implements OnInit {
         });
     }
 
+    onUnitChange(event: any): void {
+        const unitId = event.value;
+        const selectedUnit = this.unitsList().find(u => u.id === unitId);
+        if (selectedUnit) {
+            this.inventoryForm.patchValue({ unit: selectedUnit.code });
+        }
+    }
+
     onSubmit(): void {
         if (this.inventoryForm.invalid) {
             this.inventoryForm.markAllAsTouched();
@@ -114,6 +120,11 @@ export class InventoryFormDialogComponent implements OnInit {
 
         this.isLoading.set(true);
         const formData = this.inventoryForm.value;
+
+        // Ensure unit is set (fallback to 'pcs' if something went wrong, though validation should catch it)
+        if (!formData.unit) {
+            formData.unit = 'pcs';
+        }
 
         const request = this.isEditMode
             ? this.quotationService.updateInventoryItem(this.data.item!.id, formData)
