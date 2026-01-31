@@ -83,27 +83,69 @@ export class QuotationService {
     }
 
     getCategories(): Observable<string[]> {
-        return this.http.get<string[]>(`${this.apiUrl}/inventory-items/categories/`);
+        return this.http.get<string[]>(`${this.apiUrl}/inventory-items/categories/`).pipe(
+            map((response: any) => {
+                if (response && typeof response === 'object' && 'results' in response) {
+                    return response.results || [];
+                }
+                if (Array.isArray(response)) {
+                    return response;
+                }
+                return [];
+            })
+        );
     }
 
 
     // Units
     getUnits(): Observable<Unit[]> {
-        return this.http.get<Unit[]>(`${this.apiUrl}/units/`);
+        const params = new HttpParams().set('page_size', '1000');
+        return this.http.get<Unit[] | PaginatedResponse<Unit>>(`${this.apiUrl}/units/`, { params }).pipe(
+            map((response) => {
+                if (response && typeof response === 'object' && 'results' in response) {
+                    return (response as PaginatedResponse<Unit>).results || [];
+                }
+                if (Array.isArray(response)) {
+                    return response as Unit[];
+                }
+                return [];
+            })
+        );
     }
 
     // Locations
     getLocations(): Observable<Location[]> {
-        return this.http.get<Location[]>(`${this.apiUrl}/locations/`);
+        const params = new HttpParams().set('page_size', '1000');
+        return this.http.get<Location[] | PaginatedResponse<Location>>(`${this.apiUrl}/locations/`, { params }).pipe(
+            map((response) => {
+                if (response && typeof response === 'object' && 'results' in response) {
+                    return (response as PaginatedResponse<Location>).results || [];
+                }
+                if (Array.isArray(response)) {
+                    return response as Location[];
+                }
+                return [];
+            })
+        );
     }
 
     // Batches
     getBatches(itemId?: number): Observable<Batch[]> {
-        let params = new HttpParams();
+        let params = new HttpParams().set('page_size', '1000');
         if (itemId) {
             params = params.set('item', itemId.toString());
         }
-        return this.http.get<Batch[]>(`${this.apiUrl}/batches/`, { params });
+        return this.http.get<Batch[] | PaginatedResponse<Batch>>(`${this.apiUrl}/batches/`, { params }).pipe(
+            map((response) => {
+                if (response && typeof response === 'object' && 'results' in response) {
+                    return (response as PaginatedResponse<Batch>).results || [];
+                }
+                if (Array.isArray(response)) {
+                    return response as Batch[];
+                }
+                return [];
+            })
+        );
     }
 
     // Stock Transactions
