@@ -121,11 +121,9 @@ mat-form-field ::ng-deep .mdc-notched-outline__trailing {
 }
 
 mat-form-field ::ng-deep .mat-mdc-form-field-infix {
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
     min-height: 48px !important;
-    display: flex;
-    align-items: center;
 }
 
 /* Invalid State */
@@ -144,6 +142,7 @@ mat-form-field.textarea-field ::ng-deep .mat-mdc-text-field-wrapper {
 
 mat-form-field.textarea-field ::ng-deep .mat-mdc-form-field-infix {
     min-height: unset !important;
+    padding-top: 4px !important;
 }
 
 mat-form-field.textarea-field textarea {
@@ -153,22 +152,16 @@ mat-form-field.textarea-field textarea {
 }
 
 /* Icons */
-mat-form-field:not(.textarea-field) mat-icon[matPrefix] {
+mat-form-field mat-icon[matPrefix] {
     margin-right: 12px;
     color: #94a3b8;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
+    align-self: center;
 }
 
 mat-form-field.textarea-field mat-icon[matPrefix] {
-    margin-right: 12px;
-    color: #94a3b8;
-    display: flex !important;
-    align-items: flex-start;
-    padding-top: 2px;
-    height: 100%;
+    margin-top: 8px;
+    /* Push icon down slightly for textarea */
+    align-self: flex-start;
 }
 
 .currency-prefix {
