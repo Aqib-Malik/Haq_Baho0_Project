@@ -75,17 +75,27 @@ export class DemandListComponent implements OnInit {
         }
 
         this.isLoading = true;
-        this.demandService.aggregateDemands(selectedIds).subscribe({
-            next: (data) => {
-                this.aggregatedMaterials = data;
-                this.showSummary = true;
-                this.isLoading = false;
-            },
-            error: () => {
-                this.isLoading = false;
-                alert('Failed to aggregate demands.');
-            }
-        });
+        this.demandService.aggregateDemands(selectedIds)
+            .subscribe({
+                next: (data) => {
+                    // Use setTimeout to avoid NG0100 (ExpressionChangedAfterItHasBeenCheckedError)
+                    // if the response is too fast or interferes with current CD cycle
+                    setTimeout(() => {
+                        this.aggregatedMaterials = data;
+                        this.showSummary = true;
+                        this.isLoading = false;
+                        this.cdr.detectChanges();
+                    }, 0);
+                },
+                error: (err) => {
+                    setTimeout(() => {
+                        this.isLoading = false;
+                        console.error('Aggregation error:', err);
+                        alert('Failed to aggregate demands.');
+                        this.cdr.detectChanges();
+                    }, 0);
+                }
+            });
     }
 
     printReport() {

@@ -443,7 +443,7 @@ class CreateDemandSerializer(serializers.ModelSerializer):
                 # Fetch BOM
                 requirements = machine.requirements.all()
                 for req in requirements:
-                    total_req = req.quantity * list(map(lambda x: x, [1]))[0] * (float(qty) if isinstance(qty, (int, float)) else float(qty))
+
                     # Safely handle decimal math
                     from decimal import Decimal
                     q_decimal = Decimal(str(qty))

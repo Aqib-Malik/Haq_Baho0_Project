@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -82,8 +83,17 @@ export class DemandCreateComponent implements OnInit {
         };
 
         this.demandService.createDemand(payload).subscribe(() => {
-            alert('Demand Sheet Created!');
-            this.router.navigate(['/production/demands']);
+            Swal.fire({
+                title: 'Demand Sheet Created!',
+                text: 'The demand sheet has been successfully generated.',
+                icon: 'success',
+                confirmButtonColor: '#10b981', // Emerald-500 matching the theme likely
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            }).then(() => {
+                this.router.navigate(['/production/demands']);
+            });
         });
     }
 }
