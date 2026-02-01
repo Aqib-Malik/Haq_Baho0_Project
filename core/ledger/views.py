@@ -476,7 +476,7 @@ class MachineViewSet(AuditMixin, viewsets.ModelViewSet):
     serializer_class = MachineSerializer
     permission_classes = [IsAuthenticated, CustomDjangoModelPermissions]
 
-class MachineRequirementViewSet(AuditMixin, viewsets.ModelViewSet):
+class MachineRequirementViewSet(viewsets.ModelViewSet):
     """ViewSet for Machine BOM CRUD operations"""
     queryset = MachineRequirement.objects.all()
     serializer_class = MachineRequirementSerializer
