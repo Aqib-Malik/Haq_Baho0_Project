@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.utils import timezone
 from decimal import Decimal
 from .mixins import SoftDeleteMixin
 
@@ -566,4 +567,64 @@ class QuotationItem(SoftDeleteMixin):
         # Update quotation totals
         self.quotation.calculate_totals()
         self.quotation.save()
+
+
+class Machine(SoftDeleteMixin):
+    """Machine model for manufacturing units"""
+    name = models.CharField(max_length=200, unique=True)
+    code = models.CharField(max_length=50, unique=True, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+class MachineRequirement(models.Model):
+    """BOM: Materials required per unit/run of a machine"""
+    machine = models.ForeignKey(Machine, on_delete=models.CASCADE, related_name='requirements')
+    inventory_item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
+    quantity = models.DecimalField(max_digits=10, decimal_places=4, help_text="Quantity required per unit/run")
+
+    class Meta:
+        unique_together = ('machine', 'inventory_item')
+
+    def __str__(self):
+        return f"{self.inventory_item.name} for {self.machine.name}"
+
+class Demand(SoftDeleteMixin):
+    """Demand sheet for a specific client/order"""
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('finalized', 'Finalized'),
+    ]
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='demands')
+    date = models.DateField(default=timezone.now)
+    reference_number = models.CharField(max_length=100, blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    
+    class Meta:
+        ordering = ['-date', '-created_at']
+
+    def __str__(self):
+        return f"Demand for {self.company.name} - {self.date}"
+
+class DemandMachineOrder(models.Model):
+    """Input: Specific Machines requested in a Demand"""
+    demand = models.ForeignKey(Demand, on_delete=models.CASCADE, related_name='machine_orders')
+    machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
+    quantity = models.DecimalField(max_digits=15, decimal_places=2, help_text="Number of runs/units")
+
+    def __str__(self):
+        return f"{self.quantity} x {self.machine.name}"
+
+class DemandMaterial(models.Model):
+    """Output: Calculated Material Requirements for the Demand"""
+    demand = models.ForeignKey(Demand, on_delete=models.CASCADE, related_name='materials')
+    inventory_item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
+    quantity = models.DecimalField(max_digits=15, decimal_places=4)
+
+    def __str__(self):
+        return f"{self.quantity} x {self.inventory_item.name}"
 

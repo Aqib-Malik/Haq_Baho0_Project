@@ -1,4 +1,4 @@
-ssh -i ~/Downloads/django-key.pem ubuntu@13.61.5.28 "
+ssh -i ~/Downloads/django-key.pem ubuntu@16.170.24.40 "
 cd ~/Haq_Baho0_Project &&
 source venv/bin/activate &&
 git pull origin main &&

@@ -40,7 +40,7 @@ export class AdminLayoutComponent {
         public authService: AuthService,
         private notificationService: NotificationService,
         private breakpointObserver: BreakpointObserver,
-        private router: Router
+        public router: Router
     ) {
         this.breakpointObserver.observe([Breakpoints.Handset])
             .subscribe(result => {

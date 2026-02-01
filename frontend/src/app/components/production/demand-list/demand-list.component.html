@@ -1,0 +1,116 @@
+<div class="p-6">
+    <div class="flex justify-between items-center mb-6 no-print">
+        <h1 class="text-2xl font-bold">Demand Sheets</h1>
+        <div class="flex gap-2">
+            <button mat-raised-button color="accent" (click)="aggregateSelected()" [disabled]="selection.isEmpty()">
+                Aggregate Selected
+            </button>
+            <button mat-raised-button color="primary" routerLink="/production/demands/new">
+                <mat-icon>add</mat-icon> New Demand
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow overflow-hidden no-print" *ngIf="!showSummary">
+        <table mat-table [dataSource]="demands" class="w-full">
+            <!-- Checkbox Column -->
+            <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef>
+                    <mat-checkbox (change)="$event ? toggleAllRows() : null"
+                        [checked]="selection.hasValue() && isAllSelected()"
+                        [indeterminate]="selection.hasValue() && !isAllSelected()" [aria-label]="checkboxLabel()">
+                    </mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let row">
+                    <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+                        [checked]="selection.isSelected(row)" [aria-label]="checkboxLabel(row)">
+                    </mat-checkbox>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef> Date </th>
+                <td mat-cell *matCellDef="let element"> {{element.date | date}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="company">
+                <th mat-header-cell *matHeaderCellDef> Client </th>
+                <td mat-cell *matCellDef="let element"> {{element.company_name}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="reference">
+                <th mat-header-cell *matHeaderCellDef> Reference </th>
+                <td mat-cell *matCellDef="let element"> {{element.reference_number}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef> Status </th>
+                <td mat-cell *matCellDef="let element">
+                    <span class="px-2 py-1 rounded-full text-xs font-bold uppercase" [ngClass]="{
+                   'bg-green-100 text-green-800': element.status === 'finalized',
+                   'bg-gray-100 text-gray-800': element.status === 'draft'
+               }">
+                        {{element.status}}
+                    </span>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef> Actions </th>
+                <td mat-cell *matCellDef="let element">
+                    <!-- TODO: View/Edit -->
+                    <button mat-icon-button color="primary">
+                        <mat-icon>visibility</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selection.toggle(row)"></tr>
+        </table>
+    </div>
+
+    <!-- Summary Report View -->
+    <div *ngIf="showSummary" class="bg-white p-8 rounded-lg shadow mt-6 print-section">
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-800">Consolidated Demand Summary</h2>
+                <p class="text-gray-500 mt-2">Generated on {{ today | date:'medium' }}</p>
+            </div>
+            <div class="no-print space-x-2">
+                <button mat-stroked-button (click)="showSummary = false">Back to List</button>
+                <button mat-raised-button color="primary" (click)="printReport()">
+                    <mat-icon>print</mat-icon> Print Report
+                </button>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <h3 class="font-semibold mb-2">Selected Orders ({{selection.selected.length}}):</h3>
+            <ul class="list-disc list-inside text-sm text-gray-600">
+                <li *ngFor="let d of selection.selected">
+                    {{d.company_name}} - {{d.date | date}} <span
+                        *ngIf="d.reference_number">({{d.reference_number}})</span>
+                </li>
+            </ul>
+        </div>
+
+        <table class="w-full border-collapse border border-gray-300">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="border border-gray-300 p-2 text-left">Item Name</th>
+                    <th class="border border-gray-300 p-2 text-right">Total Quantity</th>
+                    <th class="border border-gray-300 p-2 text-left">Unit</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of aggregatedMaterials">
+                    <td class="border border-gray-300 p-2">{{ item.inventory_item__name }}</td>
+                    <td class="border border-gray-300 p-2 text-right font-bold">{{ item.total_quantity | number:'1.0-4'
+                        }}</td>
+                    <td class="border border-gray-300 p-2">{{ item.inventory_item__unit }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

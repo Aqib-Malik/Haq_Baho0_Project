@@ -48,7 +48,8 @@
 
 
             <!-- Inventory Group -->
-            <mat-expansion-panel [class.mat-elevation-z0]="true" class="sidenav-expansion">
+            <mat-expansion-panel [class.mat-elevation-z0]="true" class="sidenav-expansion"
+                [expanded]="router.url.includes('/inventory')">
                 <mat-expansion-panel-header>
                     <mat-panel-title>
                         <mat-icon>inventory_2</mat-icon>
@@ -56,27 +57,56 @@
                     </mat-panel-title>
                 </mat-expansion-panel-header>
                 <mat-nav-list class="sub-menu">
-                    <a mat-list-item routerLink="/inventory" routerLinkActive="active-link">
+                    <a mat-list-item routerLink="/inventory" [routerLinkActiveOptions]="{exact: true}"
+                        routerLinkActive="active-link">
                         <mat-icon matListItemIcon>list</mat-icon>
                         <div matListItemTitle>Items List</div>
                     </a>
-                    <a mat-list-item (click)="showComingSoon('Stock Receipt')">
-                        <mat-icon matListItemIcon>add_shopping_cart</mat-icon>
-                        <div matListItemTitle>Stock Receipt</div>
+                    <a mat-list-item routerLink="/inventory" [queryParams]="{tab: 'transactions'}"
+                        routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">
+                        <mat-icon matListItemIcon>receipt_long</mat-icon>
+                        <div matListItemTitle>Stock Movements</div>
                     </a>
-                    <a mat-list-item (click)="showComingSoon('Stock Issue')">
-                        <mat-icon matListItemIcon>output</mat-icon>
-                        <div matListItemTitle>Issue Stock</div>
+
+                    <mat-divider style="margin: 8px 16px; opacity: 0.2;"></mat-divider>
+
+                    <!-- Quick Actions -->
+                    <a mat-list-item routerLink="/inventory" [queryParams]="{tab: 'transactions', action: 'receipt'}">
+                        <mat-icon matListItemIcon>add_circle_outline</mat-icon>
+                        <div matListItemTitle>New Receipt</div>
                     </a>
-                    <a mat-list-item (click)="showComingSoon('Stock Return')">
-                        <mat-icon matListItemIcon>assignment_return</mat-icon>
-                        <div matListItemTitle>Returns</div>
+                    <a mat-list-item routerLink="/inventory" [queryParams]="{tab: 'transactions', action: 'issue'}">
+                        <mat-icon matListItemIcon>remove_circle_outline</mat-icon>
+                        <div matListItemTitle>New Issue</div>
                     </a>
                 </mat-nav-list>
             </mat-expansion-panel>
 
-            <!-- Projects Link -->
-            <a mat-list-item (click)="showComingSoon('Projects')">
+            <!-- Production Group -->
+            <mat-expansion-panel [class.mat-elevation-z0]="true" class="sidenav-expansion"
+                [expanded]="router.url.includes('/production')">
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        <mat-icon>precision_manufacturing</mat-icon>
+                        <span>Production</span>
+                    </mat-panel-title>
+                </mat-expansion-panel-header>
+                <mat-nav-list class="sub-menu">
+                    <a mat-list-item routerLink="/production/demands" routerLinkActive="active-link"
+                        [routerLinkActiveOptions]="{exact: true}">
+                        <mat-icon matListItemIcon>fact_check</mat-icon>
+                        <div matListItemTitle>Demand Sheets</div>
+                    </a>
+                    <a mat-list-item routerLink="/production/machines" routerLinkActive="active-link"
+                        [routerLinkActiveOptions]="{exact: true}">
+                        <mat-icon matListItemIcon>print</mat-icon>
+                        <div matListItemTitle>Machines</div>
+                    </a>
+                </mat-nav-list>
+            </mat-expansion-panel>
+
+            <!-- Projects -->
+            <a mat-list-item (click)="showComingSoon('Projects Manager')">
                 <mat-icon matListItemIcon>assignment</mat-icon>
                 <div matListItemTitle>Projects</div>
             </a>

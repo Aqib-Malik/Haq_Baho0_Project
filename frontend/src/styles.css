@@ -1,5 +1,16 @@
 /* Angular Material Theme */
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import '@angular/cdk/overlay-prebuilt.css';
+
+/* Force Overlay z-index to be on top of everything including SweetAlert and Dialogs if needed */
+.cdk-overlay-container {
+  z-index: 10000 !important;
+}
+
+.cdk-overlay-connected-position-bounding-box {
+  z-index: 10000 !important;
+}
+
 
 /* Global Styles */
 * {

@@ -14,13 +14,15 @@ from .serializers import (
     UserSerializer, RoleSerializer, PermissionSerializer,
     TaxSerializer, InventoryItemSerializer, QuotationSerializer,
     QuotationListSerializer, QuotationDetailSerializer, QuotationItemSerializer,
-    UnitSerializer, LocationSerializer, BatchSerializer, StockTransactionSerializer, ProjectSerializer
+    UnitSerializer, LocationSerializer, BatchSerializer, StockTransactionSerializer, ProjectSerializer,
+    MachineSerializer, MachineRequirementSerializer, DemandSerializer, CreateDemandSerializer
 )
 from django.contrib.auth.models import User, Group, Permission
 from .models import (
     Company, Invoice, Payment, LedgerEntry, Tax, 
     InventoryItem, Quotation, QuotationItem,
-    Unit, Location, Batch, StockTransaction, Project
+    Unit, Location, Batch, StockTransaction, Project,
+    Machine, MachineRequirement, Demand, DemandMachineOrder, DemandMaterial
 )
 from .export_utils import export_ledger_pdf, export_ledger_excel
 
@@ -463,3 +465,51 @@ class QuotationItemViewSet(AuditMixin, viewsets.ModelViewSet):
         
         return queryset
 
+        return queryset
+
+
+# --- Automated Demand & Aggregation ViewSets ---
+
+class MachineViewSet(AuditMixin, viewsets.ModelViewSet):
+    """ViewSet for Machine CRUD operations"""
+    queryset = Machine.objects.all()
+    serializer_class = MachineSerializer
+    permission_classes = [IsAuthenticated, CustomDjangoModelPermissions]
+
+class MachineRequirementViewSet(AuditMixin, viewsets.ModelViewSet):
+    """ViewSet for Machine BOM CRUD operations"""
+    queryset = MachineRequirement.objects.all()
+    serializer_class = MachineRequirementSerializer
+    permission_classes = [IsAuthenticated, CustomDjangoModelPermissions]
+
+    def get_queryset(self):
+        queryset = MachineRequirement.objects.all()
+        machine_id = self.request.query_params.get('machine', None)
+        if machine_id:
+            queryset = queryset.filter(machine_id=machine_id)
+        return queryset
+
+class DemandViewSet(AuditMixin, viewsets.ModelViewSet):
+    """ViewSet for Demand Generation and Aggregation"""
+    queryset = Demand.objects.all()
+    permission_classes = [IsAuthenticated, CustomDjangoModelPermissions]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return CreateDemandSerializer
+        return DemandSerializer
+
+    @action(detail=False, methods=['post'])
+    def aggregate(self, request):
+        """Aggregate materials for multiple demand sheets"""
+        demand_ids = request.data.get('demand_ids', [])
+        if not demand_ids:
+            return Response({'error': 'No demand IDs provided'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Aggregate materials
+        materials = DemandMaterial.objects.filter(demand_id__in=demand_ids)\
+            .values('inventory_item__id', 'inventory_item__name', 'inventory_item__unit')\
+            .annotate(total_quantity=Sum('quantity'))\
+            .order_by('inventory_item__name')
+        
+        return Response(materials)

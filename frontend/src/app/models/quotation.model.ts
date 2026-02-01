@@ -40,6 +40,19 @@ export interface Batch {
     updated_at: string;
 }
 
+export interface Project {
+    id: number;
+    name: string;
+    client?: number;
+    client_name?: string;
+    start_date: string;
+    end_date?: string;
+    status: 'active' | 'completed' | 'on_hold' | 'cancelled';
+    description?: string;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface StockTransaction {
     id: number;
     item: number;
@@ -53,6 +66,8 @@ export interface StockTransaction {
     batch_number?: string;
     location?: number;
     location_name?: string;
+    project?: number;
+    project_name?: string;
     transaction_date: string;
     reference_number?: string;
     notes?: string;
@@ -65,6 +80,7 @@ export interface StockTransaction {
     created_at: string;
     updated_at: string;
 }
+
 
 export interface InventoryItem {
     id: number;

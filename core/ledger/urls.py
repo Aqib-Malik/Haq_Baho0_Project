@@ -8,7 +8,8 @@ from .views import (
     CompanyViewSet, InvoiceViewSet, PaymentViewSet, LedgerViewSet,
     UserViewSet, RoleViewSet, PermissionViewSet,
     TaxViewSet, InventoryItemViewSet, QuotationViewSet, QuotationItemViewSet,
-    UnitViewSet, LocationViewSet, BatchViewSet, StockTransactionViewSet, ProjectViewSet
+    UnitViewSet, LocationViewSet, BatchViewSet, StockTransactionViewSet, ProjectViewSet,
+    MachineViewSet, MachineRequirementViewSet, DemandViewSet
 )
 from .serializers import CustomTokenObtainPairSerializer
 
@@ -34,6 +35,9 @@ router.register(r'taxes', TaxViewSet, basename='tax')
 router.register(r'inventory-items', InventoryItemViewSet, basename='inventory-item')
 router.register(r'quotations', QuotationViewSet, basename='quotation')
 router.register(r'quotation-items', QuotationItemViewSet, basename='quotation-item')
+router.register(r'machines', MachineViewSet, basename='machine')
+router.register(r'machine-requirements', MachineRequirementViewSet, basename='machine-requirement')
+router.register(r'demands', DemandViewSet, basename='demand')
 
 urlpatterns = [
     path('api/', include(router.urls)),

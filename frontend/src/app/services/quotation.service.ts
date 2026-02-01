@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Tax, InventoryItem, Quotation, QuotationItem, Unit, Location, Batch, StockTransaction } from '../models/quotation.model';
+import { Tax, InventoryItem, Quotation, QuotationItem, Unit, Location, Batch, StockTransaction, Project } from '../models/quotation.model';
+
+
 
 interface PaginatedResponse<T> {
     count?: number;
@@ -190,6 +192,14 @@ export class QuotationService {
         return this.http.post<StockTransaction>(`${this.apiUrl}/stock-transactions/`, transaction);
     }
 
+    updateStockTransaction(id: number, transaction: Partial<StockTransaction>): Observable<StockTransaction> {
+        return this.http.put<StockTransaction>(`${this.apiUrl}/stock-transactions/${id}/`, transaction);
+    }
+
+    deleteStockTransaction(id: number): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/stock-transactions/${id}/`);
+    }
+
     // Quotation endpoints
     getQuotations(
         companyId?: number,
@@ -295,5 +305,23 @@ export class QuotationService {
                 console.error('Error downloading PDF:', error);
             }
         });
+    }
+    // Projects
+    getProjects(status?: string): Observable<Project[]> {
+        let params = new HttpParams().set('page_size', '1000');
+        if (status) {
+            params = params.set('status', status);
+        }
+        return this.http.get<Project[] | PaginatedResponse<Project>>(`${this.apiUrl}/projects/`, { params }).pipe(
+            map((response) => {
+                if (response && typeof response === 'object' && 'results' in response) {
+                    return (response as PaginatedResponse<Project>).results || [];
+                }
+                if (Array.isArray(response)) {
+                    return response as Project[];
+                }
+                return [];
+            })
+        );
     }
 }

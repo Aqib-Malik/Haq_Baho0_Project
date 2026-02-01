@@ -1,0 +1,17 @@
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .print-section {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        margin: 0;
+        padding: 20px;
+        box-shadow: none;
+        background: white;
+        z-index: 1000;
+    }
+}

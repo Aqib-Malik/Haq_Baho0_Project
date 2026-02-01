@@ -5,7 +5,8 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import (
     Company, Invoice, Payment, LedgerEntry, Tax, 
     InventoryItem, Quotation, QuotationItem,
-    Unit, Location, Batch, StockTransaction, Project
+    Unit, Location, Batch, StockTransaction, Project,
+    Machine, MachineRequirement, Demand, DemandMachineOrder, DemandMaterial
 )
 
 # --- Existing Serializers ---
@@ -363,3 +364,104 @@ class QuotationDetailSerializer(serializers.ModelSerializer):
         
         return instance
 
+        return instance
+
+
+# --- Demand & Machine Mapping Serializers ---
+
+class MachineRequirementSerializer(serializers.ModelSerializer):
+    inventory_item_name = serializers.ReadOnlyField(source='inventory_item.name')
+    inventory_item_unit = serializers.ReadOnlyField(source='inventory_item.unit')
+
+    class Meta:
+        model = MachineRequirement
+        fields = ['id', 'machine', 'inventory_item', 'inventory_item_name', 'inventory_item_unit', 'quantity']
+
+class MachineSerializer(serializers.ModelSerializer):
+    requirements = MachineRequirementSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Machine
+        fields = '__all__'
+
+class DemandMachineOrderSerializer(serializers.ModelSerializer):
+    machine_name = serializers.ReadOnlyField(source='machine.name')
+    
+    class Meta:
+        model = DemandMachineOrder
+        fields = ['id', 'demand', 'machine', 'machine_name', 'quantity']
+
+class DemandMaterialSerializer(serializers.ModelSerializer):
+    inventory_item_name = serializers.ReadOnlyField(source='inventory_item.name')
+    inventory_item_unit = serializers.ReadOnlyField(source='inventory_item.unit')
+    
+    class Meta:
+        model = DemandMaterial
+        fields = ['id', 'demand', 'inventory_item', 'inventory_item_name', 'inventory_item_unit', 'quantity']
+
+class DemandSerializer(serializers.ModelSerializer):
+    company_name = serializers.ReadOnlyField(source='company.name')
+    machine_orders = DemandMachineOrderSerializer(many=True, read_only=True)
+    materials = DemandMaterialSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Demand
+        fields = '__all__'
+
+class CreateDemandSerializer(serializers.ModelSerializer):
+    """Serializer for creating a demand with orders"""
+    # Expected input: [{"machine_id": 1, "quantity": 100}, ...]
+    machine_orders = serializers.ListField(
+        child=serializers.DictField(), write_only=True, required=False
+    )
+
+    class Meta:
+        model = Demand
+        fields = '__all__'
+
+    def create(self, validated_data):
+        machine_orders_data = validated_data.pop('machine_orders', [])
+        demand = Demand.objects.create(**validated_data)
+        
+        # Dictionary to aggregate material totals: { item_id: total_qty }
+        material_totals = {}
+
+        # 1. Process Order Inputs
+        for order_data in machine_orders_data:
+            machine_id = order_data.get('machine_id') or order_data.get('machine')
+            qty = order_data.get('quantity')
+            
+            if not machine_id or not qty:
+                continue
+
+            # Create Order Record
+            try:
+                machine = Machine.objects.get(pk=machine_id)
+                DemandMachineOrder.objects.create(demand=demand, machine=machine, quantity=qty)
+                
+                # 2. Calculate Materials for this Machine
+                # Fetch BOM
+                requirements = machine.requirements.all()
+                for req in requirements:
+                    total_req = req.quantity * list(map(lambda x: x, [1]))[0] * (float(qty) if isinstance(qty, (int, float)) else float(qty))
+                    # Safely handle decimal math
+                    from decimal import Decimal
+                    q_decimal = Decimal(str(qty))
+                    req_qty = req.quantity * q_decimal
+                    
+                    if req.inventory_item_id in material_totals:
+                        material_totals[req.inventory_item_id] += req_qty
+                    else:
+                        material_totals[req.inventory_item_id] = req_qty
+            except Machine.DoesNotExist:
+                continue
+        
+        # 3. Save Aggregated Materials
+        for item_id, total_qty in material_totals.items():
+            DemandMaterial.objects.create(
+                demand=demand,
+                inventory_item_id=item_id,
+                quantity=total_qty
+            )
+            
+        return demand

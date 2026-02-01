@@ -63,6 +63,27 @@ export const routes: Routes = [
                 path: 'admin/roles',
                 loadComponent: () => import('./components/admin/role-management/role-management.component').then(m => m.RoleManagementComponent),
                 data: { permissions: ['view_group'] }
+            },
+            // Production Routes
+            {
+                path: 'production/machines',
+                loadComponent: () => import('./components/production/machine-list/machine-list.component').then(m => m.MachineListComponent)
+            },
+            {
+                path: 'production/machines/new',
+                loadComponent: () => import('./components/production/machine-detail/machine-detail.component').then(m => m.MachineDetailComponent)
+            },
+            {
+                path: 'production/machines/:id',
+                loadComponent: () => import('./components/production/machine-detail/machine-detail.component').then(m => m.MachineDetailComponent)
+            },
+            {
+                path: 'production/demands',
+                loadComponent: () => import('./components/production/demand-list/demand-list.component').then(m => m.DemandListComponent)
+            },
+            {
+                path: 'production/demands/new',
+                loadComponent: () => import('./components/production/demand-create/demand-create.component').then(m => m.DemandCreateComponent)
             }
         ]
     },

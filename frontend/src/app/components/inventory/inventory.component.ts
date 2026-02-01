@@ -1,4 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -74,12 +75,30 @@ export class InventoryComponent implements OnInit {
     constructor(
         private quotationService: QuotationService,
         private notificationService: NotificationService,
-        private dialog: MatDialog
+        private dialog: MatDialog,
+        private route: ActivatedRoute
     ) { }
 
     ngOnInit(): void {
         this.loadItems();
         this.setupSearch();
+
+        // Check query params for tab and actions
+        this.route.queryParams.subscribe(params => {
+            if (params['tab'] === 'transactions') {
+                this.selectedTabIndex = 1;
+                this.loadTransactions();
+            } else {
+                this.selectedTabIndex = 0;
+            }
+
+            if (params['action']) {
+                // Wait a bit for view to init if needed, though dialog is independent
+                setTimeout(() => {
+                    this.openTransactionDialog(params['action']);
+                }, 100);
+            }
+        });
 
         // Listen to transaction filter changes
         this.transactionTypeControl.valueChanges.subscribe(() => {
@@ -204,11 +223,11 @@ export class InventoryComponent implements OnInit {
         return `Rs ${num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
 
-    openTransactionDialog(): void {
+    openTransactionDialog(type: string = 'receipt', transaction?: StockTransaction, isViewOnly: boolean = false): void {
         const dialogRef = this.dialog.open(StockTransactionDialogComponent, {
             width: '600px',
             maxWidth: '95vw',
-            data: { type: 'receipt' } // Default to receipt
+            data: { type, transaction, isViewOnly } // Pass type, optional transaction, and view-only flag
         });
 
         dialogRef.afterClosed().subscribe(result => {
@@ -216,6 +235,44 @@ export class InventoryComponent implements OnInit {
                 this.loadTransactions();
                 // Also reload items to show updated stock
                 this.loadItems();
+            }
+        });
+    }
+
+    editTransaction(transaction: StockTransaction): void {
+        this.openTransactionDialog(transaction.transaction_type, transaction);
+    }
+
+    viewTransaction(transaction: StockTransaction): void {
+        this.openTransactionDialog(transaction.transaction_type, transaction, true);
+    }
+
+    confirmDeleteTransaction(transaction: StockTransaction): void {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Do you want to delete this transaction for "${transaction.item_name}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.deleteTransaction(transaction.id);
+            }
+        });
+    }
+
+    deleteTransaction(id: number): void {
+        this.quotationService.deleteStockTransaction(id).subscribe({
+            next: () => {
+                this.notificationService.showSuccess('Transaction deleted successfully');
+                this.loadTransactions();
+                this.loadItems(); // Update stock counts
+            },
+            error: (error) => {
+                console.error('Error deleting transaction:', error);
+                this.notificationService.showError('Failed to delete transaction');
             }
         });
     }

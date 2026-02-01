@@ -1,0 +1,96 @@
+<div class="p-6">
+    <div class="mb-6">
+        <button mat-button color="primary" routerLink="/production/machines">
+            <mat-icon>arrow_back</mat-icon> Back to Machines
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Machine Details Form -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold mb-4">Machine Details</h2>
+            <form [formGroup]="machineForm" (ngSubmit)="saveMachine()">
+                <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Machine Name</mat-label>
+                    <input matInput formControlName="name" placeholder="e.g. Offset Printer A">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Code</mat-label>
+                    <input matInput formControlName="code" placeholder="e.g. MCH-001">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Description</mat-label>
+                    <textarea matInput formControlName="description" rows="3"></textarea>
+                </mat-form-field>
+
+                <button mat-raised-button color="primary" type="submit" [disabled]="machineForm.invalid">
+                    {{ machineId ? 'Update' : 'Create' }} Machine
+                </button>
+            </form>
+        </div>
+
+        <!-- Requirements (BOM) -->
+        <div class="bg-white rounded-lg shadow p-6" *ngIf="machineId">
+            <h2 class="text-xl font-bold mb-4">Material Requirements (Per Run/Unit)</h2>
+
+            <!-- Add Requirement Form -->
+            <div class="flex gap-2 items-center mb-4">
+                <mat-form-field appearance="outline" class="flex-1">
+                    <mat-label>Item</mat-label>
+                    <input type="text" matInput [formControl]="newItemControl" [matAutocomplete]="auto">
+                    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+                        <mat-option *ngFor="let item of filteredItems | async" [value]="item">
+                            {{item.name}} ({{item.unit}})
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="w-24">
+                    <mat-label>Qty</mat-label>
+                    <input matInput type="number" [formControl]="newQtyControl">
+                </mat-form-field>
+
+                <button mat-mini-fab color="primary" (click)="addRequirement()"
+                    [disabled]="newItemControl.invalid || newQtyControl.invalid">
+                    <mat-icon>add</mat-icon>
+                </button>
+            </div>
+
+            <!-- Requirements Table -->
+            <table mat-table [dataSource]="requirements" class="w-full">
+                <ng-container matColumnDef="item">
+                    <th mat-header-cell *matHeaderCellDef> Item </th>
+                    <td mat-cell *matCellDef="let element"> {{element.inventory_item_name}}
+                        ({{element.inventory_item_unit}}) </td>
+                </ng-container>
+
+                <ng-container matColumnDef="quantity">
+                    <th mat-header-cell *matHeaderCellDef> Quantity </th>
+                    <td mat-cell *matCellDef="let element"> {{element.quantity}} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef> </th>
+                    <td mat-cell *matCellDef="let element">
+                        <button mat-icon-button color="warn" (click)="deleteRequirement(element.id)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+
+            <div *ngIf="requirements.length === 0" class="text-gray-500 text-center py-4">
+                No materials defined yet.
+            </div>
+        </div>
+
+        <div class="bg-gray-100 rounded-lg p-6 text-center" *ngIf="!machineId">
+            <p class="text-gray-600">Save the machine to add materials.</p>
+        </div>
+    </div>
+</div>

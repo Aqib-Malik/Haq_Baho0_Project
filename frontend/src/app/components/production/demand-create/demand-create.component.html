@@ -1,0 +1,92 @@
+<div class="p-6">
+    <div class="mb-6">
+        <button mat-button color="primary" routerLink="/production/demands">
+            <mat-icon>arrow_back</mat-icon> Back to Demands
+        </button>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6 max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6">Create New Demand Sheet</h1>
+
+        <form [formGroup]="demandForm" (ngSubmit)="onSubmit()">
+            <!-- Header Info -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <mat-form-field appearance="outline">
+                    <mat-label>Client / Mill</mat-label>
+                    <mat-select formControlName="company">
+                        <mat-option *ngFor="let c of companies" [value]="c.id">
+                            {{c.name}}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="demandForm.get('company')?.invalid">Client is required</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Date</mat-label>
+                    <input matInput [matDatepicker]="picker" formControlName="date">
+                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Reference / Order #</mat-label>
+                    <input matInput formControlName="reference_number" placeholder="Optional">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Status</mat-label>
+                    <mat-select formControlName="status">
+                        <mat-option value="draft">Draft</mat-option>
+                        <mat-option value="finalized">Finalized</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <!-- Machine Orders -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-lg font-semibold">Ordered Machines</h3>
+                    <button type="button" mat-stroked-button color="primary" (click)="addMachineOrder()">
+                        <mat-icon>add</mat-icon> Add Machine
+                    </button>
+                </div>
+
+                <div formArrayName="machine_orders">
+                    <div *ngFor="let order of machineOrders.controls; let i=index" [formGroupName]="i"
+                        class="flex gap-4 items-center mb-2 p-3 bg-gray-50 rounded border border-gray-200">
+
+                        <div class="flex-1">
+                            <mat-form-field appearance="outline" class="w-full no-bottom-space">
+                                <mat-label>Machine</mat-label>
+                                <mat-select formControlName="machine_id">
+                                    <mat-option *ngFor="let m of machines" [value]="m.id">
+                                        {{m.name}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="w-32">
+                            <mat-form-field appearance="outline" class="w-full no-bottom-space">
+                                <mat-label>Quantity / Runs</mat-label>
+                                <input matInput type="number" formControlName="quantity">
+                            </mat-form-field>
+                        </div>
+
+                        <button type="button" mat-icon-button color="warn" (click)="removeMachineOrder(i)"
+                            *ngIf="machineOrders.length > 1">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button mat-raised-button color="primary" type="submit" [disabled]="demandForm.invalid"
+                    class="px-8 py-2">
+                    Save Demand Sheet
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -14,7 +14,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 import { QuotationService } from '../../../services/quotation.service';
 import { NotificationService } from '../../../services/notification.service';
-import { InventoryItem, Unit, Location, Batch, StockTransaction } from '../../../models/quotation.model';
+import { InventoryItem, Unit, Location, Batch, StockTransaction, Project } from '../../../models/quotation.model';
 
 @Component({
     selector: 'app-stock-transaction-dialog',
@@ -40,7 +40,7 @@ import { InventoryItem, Unit, Location, Batch, StockTransaction } from '../../..
                     <mat-icon>receipt_long</mat-icon>
                 </div>
                 <div>
-                    <h2 class="dialog-title">{{ isEditMode ? 'Edit' : 'New' }} Stock Transaction</h2>
+                    <h2 class="dialog-title">{{ isViewOnly ? 'View' : (isEditMode ? 'Edit' : 'New') }} Stock Transaction</h2>
                     <p class="dialog-subtitle">Record movement of inventory</p>
                 </div>
             </div>
@@ -77,6 +77,18 @@ import { InventoryItem, Unit, Location, Batch, StockTransaction } from '../../..
                         <mat-label>Reference #</mat-label>
                         <input matInput formControlName="reference_number" placeholder="PO-123 or INV-456">
                         <mat-icon matPrefix>tag</mat-icon>
+                    </mat-form-field>
+
+                    <!-- Project -->
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                        <mat-label>Project / Work Order</mat-label>
+                        <mat-select formControlName="project">
+                            <mat-option [value]="null">-- None --</mat-option>
+                            @for (p of projects(); track p.id) {
+                                <mat-option [value]="p.id">{{ p.name }}</mat-option>
+                            }
+                        </mat-select>
+                        <mat-icon matPrefix>assignment</mat-icon>
                     </mat-form-field>
 
                     <!-- Item Selection -->
@@ -131,7 +143,7 @@ import { InventoryItem, Unit, Location, Batch, StockTransaction } from '../../..
                         <div class="batch-section">
                             <div class="batch-header">
                                 <span class="section-label">Batch Details</span>
-                                <button mat-stroked-button color="primary" type="button" (click)="toggleNewBatch()" class="small-btn">
+                                <button *ngIf="!isViewOnly" mat-stroked-button color="primary" type="button" (click)="toggleNewBatch()" class="small-btn">
                                     <mat-icon>{{ isNewBatch() ? 'list' : 'add' }}</mat-icon>
                                     {{ isNewBatch() ? 'Select Existing' : 'New Batch' }}
                                 </button>
@@ -184,11 +196,13 @@ import { InventoryItem, Unit, Location, Batch, StockTransaction } from '../../..
                 </div>
 
                 <div class="dialog-actions">
-                    <button mat-stroked-button type="button" (click)="onCancel()">Cancel</button>
-                    <button mat-raised-button color="primary" type="submit" [disabled]="isLoading()">
-                        <mat-icon>save_alt</mat-icon>
-                        {{ isLoading() ? 'Saving...' : (isEditMode ? 'Update Transaction' : 'Record Transaction') }}
-                    </button>
+                    <button mat-stroked-button type="button" (click)="onCancel()">{{ isViewOnly ? 'Close' : 'Cancel' }}</button>
+                    @if (!isViewOnly) {
+                        <button mat-raised-button color="primary" type="submit" [disabled]="isLoading()">
+                            <mat-icon>save_alt</mat-icon>
+                            {{ isLoading() ? 'Saving...' : (isEditMode ? 'Update Transaction' : 'Record Transaction') }}
+                        </button>
+                    }
                 </div>
             </form>
         </div>
@@ -209,6 +223,7 @@ export class StockTransactionDialogComponent implements OnInit {
     units = signal<Unit[]>([]);
     availableUnits = signal<Unit[]>([]);
     itemBatches = signal<Batch[]>([]);
+    projects = signal<Project[]>([]);
 
     selectedItem: InventoryItem | null = null;
     showBatchField = signal<boolean>(false);
@@ -216,20 +231,28 @@ export class StockTransactionDialogComponent implements OnInit {
     itemFilterCtrl = new FormControl<string | InventoryItem>('');
     locationFilterCtrl = new FormControl<string | Location>('');
     isNewBatch = signal<boolean>(false);
+    isViewOnly = false;
 
     constructor(
         private fb: FormBuilder,
         private quotationService: QuotationService,
         private notificationService: NotificationService,
         public dialogRef: MatDialogRef<StockTransactionDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: { type?: string, transaction?: StockTransaction }
+        @Inject(MAT_DIALOG_DATA) public data: { type?: string, transaction?: StockTransaction, isViewOnly?: boolean }
     ) {
         this.isEditMode = !!data.transaction;
+        this.isViewOnly = !!data.isViewOnly;
     }
 
     ngOnInit(): void {
         this.initForm();
         this.loadInitialData();
+
+        if (this.isViewOnly) {
+            this.form.disable();
+            this.itemFilterCtrl.disable();
+            this.locationFilterCtrl.disable();
+        }
 
         this.itemFilterCtrl.valueChanges.subscribe((val: string | InventoryItem | null) => {
             if (typeof val === 'string') {
@@ -253,6 +276,7 @@ export class StockTransactionDialogComponent implements OnInit {
             transaction_type: [this.data.type || 'receipt', Validators.required],
             transaction_date: [new Date(), Validators.required],
             reference_number: [''],
+            project: [null],
             item: [null, Validators.required],
             quantity: [null, [Validators.required, Validators.min(0.0001)]],
             unit: [null, Validators.required],
@@ -292,7 +316,8 @@ export class StockTransactionDialogComponent implements OnInit {
         forkJoin({
             items: this.quotationService.getInventoryItems(),
             locations: this.quotationService.getLocations(),
-            units: this.quotationService.getUnits()
+            units: this.quotationService.getUnits(),
+            projects: this.quotationService.getProjects('active')
         }).subscribe({
             next: (result) => {
                 this.items.set(result.items);
@@ -302,6 +327,7 @@ export class StockTransactionDialogComponent implements OnInit {
 
                 console.log('Units loaded:', result.units);
                 this.units.set(result.units);
+                this.projects.set(result.projects);
                 // Default to all units initially
                 this.availableUnits.set(result.units);
 
@@ -347,6 +373,7 @@ export class StockTransactionDialogComponent implements OnInit {
             unit: transaction.unit,
             location: transaction.location,
             batch: transaction.batch,
+            project: transaction.project,
             notes: transaction.notes
         });
     }
