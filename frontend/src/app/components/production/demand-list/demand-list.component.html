@@ -1,116 +1,187 @@
-<div class="p-6">
-    <div class="flex justify-between items-center mb-6 no-print">
-        <h1 class="text-2xl font-bold">Demand Sheets</h1>
-        <div class="flex gap-2">
-            <button mat-raised-button color="accent" (click)="aggregateSelected()" [disabled]="selection.isEmpty()">
-                Aggregate Selected
+<div class="min-h-screen bg-gray-50 p-6">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 no-print">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 tracking-tight">Demand Sheets</h1>
+            <p class="text-gray-500 mt-1">Manage production orders and material aggregation</p>
+        </div>
+        <div class="flex gap-3">
+            <button mat-flat-button color="accent" (click)="aggregateSelected()"
+                [disabled]="selection.isEmpty() || isLoading"
+                class="!rounded-full !px-6 py-2 shadow-md transition-all transform active:scale-95 disabled:shadow-none flex items-center relative overflow-hidden"
+                [ngClass]="{'!bg-gray-300 !text-gray-500': selection.isEmpty(), '!bg-amber-500 !text-white': !selection.isEmpty() && !isLoading, '!bg-amber-400 !text-white !opacity-100': isLoading}">
+
+                <div class="flex items-center gap-2">
+                    <mat-icon *ngIf="!isLoading">merge_type</mat-icon>
+                    <mat-spinner *ngIf="isLoading" diameter="20" class="!stroke-white custom-spinner"></mat-spinner>
+                    <span *ngIf="!isLoading" class="font-bold">Aggregate Selected ({{selection.selected.length}})</span>
+                    <span *ngIf="isLoading" class="font-bold">Processing...</span>
+                </div>
             </button>
-            <button mat-raised-button color="primary" routerLink="/production/demands/new">
-                <mat-icon>add</mat-icon> New Demand
+            <button mat-flat-button color="primary" routerLink="/production/demands/new"
+                class="!rounded-full !px-6 py-2 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
+                <mat-icon class="mr-2">add</mat-icon> New Demand
             </button>
         </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow overflow-hidden no-print" *ngIf="!showSummary">
-        <table mat-table [dataSource]="demands" class="w-full">
-            <!-- Checkbox Column -->
-            <ng-container matColumnDef="select">
-                <th mat-header-cell *matHeaderCellDef>
-                    <mat-checkbox (change)="$event ? toggleAllRows() : null"
-                        [checked]="selection.hasValue() && isAllSelected()"
-                        [indeterminate]="selection.hasValue() && !isAllSelected()" [aria-label]="checkboxLabel()">
-                    </mat-checkbox>
-                </th>
-                <td mat-cell *matCellDef="let row">
-                    <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
-                        [checked]="selection.isSelected(row)" [aria-label]="checkboxLabel(row)">
-                    </mat-checkbox>
-                </td>
-            </ng-container>
+    <!-- Main Content Area -->
+    <div class="grid grid-cols-1 gap-6">
 
-            <ng-container matColumnDef="date">
-                <th mat-header-cell *matHeaderCellDef> Date </th>
-                <td mat-cell *matCellDef="let element"> {{element.date | date}} </td>
-            </ng-container>
+        <!-- Demand List Panel -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden no-print transition-all duration-300"
+            [ngClass]="{'opacity-50 pointer-events-none hidden': showSummary}">
 
-            <ng-container matColumnDef="company">
-                <th mat-header-cell *matHeaderCellDef> Client </th>
-                <td mat-cell *matCellDef="let element"> {{element.company_name}} </td>
-            </ng-container>
-
-            <ng-container matColumnDef="reference">
-                <th mat-header-cell *matHeaderCellDef> Reference </th>
-                <td mat-cell *matCellDef="let element"> {{element.reference_number}} </td>
-            </ng-container>
-
-            <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef> Status </th>
-                <td mat-cell *matCellDef="let element">
-                    <span class="px-2 py-1 rounded-full text-xs font-bold uppercase" [ngClass]="{
-                   'bg-green-100 text-green-800': element.status === 'finalized',
-                   'bg-gray-100 text-gray-800': element.status === 'draft'
-               }">
-                        {{element.status}}
-                    </span>
-                </td>
-            </ng-container>
-
-            <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef> Actions </th>
-                <td mat-cell *matCellDef="let element">
-                    <!-- TODO: View/Edit -->
-                    <button mat-icon-button color="primary">
-                        <mat-icon>visibility</mat-icon>
-                    </button>
-                </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selection.toggle(row)"></tr>
-        </table>
-    </div>
-
-    <!-- Summary Report View -->
-    <div *ngIf="showSummary" class="bg-white p-8 rounded-lg shadow mt-6 print-section">
-        <div class="flex justify-between items-start mb-6">
-            <div>
-                <h2 class="text-3xl font-bold text-gray-800">Consolidated Demand Summary</h2>
-                <p class="text-gray-500 mt-2">Generated on {{ today | date:'medium' }}</p>
+            <div class="p-4 bg-gray-50/50 border-b border-gray-100 flex justify-between items-center">
+                <div class="flex items-center gap-2 text-gray-500 text-sm">
+                    <mat-icon class="!w-5 !h-5 !text-lg">filter_list</mat-icon>
+                    <span>All Demands</span>
+                </div>
+                <!-- Optional Paginator or Sort could go here -->
             </div>
-            <div class="no-print space-x-2">
-                <button mat-stroked-button (click)="showSummary = false">Back to List</button>
-                <button mat-raised-button color="primary" (click)="printReport()">
-                    <mat-icon>print</mat-icon> Print Report
-                </button>
+
+            <table mat-table [dataSource]="demands" class="w-full">
+                <!-- Checkbox Column -->
+                <ng-container matColumnDef="select">
+                    <th mat-header-cell *matHeaderCellDef class="!bg-gray-50 w-16 text-center">
+                        <mat-checkbox (change)="$event ? toggleAllRows() : null"
+                            [checked]="selection.hasValue() && isAllSelected()"
+                            [indeterminate]="selection.hasValue() && !isAllSelected()" [aria-label]="checkboxLabel()"
+                            color="primary">
+                        </mat-checkbox>
+                    </th>
+                    <td mat-cell *matCellDef="let row" class="text-center">
+                        <mat-checkbox (click)="$event.stopPropagation()"
+                            (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)"
+                            [aria-label]="checkboxLabel(row)" color="primary">
+                        </mat-checkbox>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="date">
+                    <th mat-header-cell *matHeaderCellDef class="!bg-gray-50 !font-semibold"> Date </th>
+                    <td mat-cell *matCellDef="let element" class="text-gray-600 font-medium"> {{element.date |
+                        date:'mediumDate'}} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="company">
+                    <th mat-header-cell *matHeaderCellDef class="!bg-gray-50 !font-semibold"> Client </th>
+                    <td mat-cell *matCellDef="let element" class="font-bold text-gray-800"> {{element.company_name}}
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="reference">
+                    <th mat-header-cell *matHeaderCellDef class="!bg-gray-50 !font-semibold"> Reference </th>
+                    <td mat-cell *matCellDef="let element" class="text-gray-500 font-mono text-sm">
+                        {{element.reference_number || '—'}} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef class="!bg-gray-50 !font-semibold"> Status </th>
+                    <td mat-cell *matCellDef="let element">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border" [ngClass]="{
+                        'bg-green-50 text-green-700 border-green-200': element.status === 'finalized',
+                        'bg-gray-100 text-gray-600 border-gray-200': element.status === 'draft'
+                    }">
+                            {{element.status}}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef class="!bg-gray-50"> </th>
+                    <td mat-cell *matCellDef="let element">
+                        <button mat-icon-button (click)="$event.stopPropagation()"
+                            class="text-gray-400 hover:text-blue-600 transition-colors">
+                            <mat-icon>visibility</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selection.toggle(row)"
+                    class="hover:bg-blue-50/10 cursor-pointer border-b border-gray-50 transition-colors">
+                </tr>
+            </table>
+
+            <div *ngIf="demands.data.length === 0" class="p-12 text-center text-gray-400">
+                No demand sheets found.
             </div>
         </div>
 
-        <div class="mb-6">
-            <h3 class="font-semibold mb-2">Selected Orders ({{selection.selected.length}}):</h3>
-            <ul class="list-disc list-inside text-sm text-gray-600">
-                <li *ngFor="let d of selection.selected">
-                    {{d.company_name}} - {{d.date | date}} <span
-                        *ngIf="d.reference_number">({{d.reference_number}})</span>
-                </li>
-            </ul>
-        </div>
+        <!-- Summary Report Overlay -->
+        <div *ngIf="showSummary"
+            class="bg-gray-500/20 fixed inset-0 z-50 overflow-y-auto no-print backdrop-blur-sm flex items-start justify-center pt-10 pb-10">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden print-section animate-slide-up">
 
-        <table class="w-full border-collapse border border-gray-300">
-            <thead>
-                <tr class="bg-gray-100">
-                    <th class="border border-gray-300 p-2 text-left">Item Name</th>
-                    <th class="border border-gray-300 p-2 text-right">Total Quantity</th>
-                    <th class="border border-gray-300 p-2 text-left">Unit</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let item of aggregatedMaterials">
-                    <td class="border border-gray-300 p-2">{{ item.inventory_item__name }}</td>
-                    <td class="border border-gray-300 p-2 text-right font-bold">{{ item.total_quantity | number:'1.0-4'
-                        }}</td>
-                    <td class="border border-gray-300 p-2">{{ item.inventory_item__unit }}</td>
-                </tr>
-            </tbody>
-        </table>
+                <!-- Print Header Actions -->
+                <div class="bg-gray-900 text-white p-4 flex justify-between items-center no-print">
+                    <h3 class="font-bold flex items-center gap-2">
+                        <mat-icon>summarize</mat-icon> Aggregation Report
+                    </h3>
+                    <div class="flex gap-2">
+                        <button mat-stroked-button class="!text-white !border-white/20"
+                            (click)="showSummary = false">Close</button>
+                        <button mat-raised-button color="accent" (click)="printReport()">
+                            <mat-icon class="mr-1">print</mat-icon> Print
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Report Content -->
+                <div class="p-8 md:p-12 min-h-[600px] print:p-0">
+                    <div class="text-center border-b border-gray-800 pb-6 mb-8">
+                        <h1 class="text-4xl font-serif font-bold text-gray-900 uppercase tracking-widest">Material
+                            Summary</h1>
+                        <p class="text-gray-500 mt-2">Generated on {{ today | date:'fullDate' }}</p>
+                    </div>
+
+                    <div
+                        class="mb-8 bg-gray-50 p-6 rounded-lg border border-gray-100 print:bg-transparent print:border-none print:p-0">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Included Orders</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span *ngFor="let d of selection.selected"
+                                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white border border-gray-200 text-gray-800 print:border-0 print:px-0 print:mr-4">
+                                {{d.company_name}} <span class="text-gray-400 mx-1">#{{d.id}}</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="border-b-2 border-gray-800">
+                                <th class="py-3 text-left font-bold text-gray-900 uppercase text-sm">Item Description
+                                </th>
+                                <th class="py-3 text-right font-bold text-gray-900 uppercase text-sm">Quantity</th>
+                                <th class="py-3 text-left pl-4 font-bold text-gray-900 uppercase text-sm w-20">Unit</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr *ngFor="let item of aggregatedMaterials; trackBy: trackByItem"
+                                class="hover:bg-gray-50 print:hover:bg-transparent">
+                                <td class="py-4 text-gray-800 font-medium">{{ item.inventory_item__name }}</td>
+                                <td class="py-4 text-right font-mono text-lg font-bold text-gray-900">{{
+                                    item.total_quantity | number:'1.0-4' }}</td>
+                                <td class="py-4 pl-4 text-gray-500 text-sm">{{ item.inventory_item__unit }}</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="border-t-2 border-gray-800">
+                                <td class="py-4 font-bold text-gray-900">Total Items: {{aggregatedMaterials.length}}
+                                </td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <div
+                        class="mt-16 pt-8 border-t border-gray-200 flex justify-between text-xs text-gray-400 print:flex">
+                        <span>Authorized By: _________________</span>
+                        <span>Printed by System</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Machine, MachineRequirement } from '../models/machine.model';
 
@@ -14,7 +15,13 @@ export class MachineService {
     constructor(private http: HttpClient) { }
 
     getMachines(): Observable<Machine[]> {
-        return this.http.get<Machine[]>(this.apiUrl);
+        return this.http.get<Machine[] | any>(this.apiUrl).pipe(
+            map(response => {
+                if (Array.isArray(response)) return response;
+                if (response && response.results) return response.results;
+                return [];
+            })
+        );
     }
 
     getMachine(id: number): Observable<Machine> {

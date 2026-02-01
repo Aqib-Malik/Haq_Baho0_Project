@@ -1,17 +1,53 @@
+/* Demand List Styles */
+:host {
+    display: block;
+}
+
+.mat-column-select {
+    width: 60px;
+    padding-left: 16px;
+}
+
+.mat-column-status {
+    width: 120px;
+}
+
+/* Animations */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-up {
+    animation: slideUp 0.3s ease-out forwards;
+}
+
+/* Print Styles */
 @media print {
     .no-print {
         display: none !important;
     }
 
+    /* Reset overlay styles for printing so it looks like a document */
+    .fixed {
+        position: static !important;
+        overflow: visible !important;
+        background: white !important;
+        padding: 0 !important;
+        display: block !important;
+    }
+
     .print-section {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        margin: 0;
-        padding: 20px;
-        box-shadow: none;
-        background: white;
-        z-index: 1000;
+        box-shadow: none !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        animation: none !important;
     }
 }

@@ -1,4 +1,21 @@
-/* Custom styles for MatTable if needed */
-table {
-    width: 100%;
+/* Machine List Styles */
+:host {
+    display: block;
+}
+
+/* Ensure icons align nicely using tailwind/custom mix */
+.mat-column-actions {
+    width: 120px;
+    text-align: right;
+}
+
+/* Row Hover */
+.mat-mdc-row:hover .mat-mdc-cell {
+    background-color: inherit;
+    /* Allow tailwind hover class to work */
+}
+
+/* Remove default table borders if needed */
+.mat-mdc-table {
+    background: transparent;
 }

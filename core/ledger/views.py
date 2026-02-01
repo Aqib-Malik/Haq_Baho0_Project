@@ -506,10 +506,18 @@ class DemandViewSet(AuditMixin, viewsets.ModelViewSet):
         if not demand_ids:
             return Response({'error': 'No demand IDs provided'}, status=status.HTTP_400_BAD_REQUEST)
         
+        # Ensure integers
+        try:
+            demand_ids = [int(x) for x in demand_ids]
+        except (ValueError, TypeError):
+             return Response({'error': 'Invalid demand IDs'}, status=status.HTTP_400_BAD_REQUEST)
+
         # Aggregate materials
+        # Optimization: Filter by indexed demand_id, group by inventory_item_id (indexed FK)
         materials = DemandMaterial.objects.filter(demand_id__in=demand_ids)\
             .values('inventory_item__id', 'inventory_item__name', 'inventory_item__unit')\
             .annotate(total_quantity=Sum('quantity'))\
             .order_by('inventory_item__name')
         
-        return Response(materials)
+        # Force evaluation to list to resolve query before serialization overhead
+        return Response(list(materials))

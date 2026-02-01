@@ -1,40 +1,111 @@
-<div class="p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Machines</h1>
-        <button mat-raised-button color="primary" routerLink="/production/machines/new">
-            <mat-icon>add</mat-icon> Add Machine
+<div class="min-h-screen bg-gray-50 p-6">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 tracking-tight">Machines</h1>
+            <p class="text-gray-500 mt-1">Manage your manufacturing units and configurations</p>
+        </div>
+        <button mat-flat-button color="primary" routerLink="/production/machines/new"
+            class="!rounded-xl !h-10 !px-5 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all transform hover:-translate-y-0.5">
+            <div class="flex items-center gap-2">
+                <mat-icon class="!w-5 !h-5 !text-[20px]">add_circle</mat-icon>
+                <span class="font-bold tracking-wide">New Machine</span>
+            </div>
         </button>
     </div>
 
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-        <table mat-table [dataSource]="machines" class="w-full">
-            <!-- Name Column -->
-            <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef> Name </th>
-                <td mat-cell *matCellDef="let element"> {{element.name}} </td>
-            </ng-container>
+    <!-- Content Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <!-- Search/Filter Bar (Visual Only for now, functionality can be added) -->
+        <!-- Search/Filter Bar -->
+        <div
+            class="px-6 py-4 flex items-center justify-between gap-4 border-b border-gray-100 bg-white sticky top-0 z-10">
+            <div class="relative w-full max-w-md group">
+                <mat-icon
+                    class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors">search</mat-icon>
+                <input type="text" (keyup)="applyFilter($event)" placeholder="Search machines..."
+                    class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-medium text-gray-700 placeholder:text-gray-400">
+            </div>
 
-            <!-- Description Column -->
-            <ng-container matColumnDef="description">
-                <th mat-header-cell *matHeaderCellDef> Description </th>
-                <td mat-cell *matCellDef="let element"> {{element.description}} </td>
-            </ng-container>
+            <div class="text-xs text-gray-400 font-medium">
+                {{ machines.filteredData.length }} results
+            </div>
+        </div>
 
-            <!-- Actions Column -->
-            <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef> Actions </th>
-                <td mat-cell *matCellDef="let element">
-                    <button mat-icon-button color="primary" [routerLink]="['/production/machines', element.id]">
-                        <mat-icon>edit</mat-icon>
-                    </button>
-                    <button mat-icon-button color="warn" (click)="deleteMachine(element.id)">
-                        <mat-icon>delete</mat-icon>
-                    </button>
-                </td>
-            </ng-container>
+        <div class="overflow-x-auto">
+            <table mat-table [dataSource]="machines" class="w-full">
+                <!-- Name Column -->
+                <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef
+                        class="!pl-6 !py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Name</th>
+                    <td mat-cell *matCellDef="let element" class="!pl-6 !py-4">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md shadow-blue-500/20 text-white flex items-center justify-center font-bold text-lg select-none">
+                                {{element.name.charAt(0).toUpperCase()}}
+                            </div>
+                            <div>
+                                <div class="font-bold text-gray-900 text-[15px] leading-tight">{{element.name}}</div>
+                                <div class="text-[11px] font-mono text-gray-400 mt-0.5 bg-gray-100 inline-block px-1.5 rounded"
+                                    *ngIf="element.code">{{element.code}}</div>
+                            </div>
+                        </div>
+                    </td>
+                </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
+                <!-- Description Column -->
+                <ng-container matColumnDef="description">
+                    <th mat-header-cell *matHeaderCellDef
+                        class="!py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Description</th>
+                    <td mat-cell *matCellDef="let element" class="!py-4">
+                        <p class="text-sm text-gray-500 max-w-sm leading-relaxed line-clamp-2">{{element.description ||
+                            'No description provided'}}</p>
+                    </td>
+                </ng-container>
+
+                <!-- Actions Column -->
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef class="!bg-gray-50/50 w-28"> </th>
+                    <td mat-cell *matCellDef="let element">
+                        <div class="flex justify-end gap-3 pr-4">
+                            <!-- Edit Button -->
+                            <button mat-icon-button (click)="$event.stopPropagation()"
+                                [routerLink]="['/production/machines', element.id]" matTooltip="Edit Configuration"
+                                class="!w-9 !h-9 !leading-none bg-indigo-50 text-indigo-600 !rounded-xl hover:!bg-indigo-600 hover:text-white transition-all duration-300 shadow-sm hover:shadow-md hover:shadow-indigo-500/30 group flex items-center justify-center">
+                                <mat-icon
+                                    class="!text-[20px] !w-[20px] !h-[20px] transition-transform group-hover:scale-110">edit</mat-icon>
+                            </button>
+
+                            <!-- Delete Button -->
+                            <button mat-icon-button (click)="$event.stopPropagation(); deleteMachine(element.id)"
+                                matTooltip="Delete Machine"
+                                class="!w-9 !h-9 !leading-none bg-rose-50 text-rose-600 !rounded-xl hover:!bg-rose-600 hover:text-white transition-all duration-300 shadow-sm hover:shadow-md hover:shadow-rose-500/30 group flex items-center justify-center">
+                                <mat-icon
+                                    class="!text-[20px] !w-[20px] !h-[20px] transition-transform group-hover:scale-110">delete</mat-icon>
+                            </button>
+                        </div>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"
+                    class="!bg-gray-50/80 !border-b !border-gray-200"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                    class="group hover:bg-blue-50/30 transition-all duration-200 cursor-pointer border-b border-gray-100 last:border-0 relative">
+                </tr>
+            </table>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="machines.data.length === 0" class="p-12 text-center flex flex-col items-center justify-center">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <mat-icon class="text-gray-400 !w-8 !h-8 !text-3xl">precision_manufacturing</mat-icon>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-700">No Machines Found</h3>
+            <p class="text-gray-500 mt-1 max-w-xs mx-auto">Get started by adding your first manufacturing unit to the
+                system.</p>
+            <button mat-stroked-button color="primary" class="mt-6" routerLink="/production/machines/new">Create
+                Machine</button>
+        </div>
     </div>
 </div>

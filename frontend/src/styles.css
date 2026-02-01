@@ -2,6 +2,11 @@
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 @import '@angular/cdk/overlay-prebuilt.css';
 
+/* Tailwind Imports */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Force Overlay z-index to be on top of everything including SweetAlert and Dialogs if needed */
 .cdk-overlay-container {
   z-index: 10000 !important;
@@ -672,11 +677,9 @@ mat-error {
   height: auto !important;
   min-height: 20px !important;
   overflow: visible !important;
+  display: block !important;
 }
 
-/* Ensure the form field expands to fit the error */
-
-/* Ensure SweetAlert2 is always on top of Material Dialogs */
 /* Ensure SweetAlert2 is always on top of Material Dialogs */
 .swal2-container {
   z-index: 2147483647 !important;

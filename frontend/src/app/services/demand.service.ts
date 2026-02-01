@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Demand, CreateDemandPayload } from '../models/demand.model';
 
@@ -13,7 +14,13 @@ export class DemandService {
     constructor(private http: HttpClient) { }
 
     getDemands(): Observable<Demand[]> {
-        return this.http.get<Demand[]>(this.apiUrl);
+        return this.http.get<Demand[] | any>(this.apiUrl).pipe(
+            map(response => {
+                if (Array.isArray(response)) return response;
+                if (response && response.results) return response.results;
+                return [];
+            })
+        );
     }
 
     getDemand(id: number): Observable<Demand> {

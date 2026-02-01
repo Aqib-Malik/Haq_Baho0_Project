@@ -12,9 +12,12 @@
             </button>
         </div>
 
-        <mat-nav-list>
+        <!-- Accordion for Expandable Modules -->
+        <mat-accordion displayMode="flat" [multi]="false">
+
             <!-- Accounting Group -->
-            <mat-expansion-panel [class.mat-elevation-z0]="true" class="sidenav-expansion">
+            <mat-expansion-panel [class.mat-elevation-z0]="true" class="sidenav-expansion"
+                [expanded]="router.url.includes('/ledger') || router.url.includes('/invoices') || router.url.includes('/payments') || router.url.includes('/quotations')">
                 <mat-expansion-panel-header>
                     <mat-panel-title>
                         <mat-icon>account_balance</mat-icon>
@@ -45,8 +48,6 @@
                 </mat-nav-list>
             </mat-expansion-panel>
 
-
-
             <!-- Inventory Group -->
             <mat-expansion-panel [class.mat-elevation-z0]="true" class="sidenav-expansion"
                 [expanded]="router.url.includes('/inventory')">
@@ -67,10 +68,7 @@
                         <mat-icon matListItemIcon>receipt_long</mat-icon>
                         <div matListItemTitle>Stock Movements</div>
                     </a>
-
                     <mat-divider style="margin: 8px 16px; opacity: 0.2;"></mat-divider>
-
-                    <!-- Quick Actions -->
                     <a mat-list-item routerLink="/inventory" [queryParams]="{tab: 'transactions', action: 'receipt'}">
                         <mat-icon matListItemIcon>add_circle_outline</mat-icon>
                         <div matListItemTitle>New Receipt</div>
@@ -105,12 +103,6 @@
                 </mat-nav-list>
             </mat-expansion-panel>
 
-            <!-- Projects -->
-            <a mat-list-item (click)="showComingSoon('Projects Manager')">
-                <mat-icon matListItemIcon>assignment</mat-icon>
-                <div matListItemTitle>Projects</div>
-            </a>
-
             <!-- HR Group -->
             <mat-expansion-panel [class.mat-elevation-z0]="true" class="sidenav-expansion">
                 <mat-expansion-panel-header>
@@ -130,6 +122,16 @@
                     </a>
                 </mat-nav-list>
             </mat-expansion-panel>
+
+        </mat-accordion>
+
+        <!-- Standalone Items -->
+        <mat-nav-list>
+            <!-- Projects -->
+            <a mat-list-item (click)="showComingSoon('Projects Manager')">
+                <mat-icon matListItemIcon>assignment</mat-icon>
+                <div matListItemTitle>Projects</div>
+            </a>
 
             <!-- Reports Link -->
             <a mat-list-item (click)="showComingSoon('Reports')">

@@ -1,92 +1,114 @@
-<div class="p-6">
-    <div class="mb-6">
-        <button mat-button color="primary" routerLink="/production/demands">
-            <mat-icon>arrow_back</mat-icon> Back to Demands
+<div class="min-h-screen bg-gray-50 p-6">
+    <!-- Back Nav -->
+    <div class="mb-4">
+        <button mat-button class="!text-gray-600 hover:!bg-gray-200 !rounded-full !px-4"
+            routerLink="/production/demands">
+            <mat-icon class="mr-2">arrow_back</mat-icon> Cancel & Return
         </button>
     </div>
 
-    <div class="bg-white rounded-lg shadow p-6 max-w-4xl mx-auto">
-        <h1 class="text-2xl font-bold mb-6">Create New Demand Sheet</h1>
-
+    <div class="max-w-5xl mx-auto">
         <form [formGroup]="demandForm" (ngSubmit)="onSubmit()">
-            <!-- Header Info -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <mat-form-field appearance="outline">
-                    <mat-label>Client / Mill</mat-label>
-                    <mat-select formControlName="company">
-                        <mat-option *ngFor="let c of companies" [value]="c.id">
-                            {{c.name}}
-                        </mat-option>
-                    </mat-select>
-                    <mat-error *ngIf="demandForm.get('company')?.invalid">Client is required</mat-error>
-                </mat-form-field>
 
-                <mat-form-field appearance="outline">
-                    <mat-label>Date</mat-label>
-                    <input matInput [matDatepicker]="picker" formControlName="date">
-                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-                    <mat-datepicker #picker></mat-datepicker>
-                </mat-form-field>
+            <!-- Header / Client Info Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-6">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">New Demand Sheet</h1>
+                        <p class="text-gray-500">Create a new production demand for a client.</p>
+                    </div>
+                    <div class="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg font-mono text-sm font-bold">
+                        Draft Status
+                    </div>
+                </div>
 
-                <mat-form-field appearance="outline">
-                    <mat-label>Reference / Order #</mat-label>
-                    <input matInput formControlName="reference_number" placeholder="Optional">
-                </mat-form-field>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Select Client / Mill</mat-label>
+                        <mat-select formControlName="company">
+                            <mat-option *ngFor="let c of companies" [value]="c.id">
+                                {{c.name}}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error>Client is required</mat-error>
+                    </mat-form-field>
 
-                <mat-form-field appearance="outline">
-                    <mat-label>Status</mat-label>
-                    <mat-select formControlName="status">
-                        <mat-option value="draft">Draft</mat-option>
-                        <mat-option value="finalized">Finalized</mat-option>
-                    </mat-select>
-                </mat-form-field>
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Order Date</mat-label>
+                        <input matInput [matDatepicker]="picker" formControlName="date">
+                        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker></mat-datepicker>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Reference No. (Optional)</mat-label>
+                        <input matInput formControlName="reference_number" placeholder="e.g. PO-2024-001">
+                    </mat-form-field>
+                </div>
             </div>
 
-            <!-- Machine Orders -->
-            <div class="mb-6">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-lg font-semibold">Ordered Machines</h3>
-                    <button type="button" mat-stroked-button color="primary" (click)="addMachineOrder()">
-                        <mat-icon>add</mat-icon> Add Machine
+            <!-- Machine Orders Section -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        <mat-icon class="text-purple-600">precision_manufacturing</mat-icon> Order Details
+                    </h2>
+                    <button type="button" mat-stroked-button color="primary" (click)="addMachineOrder()"
+                        class="!rounded-full">
+                        <mat-icon>add</mat-icon> Add Machine Run
                     </button>
                 </div>
 
-                <div formArrayName="machine_orders">
+                <div formArrayName="machine_orders" class="space-y-4">
                     <div *ngFor="let order of machineOrders.controls; let i=index" [formGroupName]="i"
-                        class="flex gap-4 items-center mb-2 p-3 bg-gray-50 rounded border border-gray-200">
+                        class="group relative flex flex-col md:flex-row gap-4 items-start md:items-center p-6 bg-gray-50 rounded-xl border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all">
 
-                        <div class="flex-1">
-                            <mat-form-field appearance="outline" class="w-full no-bottom-space">
-                                <mat-label>Machine</mat-label>
+                        <div
+                            class="absolute -left-3 top-6 bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm">
+                            {{i + 1}}
+                        </div>
+
+                        <div class="flex-1 w-full">
+                            <mat-form-field appearance="outline" class="w-full bg-white rounded-lg">
+                                <mat-label>Select Machine</mat-label>
                                 <mat-select formControlName="machine_id">
                                     <mat-option *ngFor="let m of machines" [value]="m.id">
-                                        {{m.name}}
+                                        <span class="font-medium">{{m.name}}</span>
+                                        <span class="text-xs text-gray-400 ml-2" *ngIf="m.code">({{m.code}})</span>
                                     </mat-option>
                                 </mat-select>
                             </mat-form-field>
                         </div>
 
-                        <div class="w-32">
-                            <mat-form-field appearance="outline" class="w-full no-bottom-space">
-                                <mat-label>Quantity / Runs</mat-label>
-                                <input matInput type="number" formControlName="quantity">
+                        <div class="w-full md:w-48">
+                            <mat-form-field appearance="outline" class="w-full bg-white rounded-lg">
+                                <mat-label>Quantity / Unit Runs</mat-label>
+                                <input matInput type="number" formControlName="quantity" placeholder="0">
+                                <span matSuffix class="text-sm text-gray-400 mr-2">Units</span>
                             </mat-form-field>
                         </div>
 
                         <button type="button" mat-icon-button color="warn" (click)="removeMachineOrder(i)"
-                            *ngIf="machineOrders.length > 1">
+                            class="self-center opacity-0 group-hover:opacity-100 transition-opacity bg-white shadow-sm hover:warn-bg"
+                            matTooltip="Remove this line">
                             <mat-icon>delete</mat-icon>
                         </button>
                     </div>
+
+                    <div *ngIf="machineOrders.controls.length === 0"
+                        class="text-center py-12 bg-gray-50 rounded-xl border-dashed border-2 border-gray-200">
+                        <p class="text-gray-400">No machines added yet. Click "Add Machine Run" to start.</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-end pt-6 border-t border-gray-100">
+                    <button mat-raised-button color="primary" type="submit" [disabled]="demandForm.invalid"
+                        class="!px-10 !py-6 !text-lg !rounded-xl shadow-lg hover:shadow-xl transition-all">
+                        Generate Demand Sheet
+                    </button>
                 </div>
             </div>
 
-            <div class="flex justify-end">
-                <button mat-raised-button color="primary" type="submit" [disabled]="demandForm.invalid"
-                    class="px-8 py-2">
-                    Save Demand Sheet
-                </button>
-            </div>
         </form>
     </div>
 </div>

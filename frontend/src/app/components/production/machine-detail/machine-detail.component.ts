@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule, FormControl } from '@angular/forms';
@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatSelectModule } from '@angular/material/select';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MachineService } from '../../../services/machine.service';
@@ -15,6 +15,7 @@ import { Machine, MachineRequirement } from '../../../models/machine.model';
 import { InventoryItem } from '../../../models/quotation.model';
 import { Observable } from 'rxjs';
 import { startWith, map } from 'rxjs/operators';
+import Swal from 'sweetalert2';
 
 @Component({
     selector: 'app-machine-detail',
@@ -30,7 +31,7 @@ import { startWith, map } from 'rxjs/operators';
 export class MachineDetailComponent implements OnInit {
     machineId: number | null = null;
     machineForm: FormGroup;
-    requirements: MachineRequirement[] = [];
+    requirements = new MatTableDataSource<MachineRequirement>([]);
     displayedColumns: string[] = ['item', 'quantity', 'actions'];
 
     // Requirement Add Form
@@ -44,11 +45,12 @@ export class MachineDetailComponent implements OnInit {
         private route: ActivatedRoute,
         private router: Router,
         private machineService: MachineService,
-        private quotationService: QuotationService
+        private quotationService: QuotationService,
+        private cdr: ChangeDetectorRef
     ) {
         this.machineForm = this.fb.group({
             name: ['', Validators.required],
-            code: [''],
+            code: ['', Validators.required],
             description: ['']
         });
     }
@@ -86,22 +88,38 @@ export class MachineDetailComponent implements OnInit {
     loadMachine(id: number) {
         this.machineService.getMachine(id).subscribe(machine => {
             this.machineForm.patchValue(machine);
-            this.requirements = machine.requirements || [];
+            this.requirements.data = machine.requirements || [];
+            this.cdr.detectChanges();
         });
     }
 
     saveMachine() {
-        if (this.machineForm.invalid) return;
+        if (this.machineForm.invalid) {
+            this.machineForm.markAllAsTouched();
+            return;
+        }
 
         const data = this.machineForm.value;
         if (this.machineId) {
             this.machineService.updateMachine(this.machineId, data).subscribe(() => {
-                alert('Machine updated');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Updated!',
+                    text: 'Machine configuration saved successfully.',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
             });
         } else {
             this.machineService.createMachine(data).subscribe(machine => {
                 this.machineId = machine.id;
-                alert('Machine created. You can now add requirements.');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Created!',
+                    text: 'Machine created. You can now configure the BOM.',
+                    confirmButtonText: 'Start Configuration',
+                    confirmButtonColor: '#3b82f6'
+                });
                 this.router.navigate(['/production/machines', machine.id], { replaceUrl: true });
             });
         }
@@ -109,7 +127,12 @@ export class MachineDetailComponent implements OnInit {
 
     addRequirement() {
         if (!this.machineId) {
-            alert('Please save the machine first.');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Unsaved Changes',
+                text: 'Please save the machine details first.',
+                confirmButtonColor: '#f59e0b'
+            });
             return;
         }
 
@@ -117,7 +140,12 @@ export class MachineDetailComponent implements OnInit {
 
         const item = this.newItemControl.value;
         if (typeof item === 'string') {
-            alert('Please select a valid item from the list');
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Selection',
+                text: 'Please select a valid item from the list',
+                confirmButtonColor: '#ef4444'
+            });
             return;
         }
         if (!item || !item.id) return;
@@ -136,10 +164,28 @@ export class MachineDetailComponent implements OnInit {
     }
 
     deleteRequirement(id: number) {
-        if (confirm('Remove this material?')) {
-            this.machineService.deleteRequirement(id).subscribe(() => {
-                this.requirements = this.requirements.filter(r => r.id !== id);
-            });
-        }
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to remove this material from the BOM?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#3b82f6',
+            confirmButtonText: 'Yes, remove it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.machineService.deleteRequirement(id).subscribe(() => {
+                    this.requirements.data = this.requirements.data.filter(r => r.id !== id);
+                    this.cdr.detectChanges();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Removed!',
+                        text: 'Material requirement has been removed.',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                });
+            }
+        });
     }
 }

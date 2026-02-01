@@ -1,3 +1,55 @@
-mat-form-field {
-    width: 100%;
+/* Animations */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-down {
+    animation: fadeInDown 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    opacity: 0;
+    /* Start hidden */
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    opacity: 0;
+    /* Start hidden */
+}
+
+/* Material Field Overrides for 'Theme Input' style */
+.theme-input .mat-mdc-text-field-wrapper {
+    border-radius: 12px !important;
+    background-color: #f9fafb !important;
+    /* Gray-50 */
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.theme-input.mat-focused .mat-mdc-text-field-wrapper {
+    background-color: white !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Hide default underlined */
+.theme-input .mdc-line-ripple {
+    display: none !important;
 }

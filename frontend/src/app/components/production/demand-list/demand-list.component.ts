@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DemandService } from '../../../services/demand.service';
 import { Demand } from '../../../models/demand.model';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -14,21 +15,25 @@ import { SelectionModel } from '@angular/cdk/collections';
     standalone: true,
     imports: [
         CommonModule, RouterModule, MatTableModule, MatButtonModule,
-        MatIconModule, MatCheckboxModule, DatePipe, DecimalPipe
+        MatIconModule, MatCheckboxModule, MatProgressSpinnerModule, DatePipe, DecimalPipe
     ],
     templateUrl: './demand-list.component.html',
     styleUrls: ['./demand-list.component.css']
 })
 export class DemandListComponent implements OnInit {
-    demands: Demand[] = [];
+    demands = new MatTableDataSource<Demand>([]);
     displayedColumns: string[] = ['select', 'date', 'company', 'reference', 'status', 'actions'];
     selection = new SelectionModel<Demand>(true, []);
+    isLoading = false;
 
     aggregatedMaterials: any[] = [];
     showSummary = false;
     today = new Date();
 
-    constructor(private demandService: DemandService) { }
+    constructor(
+        private demandService: DemandService,
+        private cdr: ChangeDetectorRef
+    ) { }
 
     ngOnInit(): void {
         this.loadDemands();
@@ -36,13 +41,14 @@ export class DemandListComponent implements OnInit {
 
     loadDemands() {
         this.demandService.getDemands().subscribe(data => {
-            this.demands = data;
+            this.demands.data = data;
+            this.cdr.detectChanges();
         });
     }
 
     isAllSelected() {
         const numSelected = this.selection.selected.length;
-        const numRows = this.demands.length;
+        const numRows = this.demands.data.length;
         return numSelected === numRows;
     }
 
@@ -51,7 +57,7 @@ export class DemandListComponent implements OnInit {
             this.selection.clear();
             return;
         }
-        this.selection.select(...this.demands);
+        this.selection.select(...this.demands.data);
     }
 
     checkboxLabel(row?: Demand): string {
@@ -68,13 +74,25 @@ export class DemandListComponent implements OnInit {
             return;
         }
 
-        this.demandService.aggregateDemands(selectedIds).subscribe(data => {
-            this.aggregatedMaterials = data;
-            this.showSummary = true;
+        this.isLoading = true;
+        this.demandService.aggregateDemands(selectedIds).subscribe({
+            next: (data) => {
+                this.aggregatedMaterials = data;
+                this.showSummary = true;
+                this.isLoading = false;
+            },
+            error: () => {
+                this.isLoading = false;
+                alert('Failed to aggregate demands.');
+            }
         });
     }
 
     printReport() {
         window.print();
+    }
+
+    trackByItem(index: number, item: any): number {
+        return item.inventory_item__id;
     }
 }

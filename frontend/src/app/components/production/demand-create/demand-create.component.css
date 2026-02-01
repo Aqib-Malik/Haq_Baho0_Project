@@ -1,8 +1,17 @@
-.no-bottom-space {
-    margin-bottom: -1.25em;
-    /* Adjust to compact form */
+/* Demand Create Styles */
+:host {
+    display: block;
 }
 
 mat-form-field {
     width: 100%;
+}
+
+.warn-bg:hover {
+    background-color: #fee2e2;
+}
+
+/* Remove default mat-form-field padding sometimes causing issues in flex containers */
+.mat-mdc-form-field-subscript-wrapper {
+    /* Optional adjustments if needed for compactness */
 }
