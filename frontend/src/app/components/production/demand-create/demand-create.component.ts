@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -31,10 +31,13 @@ export class DemandCreateComponent implements OnInit {
     demandForm: FormGroup;
     companies: Company[] = [];
     machines: Machine[] = [];
+    isEditMode = false;
+    demandId: number | null = null;
 
     constructor(
         private fb: FormBuilder,
         private router: Router,
+        private route: ActivatedRoute,
         private ledgerService: LedgerService,
         private machineService: MachineService,
         private demandService: DemandService
@@ -51,7 +54,42 @@ export class DemandCreateComponent implements OnInit {
     ngOnInit(): void {
         this.ledgerService.getCompanies().subscribe(data => this.companies = data);
         this.machineService.getMachines().subscribe(data => this.machines = data);
-        this.addMachineOrder(); // Add one row by default
+
+        const id = this.route.snapshot.paramMap.get('id');
+        if (id) {
+            this.isEditMode = true;
+            this.demandId = +id;
+            this.loadDemand(this.demandId);
+        } else {
+            this.addMachineOrder(); // Add one row by default for new
+        }
+    }
+
+    loadDemand(id: number) {
+        this.demandService.getDemand(id).subscribe(data => {
+            this.demandForm.patchValue({
+                company: data.company,
+                date: new Date(data.date),
+                reference_number: data.reference_number,
+                status: data.status
+            });
+
+            // Clear existing and populate machine orders
+            const ordersArray = this.demandForm.get('machine_orders') as FormArray;
+            ordersArray.clear();
+
+            if (data.machine_orders && data.machine_orders.length > 0) {
+                data.machine_orders.forEach((order: any) => {
+                    const orderGroup = this.fb.group({
+                        machine_id: [order.machine, Validators.required],
+                        quantity: [order.quantity, [Validators.required, Validators.min(1)]]
+                    });
+                    ordersArray.push(orderGroup);
+                });
+            } else {
+                this.addMachineOrder();
+            }
+        });
     }
 
     get machineOrders() {
@@ -82,12 +120,16 @@ export class DemandCreateComponent implements OnInit {
             date: dateStr
         };
 
-        this.demandService.createDemand(payload).subscribe(() => {
+        const request$ = this.isEditMode && this.demandId
+            ? this.demandService.updateDemand(this.demandId, payload)
+            : this.demandService.createDemand(payload);
+
+        request$.subscribe(() => {
             Swal.fire({
-                title: 'Demand Sheet Created!',
-                text: 'The demand sheet has been successfully generated.',
+                title: this.isEditMode ? 'Demand Updated!' : 'Demand Sheet Created!',
+                text: this.isEditMode ? 'The demand sheet has been successfully updated.' : 'The demand sheet has been successfully generated.',
                 icon: 'success',
-                confirmButtonColor: '#10b981', // Emerald-500 matching the theme likely
+                confirmButtonColor: '#10b981',
                 timer: 2000,
                 timerProgressBar: true,
                 showConfirmButton: false

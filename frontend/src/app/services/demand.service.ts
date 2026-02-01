@@ -31,6 +31,10 @@ export class DemandService {
         return this.http.post<Demand>(this.apiUrl, demand);
     }
 
+    updateDemand(id: number, demand: CreateDemandPayload): Observable<Demand> {
+        return this.http.put<Demand>(`${this.apiUrl}${id}/`, demand);
+    }
+
     deleteDemand(id: number): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}${id}/`);
     }
