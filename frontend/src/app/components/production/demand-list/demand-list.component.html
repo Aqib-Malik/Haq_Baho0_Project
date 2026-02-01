@@ -102,8 +102,12 @@
                     <td mat-cell *matCellDef="let element">
                         <button mat-icon-button (click)="$event.stopPropagation()"
                             [routerLink]="['/production/demands', element.id]"
-                            class="text-gray-400 hover:text-blue-600 transition-colors">
+                            class="text-gray-400 hover:text-blue-600 transition-colors mr-1">
                             <mat-icon>visibility</mat-icon>
+                        </button>
+                        <button mat-icon-button (click)="deleteDemand(element.id); $event.stopPropagation()"
+                            class="text-gray-400 hover:text-red-500 transition-colors">
+                            <mat-icon>delete</mat-icon>
                         </button>
                     </td>
                 </ng-container>

@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import Swal from 'sweetalert2';
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -104,5 +105,28 @@ export class DemandListComponent implements OnInit {
 
     trackByItem(index: number, item: any): number {
         return item.inventory_item__id;
+    }
+
+    deleteDemand(id: number) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.demandService.deleteDemand(id).subscribe(() => {
+                    this.loadDemands();
+                    Swal.fire(
+                        'Deleted!',
+                        'The demand sheet has been deleted.',
+                        'success'
+                    );
+                });
+            }
+        });
     }
 }

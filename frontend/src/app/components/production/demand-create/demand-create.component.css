@@ -12,6 +12,39 @@ mat-form-field {
 }
 
 /* Remove default mat-form-field padding sometimes causing issues in flex containers */
-.mat-mdc-form-field-subscript-wrapper {
-    /* Optional adjustments if needed for compactness */
+/* Remove default mat-form-field padding sometimes causing issues in flex containers */
+.dense-field .mat-mdc-form-field-flex {
+    height: 40px !important;
+    align-items: center !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.dense-field .mat-mdc-text-field-wrapper {
+    height: 40px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.dense-field .mat-mdc-form-field-infix {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+    min-height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    border-top: 0 !important;
+}
+
+/* Ensure dropdowns can escape the container */
+.dense-field .mat-mdc-form-field-icon-prefix,
+.dense-field .mat-mdc-form-field-icon-suffix {
+    padding: 0 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    height: 100% !important;
+}
+
+.custom-mat-field .mat-mdc-text-field-wrapper {
+    background-color: #f8fafc !important;
+    /* slate-50 */
 }
