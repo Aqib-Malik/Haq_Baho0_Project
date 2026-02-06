@@ -212,16 +212,20 @@ def add_watermark(canvas, doc):
     canvas.setFillColor(colors.HexColor('#999999'))  # Medium gray for better visibility
     canvas.setFillAlpha(0.25)  # 25% opacity - visible but not intrusive
     
-    # Set font size for watermark (larger for better visibility)
-    canvas.setFont('Helvetica-Bold', 72)
+    # Set smaller font size to ensure full text fits within page boundaries
+    font_size = 48
+    canvas.setFont('Helvetica-Bold', font_size)
     
-    # Rotate canvas 45 degrees for diagonal watermark
+    # Calculate text width with correct font size
+    text_width = canvas.stringWidth(watermark_text, 'Helvetica-Bold', font_size)
+    
+    # Use a less steep angle (30 degrees) to fit better within page boundaries
     # Translate to center point, rotate around that point
     canvas.translate(center_x, center_y)
-    canvas.rotate(45)
+    canvas.rotate(30)  # Reduced from 45 to 30 degrees for better fit
     
     # Draw watermark text centered at origin (which is now the page center after translation)
-    text_width = canvas.stringWidth(watermark_text, 'Helvetica-Bold', 60)
+    # Offset slightly to ensure it fits within page boundaries
     canvas.drawCentredString(-text_width/2, 0, watermark_text)
     
     canvas.restoreState()
