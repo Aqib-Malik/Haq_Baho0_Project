@@ -115,7 +115,6 @@ export interface QuotationItem {
     quantity: number;
     unit_price: string;
     unit: string;
-    ton?: string;
     subtotal: string;
     machine_cost?: string;
     created_at?: string;
@@ -138,6 +137,7 @@ export interface Quotation {
     discount_value: string;
     discount_amount: string;
     total_amount: string;
+    ton?: string;
     notes?: string;
     status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired';
     items?: QuotationItem[];

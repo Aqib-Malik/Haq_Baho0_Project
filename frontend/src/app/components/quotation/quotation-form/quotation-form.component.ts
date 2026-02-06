@@ -131,6 +131,7 @@ export class QuotationFormComponent implements OnInit {
             tax: [null],
             discount_type: ['percentage'],
             discount_value: [0, [Validators.min(0)]],
+            ton: [null, Validators.min(0)],
             notes: [''],
             status: ['draft'],
             items: this.fb.array([])
@@ -153,7 +154,6 @@ export class QuotationFormComponent implements OnInit {
             quantity: [item?.quantity || 1, [Validators.required, Validators.min(0.01)]],
             unit_price: [item?.unit_price || 0, [Validators.required, Validators.min(0)]],
             unit: [item?.unit || 'pcs', Validators.required],
-            ton: [item?.ton || null, Validators.min(0)],
             machine_cost: [item?.machine_cost || 0, Validators.min(0)],
             use_manual: [!item?.inventory_item]
         });
@@ -245,6 +245,7 @@ export class QuotationFormComponent implements OnInit {
                     tax: quotation.tax,
                     discount_type: quotation.discount_type,
                     discount_value: quotation.discount_value,
+                    ton: quotation.ton,
                     notes: quotation.notes,
                     status: quotation.status
                 });
