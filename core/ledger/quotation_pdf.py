@@ -45,11 +45,11 @@ def generate_quotation_pdf(quotation):
     company_subtitle_style = ParagraphStyle(
         'CompanySubtitle',
         parent=styles['Normal'],
-        fontSize=10,
+        fontSize=14,
         textColor=colors.black,
         spaceAfter=20,
         alignment=TA_LEFT,
-        fontName='Helvetica'
+        fontName='Helvetica-Bold'
     )
     
     date_style = ParagraphStyle(

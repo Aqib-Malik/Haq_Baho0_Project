@@ -528,6 +528,14 @@ class QuotationItem(SoftDeleteMixin):
         validators=[MinValueValidator(Decimal('0.00'))]
     )
     unit = models.CharField(max_length=50, default='pcs')
+    ton = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(Decimal('0.00'))],
+        help_text='Weight in tons'
+    )
     subtotal = models.DecimalField(
         max_digits=15,
         decimal_places=2,

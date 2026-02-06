@@ -115,6 +115,7 @@ export interface QuotationItem {
     quantity: number;
     unit_price: string;
     unit: string;
+    ton?: string;
     subtotal: string;
     machine_cost?: string;
     created_at?: string;
