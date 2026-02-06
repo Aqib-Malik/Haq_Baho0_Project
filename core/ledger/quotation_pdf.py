@@ -198,7 +198,7 @@ def generate_quotation_pdf(quotation):
 
 
 def add_watermark(canvas, doc):
-    """Add company watermark to each page - ensures full text fits within boundaries"""
+    """Add company watermark to each page - repeats multiple times across the page"""
     canvas.saveState()
     
     # Set watermark properties - semi-transparent and rotated
@@ -222,38 +222,63 @@ def add_watermark(canvas, doc):
     # Calculate maximum text width that fits within page boundaries
     # When rotated at angle θ, text width projects as: text_width * cos(θ) horizontally
     # We need this to fit in usable_width with safety margin
-    # Use 60% of usable width to be very conservative and ensure no clipping
-    max_horizontal_projection = usable_width * 0.60
+    # Use 50% of usable width since we'll repeat it multiple times
+    max_horizontal_projection = usable_width * 0.50
     max_text_width = max_horizontal_projection / cos_angle
     
     # Find font size that fits the text within max_text_width
     # Start with a reasonable size and scale down if needed
-    font_size = 32
+    font_size = 28
     canvas.setFont('Helvetica-Bold', font_size)
     text_width = canvas.stringWidth(watermark_text, 'Helvetica-Bold', font_size)
     
     # Scale down font if text is too wide
     if text_width > max_text_width:
         scale_factor = (max_text_width / text_width) * 0.90  # 90% safety margin
-        font_size = max(20, int(font_size * scale_factor))  # Minimum 20pt
+        font_size = max(18, int(font_size * scale_factor))  # Minimum 18pt
         canvas.setFont('Helvetica-Bold', font_size)
         text_width = canvas.stringWidth(watermark_text, 'Helvetica-Bold', font_size)
     
-    # Calculate center of page
-    center_x = page_width / 2
-    center_y = page_height / 2
+    # Calculate text height for spacing
+    text_height = font_size * 1.2
     
     # Set semi-transparent gray color for watermark
     canvas.setFillColor(colors.HexColor('#999999'))  # Medium gray for better visibility
     canvas.setFillAlpha(0.25)  # 25% opacity - visible but not intrusive
     
-    # Translate to center point, rotate around that point
-    canvas.translate(center_x, center_y)
-    canvas.rotate(rotation_angle)
+    # Calculate spacing for repeating pattern
+    # Create a grid pattern: 3 rows x 3 columns = 9 watermarks
+    rows = 3
+    cols = 3
     
-    # Draw watermark text centered at origin (which is now the page center after translation)
-    # This ensures the text is centered and fully visible
-    canvas.drawCentredString(-text_width/2, 0, watermark_text)
+    # Calculate spacing between watermarks
+    # Account for rotated text dimensions
+    spacing_x = usable_width / (cols + 1)
+    spacing_y = usable_height / (rows + 1)
+    
+    # Starting position (top-left of usable area)
+    start_x = margin + spacing_x
+    start_y = margin + spacing_y
+    
+    # Draw watermark at each grid position
+    for row in range(rows):
+        for col in range(cols):
+            # Calculate position for this watermark
+            x = start_x + (col * spacing_x)
+            y = start_y + (row * spacing_y)
+            
+            # Save state for this watermark
+            canvas.saveState()
+            
+            # Translate to watermark position and rotate
+            canvas.translate(x, y)
+            canvas.rotate(rotation_angle)
+            
+            # Draw watermark text centered at origin
+            canvas.drawCentredString(-text_width/2, 0, watermark_text)
+            
+            # Restore state for next watermark
+            canvas.restoreState()
     
     canvas.restoreState()
 
