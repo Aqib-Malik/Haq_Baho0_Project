@@ -51,10 +51,15 @@ export class QuotationPrintComponent implements OnInit {
   }
 
   downloadPdf(): void {
-    // The user wants to download "exact these pages", so we use the browser's print-to-pdf capability
-    // which uses the @media print CSS already defined.
-    this.notificationService.showInfo('Select "Save as PDF" in the print dialog.');
-    window.print();
+    // Use the same backend PDF generation as the list view for consistency
+    const quotation = this.quotation();
+    if (!quotation) {
+      this.notificationService.showError('Quotation not loaded');
+      return;
+    }
+    
+    this.quotationService.downloadPdf(quotation.id, quotation.quotation_number);
+    this.notificationService.showSuccess('Downloading PDF...');
   }
 
 

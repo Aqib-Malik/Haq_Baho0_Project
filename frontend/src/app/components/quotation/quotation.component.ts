@@ -178,8 +178,23 @@ export class QuotationComponent implements OnInit {
 
     showDetail(quotation: Quotation): void {
         const company = this.companies().find(c => c.id === quotation.company);
-        // Navigate to the print view page
-        this.router.navigate(['/quotations', quotation.id, 'view']);
+        // Open detail dialog instead of navigating to PDF-style print view
+        const dialogRef = this.dialog.open(QuotationDetailDialogComponent, {
+            width: '90%',
+            maxWidth: '1200px',
+            data: { quotation, company }
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result === 'edit') {
+                this.showEditForm(quotation);
+            } else if (result === 'delete') {
+                this.deleteQuotation(quotation);
+            } else if (result) {
+                // Reload quotations if any action was performed
+                this.loadQuotations();
+            }
+        });
     }
 
     async deleteQuotation(quotation: Quotation): Promise<void> {

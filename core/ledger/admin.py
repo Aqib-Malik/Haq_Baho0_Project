@@ -212,6 +212,9 @@ class QuotationAdmin(admin.ModelAdmin):
         ('Quotation Information', {
             'fields': ('quotation_number', 'company', 'quotation_date', 'valid_until', 'status')
         }),
+        ('Additional Information', {
+            'fields': ('ton',)
+        }),
         ('Tax & Discount', {
             'fields': ('tax', 'discount_type', 'discount_value')
         }),

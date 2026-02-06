@@ -151,7 +151,7 @@ def generate_quotation_pdf(quotation):
     
     # Build subtitle row - include ton if available
     subtitle_left = client_name
-    if quotation.ton:
+    if quotation.ton is not None and quotation.ton > 0:
         subtitle_left += f' | Ton: {float(quotation.ton):,.2f}'
     
     subtitle_date_data = [
@@ -199,7 +199,7 @@ def generate_quotation_pdf(quotation):
         elements.append(Spacer(1, 15))
     
     # Ton display (if available)
-    if quotation.ton:
+    if quotation.ton is not None and quotation.ton > 0:
         ton_style = ParagraphStyle(
             'TonStyle',
             parent=styles['Normal'],

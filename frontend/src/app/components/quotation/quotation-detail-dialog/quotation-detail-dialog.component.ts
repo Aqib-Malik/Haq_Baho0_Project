@@ -1,5 +1,6 @@
 import { Component, Inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -31,7 +32,8 @@ export class QuotationDetailDialogComponent {
     constructor(
         public dialogRef: MatDialogRef<QuotationDetailDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public data: { quotation: Quotation, company?: Company },
-        private quotationService: QuotationService
+        private quotationService: QuotationService,
+        private router: Router
     ) {
         this.quotation = data.quotation;
         this.company = data.company;
@@ -43,6 +45,12 @@ export class QuotationDetailDialogComponent {
 
     downloadPdf(): void {
         this.quotationService.downloadPdf(this.quotation.id, this.quotation.quotation_number);
+    }
+
+    viewPdfPreview(): void {
+        // Close dialog and navigate to PDF preview page
+        this.dialogRef.close();
+        this.router.navigate(['/quotations', this.quotation.id, 'view']);
     }
 
     edit(): void {
