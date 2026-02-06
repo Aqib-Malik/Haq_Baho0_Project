@@ -179,6 +179,29 @@ def generate_quotation_pdf(quotation):
                 desc_para = Paragraph(f'{line_idx}. {line}', item_desc_style)
                 elements.append(desc_para)
         
+        # Quantity, Unit, and Ton info (if available)
+        item_info_parts = []
+        if item.quantity:
+            unit_str = f' {item.unit}' if item.unit else ''
+            item_info_parts.append(f'Qty: {float(item.quantity):,.2f}{unit_str}')
+        if item.ton:
+            item_info_parts.append(f'Ton: {float(item.ton):,.2f}')
+        
+        if item_info_parts:
+            item_info_style = ParagraphStyle(
+                'ItemInfo',
+                parent=styles['Normal'],
+                fontSize=9,
+                textColor=colors.HexColor('#666666'),
+                spaceAfter=4,
+                alignment=TA_LEFT,
+                fontName='Helvetica',
+                leftIndent=20
+            )
+            item_info = Paragraph(' | '.join(item_info_parts), item_info_style)
+            elements.append(item_info)
+            elements.append(Spacer(1, 4))
+        
         # Rate aligned to right
         rate_data = [
             ['', f'RATE', f'{float(item.subtotal):,.0f}/-']

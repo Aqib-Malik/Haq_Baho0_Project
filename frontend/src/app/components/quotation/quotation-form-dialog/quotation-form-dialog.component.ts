@@ -148,6 +148,7 @@ export class QuotationFormDialogComponent implements OnInit {
             quantity: [item?.quantity || 1, [Validators.required, Validators.min(0.01)]],
             unit_price: [item?.unit_price || 0, [Validators.required, Validators.min(0)]],
             unit: [item?.unit || 'pcs', Validators.required],
+            ton: [item?.ton || null, Validators.min(0)],
             machine_cost: [item?.machine_cost || 0, Validators.min(0)],
             use_manual: [!item?.inventory_item]
         });

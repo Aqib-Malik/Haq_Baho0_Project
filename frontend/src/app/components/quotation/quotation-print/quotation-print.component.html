@@ -49,6 +49,11 @@
                         <!-- Simple whitespace preserve for now -->
                         <pre class="specs-text">{{ item.description }}</pre>
                     </div>
+                    <!-- Quantity, Unit, and Ton info -->
+                    <div class="item-meta" *ngIf="item.quantity || item.unit || item.ton">
+                        <span *ngIf="item.quantity">{{ item.quantity }} {{ item.unit || '' }}</span>
+                        <span *ngIf="item.ton" class="ton-info"> | Ton: {{ item.ton }}</span>
+                    </div>
                 </div>
 
                 <div class="item-pricing">
