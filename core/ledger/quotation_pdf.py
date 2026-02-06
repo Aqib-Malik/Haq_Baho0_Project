@@ -123,9 +123,10 @@ def generate_quotation_pdf(quotation):
     elements.append(header_table)
     elements.append(Spacer(1, 10))
     
-    # Subtitle and Date row
+    # Subtitle and Date row (client company for this quotation)
+    client_name = quotation.company.name if quotation.company else ''
     subtitle_date_data = [
-        [Paragraph('SULTANIA FEED MILL', company_subtitle_style), 
+        [Paragraph(client_name, company_subtitle_style), 
          Paragraph(f'DATE  {quotation.quotation_date.strftime("%d/%m/%Y")}', date_style)]
     ]
     subtitle_date_table = Table(subtitle_date_data, colWidths=[4*inch, 3*inch])
