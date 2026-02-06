@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib import colors
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 from reportlab.pdfgen import canvas
@@ -186,6 +186,100 @@ def generate_quotation_pdf(quotation):
     ]))
     elements.append(total_table)
     
+    # Add Terms and Conditions page if notes exist
+    if quotation.notes:
+        elements.append(Spacer(1, 20))
+        # Page break for terms page
+        elements.append(PageBreak())
+        
+        # Terms and Conditions Header
+        terms_header_style = ParagraphStyle(
+            'TermsHeader',
+            parent=styles['Heading2'],
+            fontSize=14,
+            textColor=colors.black,
+            spaceAfter=20,
+            alignment=TA_CENTER,
+            fontName='Helvetica-Bold',
+            leading=18
+        )
+        
+        terms_title = Paragraph('GENERAL TERMS & CONDITION', terms_header_style)
+        elements.append(terms_title)
+        elements.append(Spacer(1, 15))
+        
+        # Terms content from notes
+        terms_style = ParagraphStyle(
+            'TermsStyle',
+            parent=styles['Normal'],
+            fontSize=10,
+            textColor=colors.black,
+            spaceAfter=8,
+            alignment=TA_LEFT,
+            fontName='Helvetica',
+            leftIndent=0,
+            leading=14
+        )
+        
+        # Split notes by newlines and create paragraphs
+        notes_lines = quotation.notes.split('\n')
+        for line in notes_lines:
+            if line.strip():  # Only add non-empty lines
+                terms_para = Paragraph(line.strip(), terms_style)
+                elements.append(terms_para)
+        
+        elements.append(Spacer(1, 30))
+        
+        # Thanking you section
+        thank_you_style = ParagraphStyle(
+            'ThankYouStyle',
+            parent=styles['Normal'],
+            fontSize=11,
+            textColor=colors.black,
+            spaceAfter=30,
+            alignment=TA_LEFT,
+            fontName='Helvetica-Bold',
+            leading=14
+        )
+        
+        thank_you = Paragraph('THANKING YOU.', thank_you_style)
+        elements.append(thank_you)
+        elements.append(Spacer(1, 20))
+        
+        # Signature section
+        signature_style = ParagraphStyle(
+            'SignatureStyle',
+            parent=styles['Normal'],
+            fontSize=10,
+            textColor=colors.black,
+            spaceAfter=5,
+            alignment=TA_LEFT,
+            fontName='Helvetica',
+            leading=14
+        )
+        
+        yours_faithfully = Paragraph('Yours faithfully,', signature_style)
+        elements.append(yours_faithfully)
+        elements.append(Spacer(1, 5))
+        
+        company_sign_style = ParagraphStyle(
+            'CompanySignStyle',
+            parent=styles['Normal'],
+            fontSize=11,
+            textColor=colors.black,
+            spaceAfter=20,
+            alignment=TA_LEFT,
+            fontName='Helvetica-Bold',
+            leading=14
+        )
+        
+        company_sign = Paragraph('HAQ BAHOO MIAN & COMPANY', company_sign_style)
+        elements.append(company_sign)
+        elements.append(Spacer(1, 10))
+        
+        signature_line = Paragraph('Signature _________________', signature_style)
+        elements.append(signature_line)
+    
     # Build PDF with watermark and footer on each page
     doc.build(elements, onFirstPage=add_page_decorations, onLaterPages=add_page_decorations)
     
@@ -198,7 +292,7 @@ def generate_quotation_pdf(quotation):
 
 
 def add_watermark(canvas, doc):
-    """Add company watermark to each page - repeats multiple times across the page"""
+    """Add company watermark to each page - diagonal repeating pattern"""
     canvas.saveState()
     
     # Set watermark properties - semi-transparent and rotated
@@ -214,28 +308,26 @@ def add_watermark(canvas, doc):
     usable_width = page_width - (2 * margin)
     usable_height = page_height - (2 * margin) - footer_height
     
-    # Use a conservative rotation angle (20 degrees) for better fit
-    rotation_angle = 20
+    # Use a diagonal rotation angle (30 degrees) for classic watermark look
+    rotation_angle = 30
     angle_rad = math.radians(rotation_angle)
     cos_angle = math.cos(angle_rad)
     
     # Calculate maximum text width that fits within page boundaries
     # When rotated at angle θ, text width projects as: text_width * cos(θ) horizontally
-    # We need this to fit in usable_width with safety margin
-    # Use 50% of usable width since we'll repeat it multiple times
-    max_horizontal_projection = usable_width * 0.50
+    # Use 45% of usable width for each watermark instance
+    max_horizontal_projection = usable_width * 0.45
     max_text_width = max_horizontal_projection / cos_angle
     
     # Find font size that fits the text within max_text_width
-    # Start with a reasonable size and scale down if needed
-    font_size = 28
+    font_size = 32
     canvas.setFont('Helvetica-Bold', font_size)
     text_width = canvas.stringWidth(watermark_text, 'Helvetica-Bold', font_size)
     
     # Scale down font if text is too wide
     if text_width > max_text_width:
         scale_factor = (max_text_width / text_width) * 0.90  # 90% safety margin
-        font_size = max(18, int(font_size * scale_factor))  # Minimum 18pt
+        font_size = max(20, int(font_size * scale_factor))  # Minimum 20pt
         canvas.setFont('Helvetica-Bold', font_size)
         text_width = canvas.stringWidth(watermark_text, 'Helvetica-Bold', font_size)
     
@@ -246,39 +338,49 @@ def add_watermark(canvas, doc):
     canvas.setFillColor(colors.HexColor('#999999'))  # Medium gray for better visibility
     canvas.setFillAlpha(0.25)  # 25% opacity - visible but not intrusive
     
-    # Calculate spacing for repeating pattern
-    # Create a grid pattern: 3 rows x 3 columns = 9 watermarks
-    rows = 3
-    cols = 3
+    # Create diagonal repeating pattern - staggered grid
+    # Calculate spacing for diagonal rows
+    # Each watermark needs space: text_width * cos(angle) horizontally
+    horizontal_projection = text_width * cos_angle
+    vertical_projection = text_height * math.sin(angle_rad)
     
-    # Calculate spacing between watermarks
-    # Account for rotated text dimensions
-    spacing_x = usable_width / (cols + 1)
-    spacing_y = usable_height / (rows + 1)
+    # Spacing between watermarks (with some overlap for continuous effect)
+    spacing_x = horizontal_projection * 1.2  # 20% spacing between horizontal positions
+    spacing_y = text_height * 1.8  # Vertical spacing between rows
     
-    # Starting position (top-left of usable area)
-    start_x = margin + spacing_x
-    start_y = margin + spacing_y
+    # Calculate number of rows and columns
+    num_rows = int(usable_height / spacing_y) + 3
+    num_cols = int(usable_width / spacing_x) + 3
     
-    # Draw watermark at each grid position
-    for row in range(rows):
-        for col in range(cols):
-            # Calculate position for this watermark
-            x = start_x + (col * spacing_x)
+    # Starting position (slightly offset to center the pattern)
+    start_x = margin - spacing_x * 0.5
+    start_y = margin - spacing_y * 0.5
+    
+    # Draw watermarks in staggered diagonal pattern
+    for row in range(num_rows):
+        for col in range(num_cols):
+            # Calculate position with staggered offset for diagonal effect
+            # Offset odd rows to create diagonal pattern
+            x_offset = (spacing_x * 0.6) if (row % 2 == 1) else 0
+            x = start_x + (col * spacing_x) + x_offset
             y = start_y + (row * spacing_y)
             
-            # Save state for this watermark
-            canvas.saveState()
-            
-            # Translate to watermark position and rotate
-            canvas.translate(x, y)
-            canvas.rotate(rotation_angle)
-            
-            # Draw watermark text centered at origin
-            canvas.drawCentredString(-text_width/2, 0, watermark_text)
-            
-            # Restore state for next watermark
-            canvas.restoreState()
+            # Only draw if within page boundaries
+            if (x > margin - 50 and x < page_width - margin + 50 and 
+                y > margin - 50 and y < page_height - margin - footer_height + 50):
+                
+                # Save state for this watermark
+                canvas.saveState()
+                
+                # Translate to watermark position and rotate
+                canvas.translate(x, y)
+                canvas.rotate(rotation_angle)
+                
+                # Draw watermark text centered at origin
+                canvas.drawCentredString(-text_width/2, 0, watermark_text)
+                
+                # Restore state for next watermark
+                canvas.restoreState()
     
     canvas.restoreState()
 
