@@ -205,44 +205,39 @@ def add_watermark(canvas, doc):
     watermark_text = "HAQ BAHOO MIAN & COMPANY"
     
     # Page dimensions and margins
-    page_width = A4[0]
-    page_height = A4[1]
+    page_width = A4[0]  # 595.27 points
+    page_height = A4[1]  # 841.89 points
     margin = 40  # Same as doc margins
+    footer_height = 60  # Footer space
     
-    # Calculate usable area (accounting for margins)
+    # Calculate usable area (accounting for margins and footer)
     usable_width = page_width - (2 * margin)
-    usable_height = page_height - (2 * margin) - 60  # Subtract footer space
+    usable_height = page_height - (2 * margin) - footer_height
     
-    # Calculate diagonal space available (for rotated text)
-    # Using 30 degree angle, diagonal space = usable_width / cos(30°) ≈ usable_width * 1.155
-    # But we need to fit text width, so: text_width * cos(30°) should fit in usable_width
-    # Actually, when rotated, the text height becomes the limiting factor
-    # For 30° rotation: effective_width = text_width * cos(30°) + text_height * sin(30°)
-    # To be safe, we'll use: max_diagonal = min(usable_width, usable_height) * 0.8
-    
-    # Start with a reasonable font size and calculate if it fits
-    font_size = 40
-    rotation_angle = 30
+    # Use a conservative rotation angle (20 degrees) for better fit
+    rotation_angle = 20
     angle_rad = math.radians(rotation_angle)
+    cos_angle = math.cos(angle_rad)
     
-    # Calculate text dimensions
+    # Calculate maximum text width that fits within page boundaries
+    # When rotated at angle θ, text width projects as: text_width * cos(θ) horizontally
+    # We need this to fit in usable_width with safety margin
+    # Use 60% of usable width to be very conservative and ensure no clipping
+    max_horizontal_projection = usable_width * 0.60
+    max_text_width = max_horizontal_projection / cos_angle
+    
+    # Find font size that fits the text within max_text_width
+    # Start with a reasonable size and scale down if needed
+    font_size = 32
     canvas.setFont('Helvetica-Bold', font_size)
     text_width = canvas.stringWidth(watermark_text, 'Helvetica-Bold', font_size)
-    text_height = font_size * 1.2  # Approximate line height
     
-    # Calculate bounding box when rotated
-    # Rotated width = |text_width * cos(angle) + text_height * sin(angle)|
-    rotated_width = abs(text_width * math.cos(angle_rad)) + abs(text_height * math.sin(angle_rad))
-    rotated_height = abs(text_width * math.sin(angle_rad)) + abs(text_height * math.cos(angle_rad))
-    
-    # Scale down if needed to fit within usable area (with some padding)
-    max_available = min(usable_width, usable_height) * 0.85  # 85% of smaller dimension
-    if rotated_width > max_available:
-        scale_factor = max_available / rotated_width
-        font_size = int(font_size * scale_factor)
+    # Scale down font if text is too wide
+    if text_width > max_text_width:
+        scale_factor = (max_text_width / text_width) * 0.90  # 90% safety margin
+        font_size = max(20, int(font_size * scale_factor))  # Minimum 20pt
         canvas.setFont('Helvetica-Bold', font_size)
         text_width = canvas.stringWidth(watermark_text, 'Helvetica-Bold', font_size)
-        text_height = font_size * 1.2
     
     # Calculate center of page
     center_x = page_width / 2
@@ -257,6 +252,7 @@ def add_watermark(canvas, doc):
     canvas.rotate(rotation_angle)
     
     # Draw watermark text centered at origin (which is now the page center after translation)
+    # This ensures the text is centered and fully visible
     canvas.drawCentredString(-text_width/2, 0, watermark_text)
     
     canvas.restoreState()
