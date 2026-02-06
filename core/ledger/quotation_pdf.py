@@ -414,21 +414,39 @@ def add_footer(canvas, doc):
     canvas.setFillColor(colors.HexColor('#1e3a8a'))
     canvas.rect(0, 0, A4[0], 60, fill=True, stroke=False)
     
-    # Footer text
+    # Footer text - all white
     canvas.setFillColor(colors.white)
     canvas.setFont('Helvetica', 9)
     
-    # Address (top line)
-    canvas.drawCentredString(A4[0]/2, 38,
+    # Calculate evenly spaced vertical positions
+    footer_height = 60
+    line_height = 12
+    start_y = 42  # Start from top of footer
+    
+    # Line 1: Address (centered)
+    canvas.drawCentredString(A4[0]/2, start_y,
                             'Near Lohlianwali Nahr Opp Railway Line G.T Road Gujranwla')
     
-    # Website (second line)
-    canvas.drawCentredString(A4[0]/2, 24, 'https://haqbahoomianco.com/')
+    # Line 2: Website (centered)
+    canvas.drawCentredString(A4[0]/2, start_y - line_height, 'https://haqbahoomianco.com/')
     
-    # Email and phone (bottom line)
-    canvas.setFont('Helvetica', 8)
-    canvas.drawString(80, 10, 'Haqbahoomiancompany@Gmail.com')
-    canvas.drawString(A4[0] - 200, 10, '+92 321 319 6814')
+    # Line 3: Email and Phone (properly balanced)
+    email_text = 'Haqbahoomiancompany@Gmail.com'
+    phone_text = '+92 321 319 6814'
+    
+    # Calculate positions for balanced layout
+    # Center the gap between email and phone
+    email_width = canvas.stringWidth(email_text, 'Helvetica', 9)
+    phone_width = canvas.stringWidth(phone_text, 'Helvetica', 9)
+    gap = 40  # Space between email and phone
+    
+    # Center the combined width
+    total_width = email_width + gap + phone_width
+    start_x = (A4[0] - total_width) / 2
+    
+    # Draw email and phone on same line, properly spaced
+    canvas.drawString(start_x, start_y - (2 * line_height), email_text)
+    canvas.drawString(start_x + email_width + gap, start_y - (2 * line_height), phone_text)
     
     canvas.restoreState()
 
