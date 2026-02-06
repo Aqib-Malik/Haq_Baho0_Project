@@ -88,9 +88,9 @@
                                         {{ item.unit }}
                                     </span>
                                     <span class="stock-badge"
-                                        [class.low-stock]="(item.stock_quantity ? +item.stock_quantity : 0) <= +item.min_stock_level">
+                                        [class.low-stock]="((item.stock_quantity ?? 0) <= (item.min_stock_level ?? 0))">
                                         <mat-icon>inventory</mat-icon>
-                                        {{ (item.stock_quantity || 0) | number:'1.0-4' }}
+                                        {{ (item.stock_quantity ?? 0) | number:'1.0-4' }}
                                     </span>
                                 </div>
                             </div>
@@ -125,8 +125,8 @@
             </div>
         </mat-tab>
 
-        <!-- Tab 2: Stock Transactions -->
-        <mat-tab label="Stock Transactions">
+        <!-- Tab 2: Stock Transactions (Hidden for now) -->
+        <mat-tab label="Stock Transactions" *ngIf="false">
             <div class="tab-content">
                 <div class="compact-header">
                     <div class="header-left">

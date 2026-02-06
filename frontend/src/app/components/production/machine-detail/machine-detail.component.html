@@ -125,7 +125,8 @@
                     <div class="px-5 py-4 border-b border-gray-800 bg-gradient-to-r from-gray-900 to-gray-800">
                         <div class="flex justify-between items-center">
                             <h2 class="text-lg font-bold flex items-center gap-2">
-                                <mat-icon class="text-purple-400 !w-5 !h-5 !text-lg">science</mat-icon> Material Logic
+                                <mat-icon class="text-purple-400 !w-5 !h-5 !text-lg">inventory</mat-icon> Required
+                                Materials
                             </h2>
                             <div class="px-2 py-0.5 bg-white/10 rounded text-[10px] font-mono text-gray-300">
                                 BOM Config
@@ -136,13 +137,13 @@
                     <!-- Add New Item Area -->
                     <div class="p-4 bg-gray-800/50">
                         <div class="flex flex-col gap-2">
-                            <div class="flex flex-col md:flex-row gap-2">
+                            <div class="flex gap-2 items-center">
                                 <div class="flex-1 relative">
                                     <input type="text" [formControl]="newItemControl" [matAutocomplete]="auto"
                                         placeholder="Search material..."
-                                        class="w-full h-9 rounded-lg bg-gray-700 border border-gray-600 text-white px-3 text-sm placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all">
+                                        class="w-full h-10 rounded-lg bg-gray-700 border border-gray-600 text-white px-3 pr-10 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
                                     <mat-icon
-                                        class="absolute right-2 top-2 text-gray-500 pointer-events-none !text-lg">search</mat-icon>
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none !text-xl">search</mat-icon>
                                     <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn"
                                         class="modern-autocomplete">
                                         <mat-option *ngFor="let item of filteredItems | async" [value]="item"
@@ -156,17 +157,22 @@
                                     </mat-autocomplete>
                                 </div>
 
-                                <div class="flex gap-2">
-                                    <div class="w-24 relative">
-                                        <input type="number" [formControl]="newQtyControl" placeholder="Qty"
-                                            class="w-full h-9 rounded-lg bg-gray-700 border border-gray-600 text-white px-3 text-sm placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all font-mono">
-                                    </div>
-                                    <button mat-raised-button color="accent" (click)="addRequirement()"
-                                        [disabled]="newItemControl.invalid || newQtyControl.invalid"
-                                        class="!h-9 !w-9 !min-w-[36px] !p-0 !rounded-lg flex items-center justify-center shadow-lg">
-                                        <mat-icon class="!w-5 !h-5 !text-lg">add</mat-icon>
-                                    </button>
+                                <!-- Quick Add Item Button -->
+                                <button mat-mini-fab (click)="openQuickAddDialog()" matTooltip="Add new inventory item"
+                                    class="!bg-green-600 hover:!bg-green-700 !text-white !shadow-lg !w-10 !h-10 !flex !items-center !justify-center">
+                                    <mat-icon class="!text-xl">add_box</mat-icon>
+                                </button>
+
+                                <div class="w-28 relative">
+                                    <input type="number" [formControl]="newQtyControl" placeholder="Qty"
+                                        class="w-full h-10 rounded-lg bg-gray-700 border border-gray-600 text-white px-3 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-mono text-center">
                                 </div>
+
+                                <button mat-mini-fab (click)="addRequirement()"
+                                    [disabled]="newItemControl.invalid || newQtyControl.invalid"
+                                    class="!shadow-lg !w-10 !h-10 !flex !items-center !justify-center">
+                                    <mat-icon class="!text-xl">add</mat-icon>
+                                </button>
                             </div>
                         </div>
                     </div>

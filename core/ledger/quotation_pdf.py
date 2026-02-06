@@ -6,9 +6,11 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
 from io import BytesIO
 from decimal import Decimal
 import os
+import math
 
 
 def generate_quotation_pdf(quotation):
@@ -184,8 +186,8 @@ def generate_quotation_pdf(quotation):
     ]))
     elements.append(total_table)
     
-    # Build PDF
-    doc.build(elements, onFirstPage=add_footer, onLaterPages=add_footer)
+    # Build PDF with watermark and footer on each page
+    doc.build(elements, onFirstPage=add_page_decorations, onLaterPages=add_page_decorations)
     
     # Get the value of the BytesIO buffer and write it to the response
     pdf = buffer.getvalue()
@@ -193,6 +195,36 @@ def generate_quotation_pdf(quotation):
     response.write(pdf)
     
     return response
+
+
+def add_watermark(canvas, doc):
+    """Add company watermark to each page"""
+    canvas.saveState()
+    
+    # Set watermark properties - semi-transparent and rotated
+    watermark_text = "HAQ BAHOO MIAN & COMPANY"
+    
+    # Calculate center of page
+    center_x = A4[0] / 2
+    center_y = A4[1] / 2
+    
+    # Set semi-transparent gray color for watermark
+    canvas.setFillColor(colors.HexColor('#CCCCCC'))  # Light gray
+    canvas.setFillAlpha(0.15)  # 15% opacity - subtle but visible
+    
+    # Set font size for watermark
+    canvas.setFont('Helvetica-Bold', 60)
+    
+    # Rotate canvas 45 degrees for diagonal watermark
+    # Translate to center point, rotate around that point
+    canvas.translate(center_x, center_y)
+    canvas.rotate(45)
+    
+    # Draw watermark text centered at origin (which is now the page center after translation)
+    text_width = canvas.stringWidth(watermark_text, 'Helvetica-Bold', 60)
+    canvas.drawCentredString(-text_width/2, 0, watermark_text)
+    
+    canvas.restoreState()
 
 
 def add_footer(canvas, doc):
@@ -216,3 +248,11 @@ def add_footer(canvas, doc):
     canvas.drawString(A4[0] - 200, 20, '📞 +92 321 319 6814')
     
     canvas.restoreState()
+
+
+def add_page_decorations(canvas, doc):
+    """Add both watermark and footer to each page"""
+    # Add watermark first (behind content)
+    add_watermark(canvas, doc)
+    # Add footer on top
+    add_footer(canvas, doc)

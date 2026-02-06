@@ -31,15 +31,9 @@
 
                     <!-- Category -->
                     <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                        <mat-label>Category</mat-label>
-                        <input matInput formControlName="category" placeholder="e.g. Medicine"
-                            [matAutocomplete]="autoCat">
+                        <mat-label>Category (Optional)</mat-label>
+                        <input matInput formControlName="category" placeholder="e.g. Medicine, Raw Material">
                         <mat-icon matPrefix>category</mat-icon>
-                        <mat-autocomplete #autoCat="matAutocomplete" class="category-panel">
-                            @for (cat of categories(); track cat) {
-                            <mat-option [value]="cat">{{ cat }}</mat-option>
-                            }
-                        </mat-autocomplete>
                     </mat-form-field>
 
                     <!-- SKU -->
@@ -59,8 +53,8 @@
                 </div>
             </div>
 
-            <!-- Section 2: Stock & Tracking -->
-            <div class="form-section">
+            <!-- Section 2: Stock & Storage (Hidden for now) -->
+            <div class="form-section" *ngIf="false">
                 <h3 class="section-title">Stock & Storage</h3>
                 <div class="form-grid">
                     <!-- Unit (Using Base Unit FK for robustness, creates simpler UX) -->

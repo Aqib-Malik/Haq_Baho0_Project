@@ -11,40 +11,21 @@ mat-form-field {
     background-color: #fee2e2;
 }
 
-/* Remove default mat-form-field padding sometimes causing issues in flex containers */
-/* Remove default mat-form-field padding sometimes causing issues in flex containers */
-.dense-field .mat-mdc-form-field-flex {
-    height: 40px !important;
-    align-items: center !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-}
-
-.dense-field .mat-mdc-text-field-wrapper {
-    height: 40px !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-}
-
-.dense-field .mat-mdc-form-field-infix {
-    padding-top: 4px !important;
-    padding-bottom: 4px !important;
-    min-height: 40px !important;
-    display: flex !important;
-    align-items: center !important;
-    border-top: 0 !important;
-}
-
-/* Ensure dropdowns can escape the container */
-.dense-field .mat-mdc-form-field-icon-prefix,
-.dense-field .mat-mdc-form-field-icon-suffix {
-    padding: 0 4px !important;
-    display: flex !important;
-    align-items: center !important;
-    height: 100% !important;
-}
-
-.custom-mat-field .mat-mdc-text-field-wrapper {
+/* Clean, simple form field styling - no dense overrides */
+::ng-deep .custom-mat-field .mat-mdc-text-field-wrapper {
     background-color: #f8fafc !important;
-    /* slate-50 */
+}
+
+/* Ensure proper spacing for form fields */
+::ng-deep mat-form-field {
+    display: block;
+}
+
+/* Fix select panel z-index to ensure it appears above everything */
+::ng-deep .cdk-overlay-pane {
+    z-index: 10000 !important;
+}
+
+::ng-deep .mat-mdc-select-panel {
+    max-height: 300px !important;
 }

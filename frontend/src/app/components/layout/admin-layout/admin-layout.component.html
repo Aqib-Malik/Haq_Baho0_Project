@@ -48,38 +48,6 @@
                 </mat-nav-list>
             </mat-expansion-panel>
 
-            <!-- Inventory Group -->
-            <mat-expansion-panel [class.mat-elevation-z0]="true" class="sidenav-expansion"
-                [expanded]="router.url.includes('/inventory')">
-                <mat-expansion-panel-header>
-                    <mat-panel-title>
-                        <mat-icon>inventory_2</mat-icon>
-                        <span>Inventory</span>
-                    </mat-panel-title>
-                </mat-expansion-panel-header>
-                <mat-nav-list class="sub-menu">
-                    <a mat-list-item routerLink="/inventory" [routerLinkActiveOptions]="{exact: true}"
-                        routerLinkActive="active-link">
-                        <mat-icon matListItemIcon>list</mat-icon>
-                        <div matListItemTitle>Items List</div>
-                    </a>
-                    <a mat-list-item routerLink="/inventory" [queryParams]="{tab: 'transactions'}"
-                        routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">
-                        <mat-icon matListItemIcon>receipt_long</mat-icon>
-                        <div matListItemTitle>Stock Movements</div>
-                    </a>
-                    <mat-divider style="margin: 8px 16px; opacity: 0.2;"></mat-divider>
-                    <a mat-list-item routerLink="/inventory" [queryParams]="{tab: 'transactions', action: 'receipt'}">
-                        <mat-icon matListItemIcon>add_circle_outline</mat-icon>
-                        <div matListItemTitle>New Receipt</div>
-                    </a>
-                    <a mat-list-item routerLink="/inventory" [queryParams]="{tab: 'transactions', action: 'issue'}">
-                        <mat-icon matListItemIcon>remove_circle_outline</mat-icon>
-                        <div matListItemTitle>New Issue</div>
-                    </a>
-                </mat-nav-list>
-            </mat-expansion-panel>
-
             <!-- Production Group -->
             <mat-expansion-panel [class.mat-elevation-z0]="true" class="sidenav-expansion"
                 [expanded]="router.url.includes('/production')">
@@ -99,6 +67,40 @@
                         [routerLinkActiveOptions]="{exact: true}">
                         <mat-icon matListItemIcon>print</mat-icon>
                         <div matListItemTitle>Machines</div>
+                    </a>
+                </mat-nav-list>
+            </mat-expansion-panel>
+
+            <!-- Inventory Group -->
+            <mat-expansion-panel [class.mat-elevation-z0]="true" class="sidenav-expansion"
+                [expanded]="router.url.includes('/inventory')">
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        <mat-icon>inventory_2</mat-icon>
+                        <span>Inventory</span>
+                    </mat-panel-title>
+                </mat-expansion-panel-header>
+                <mat-nav-list class="sub-menu">
+                    <a mat-list-item routerLink="/inventory" [routerLinkActiveOptions]="{exact: true}"
+                        routerLinkActive="active-link">
+                        <mat-icon matListItemIcon>list</mat-icon>
+                        <div matListItemTitle>Items List</div>
+                    </a>
+                    <a mat-list-item routerLink="/inventory" [queryParams]="{tab: 'transactions'}"
+                        routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" *ngIf="false">
+                        <mat-icon matListItemIcon>receipt_long</mat-icon>
+                        <div matListItemTitle>Stock Movements</div>
+                    </a>
+                    <mat-divider style="margin: 8px 16px; opacity: 0.2;" *ngIf="false"></mat-divider>
+                    <a mat-list-item routerLink="/inventory" [queryParams]="{tab: 'transactions', action: 'receipt'}"
+                        *ngIf="false">
+                        <mat-icon matListItemIcon>add_circle_outline</mat-icon>
+                        <div matListItemTitle>New Receipt</div>
+                    </a>
+                    <a mat-list-item routerLink="/inventory" [queryParams]="{tab: 'transactions', action: 'issue'}"
+                        *ngIf="false">
+                        <mat-icon matListItemIcon>remove_circle_outline</mat-icon>
+                        <div matListItemTitle>New Issue</div>
                     </a>
                 </mat-nav-list>
             </mat-expansion-panel>

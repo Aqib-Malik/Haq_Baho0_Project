@@ -1,145 +1,160 @@
-<div class="min-h-screen bg-slate-50 p-4 md:p-8 font-sans">
+<div class="min-h-screen bg-slate-50 p-3 md:p-6 font-sans">
 
     <!-- Top Navigation -->
-    <div class="max-w-5xl mx-auto mb-4 flex justify-between items-center animate-fade-in-down">
+    <div class="max-w-5xl mx-auto mb-3 flex justify-between items-center animate-fade-in-down">
         <button mat-button
-            class="!text-slate-500 hover:!text-slate-800 hover:!bg-slate-200/50 !rounded-full !px-4 !h-8 transition-all"
+            class="!text-slate-500 hover:!text-slate-800 hover:!bg-slate-200/50 !rounded-full !px-3 !h-7 transition-all"
             routerLink="/production/demands">
-            <mat-icon class="mr-1 !w-4 !h-4 !text-base">arrow_back_ios</mat-icon> <span class="font-medium text-sm">Back
+            <mat-icon class="mr-1 !w-4 !h-4 !text-base">arrow_back_ios</mat-icon> <span class="font-medium text-xs">Back
                 to List</span>
         </button>
         <div class="text-xs font-medium text-slate-400">Production / New Demand</div>
     </div>
 
     <div class="max-w-5xl mx-auto">
-        <form [formGroup]="demandForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+        <form [formGroup]="demandForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
 
             <!-- Header / Client Info Card -->
-            <div class="bg-white rounded-2xl shadow-lg shadow-slate-200/50 overflow-hidden border border-slate-100">
+            <div class="bg-white rounded-xl shadow-lg shadow-slate-200/60 overflow-hidden border border-slate-200/50">
                 <!-- Decorative Header Bar -->
-                <div class="h-1.5 bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500"></div>
+                <div class="h-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"></div>
 
-                <div class="p-6">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-2">
+                <div class="p-5">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-5 gap-2">
                         <div>
-                            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">
+                            <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
                                 {{ isEditMode ? 'Edit Demand' : 'New Demand Sheet' }}
                             </h1>
+                            <p class="text-xs text-slate-500 font-medium mt-0.5">Configure your production order details
+                            </p>
                         </div>
-                        <div class="px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wider shadow-sm border"
+                        <div class="px-3 py-1.5 rounded-lg font-bold text-xs uppercase tracking-wider shadow-md border-2"
                             [ngClass]="{
-                                'bg-green-50 text-green-700 border-green-200': demandForm.get('status')?.value === 'finalized',
-                                'bg-slate-100 text-slate-600 border-slate-200': demandForm.get('status')?.value !== 'finalized'
+                                'bg-gradient-to-br from-green-50 to-emerald-50 text-green-700 border-green-300': demandForm.get('status')?.value === 'finalized',
+                                'bg-gradient-to-br from-slate-50 to-gray-50 text-slate-600 border-slate-300': demandForm.get('status')?.value !== 'finalized'
                              }">
                             {{ demandForm.get('status')?.value || 'DRAFT' }}
                         </div>
                     </div>
 
+                    <!-- Form Fields with Enhanced Styling -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <mat-form-field appearance="outline" class="w-full custom-mat-field dense-field">
-                            <mat-label class="font-bold text-slate-600 text-xs">Client / Mill</mat-label>
-                            <mat-select formControlName="company">
-                                <mat-option *ngFor="let c of companies" [value]="c.id">
-                                    <span class="text-slate-800 font-medium text-sm">{{c.name}}</span>
-                                </mat-option>
-                            </mat-select>
-                            <mat-icon matPrefix class="mr-2 text-slate-400 !w-4 !h-4 text-base">business</mat-icon>
-                        </mat-form-field>
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-bold text-slate-700 ml-1">
+                                <mat-icon
+                                    class="!w-3.5 !h-3.5 !text-xs align-middle mr-1 text-blue-600">business</mat-icon>
+                                Client / Mill <span class="text-red-500">*</span>
+                            </label>
+                            <mat-form-field appearance="outline" class="w-full">
+                                <mat-select formControlName="company" placeholder="Select client...">
+                                    <mat-option *ngFor="let c of companies" [value]="c.id">
+                                        {{c.name}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
 
-                        <mat-form-field appearance="outline" class="w-full custom-mat-field dense-field">
-                            <mat-label class="font-bold text-slate-600 text-xs">Order Date</mat-label>
-                            <input matInput [matDatepicker]="picker" formControlName="date"
-                                class="font-medium text-slate-800 text-sm">
-                            <mat-datepicker-toggle matIconSuffix [for]="picker"
-                                class="text-indigo-500 scale-75"></mat-datepicker-toggle>
-                            <mat-datepicker #picker></mat-datepicker>
-                            <mat-icon matPrefix
-                                class="mr-2 text-slate-400 !w-4 !h-4 text-base">calendar_today</mat-icon>
-                        </mat-form-field>
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-bold text-slate-700 ml-1">
+                                <mat-icon
+                                    class="!w-3.5 !h-3.5 !text-xs align-middle mr-1 text-indigo-600">calendar_today</mat-icon>
+                                Order Date <span class="text-red-500">*</span>
+                            </label>
+                            <mat-form-field appearance="outline" class="w-full">
+                                <input matInput [matDatepicker]="picker" formControlName="date">
+                                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                                <mat-datepicker #picker></mat-datepicker>
+                            </mat-form-field>
+                        </div>
 
-                        <mat-form-field appearance="outline" class="w-full custom-mat-field dense-field">
-                            <mat-label class="font-bold text-slate-600 text-xs">Reference No.</mat-label>
-                            <input matInput formControlName="reference_number" placeholder="Optional"
-                                class="font-medium text-sm">
-                            <mat-icon matPrefix class="mr-2 text-slate-400 !w-4 !h-4 text-base">tag</mat-icon>
-                        </mat-form-field>
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-bold text-slate-700 ml-1">
+                                <mat-icon
+                                    class="!w-3.5 !h-3.5 !text-xs align-middle mr-1 text-purple-600">tag</mat-icon>
+                                Reference No.
+                            </label>
+                            <mat-form-field appearance="outline" class="w-full">
+                                <input matInput formControlName="reference_number" placeholder="Optional">
+                            </mat-form-field>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Machine Orders Section -->
             <div
-                class="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-100 p-5 md:p-6 relative overflow-hidden">
+                class="bg-white rounded-xl shadow-lg shadow-slate-200/60 border border-slate-200/50 p-4 md:p-5 relative overflow-hidden">
                 <!-- Background decoration -->
                 <div
-                    class="absolute top-0 right-0 w-48 h-48 bg-indigo-50 rounded-full blur-3xl -mr-16 -mt-16 opacity-50 pointer-events-none">
+                    class="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-full blur-3xl -mr-16 -mt-16 opacity-60 pointer-events-none">
                 </div>
 
                 <div
-                    class="flex flex-col md:flex-row justify-between items-end md:items-center mb-5 relative z-10 gap-3">
+                    class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 relative z-10 gap-2">
                     <div>
-                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                            <div class="p-1.5 bg-indigo-100 rounded-md text-indigo-600">
+                        <h2 class="text-xl font-black text-slate-900 flex items-center gap-2">
+                            <div
+                                class="p-1.5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg text-white shadow-md">
                                 <mat-icon class="!w-5 !h-5 !text-xl">precision_manufacturing</mat-icon>
                             </div>
-                            Order Details
+                            Machine Orders
                         </h2>
+                        <p class="text-xs text-slate-500 font-medium ml-9">Add machines to your production order</p>
                     </div>
 
                     <button type="button" mat-flat-button color="primary" (click)="addMachineOrder()"
-                        class="!rounded-full !py-1 !px-4 !h-8 !text-sm shadow-md shadow-indigo-200 hover:shadow-indigo-300 transition-all transform hover:-translate-y-0.5">
-                        <mat-icon class="mr-1 !w-4 !h-4 !text-base">add_circle</mat-icon> Add Run
+                        class="!rounded-lg !py-1.5 !px-4 !h-9 !text-xs !font-bold shadow-md shadow-indigo-200 hover:shadow-lg hover:shadow-indigo-300 transition-all transform hover:-translate-y-0.5 !bg-gradient-to-r !from-indigo-600 !to-purple-600">
+                        <mat-icon class="mr-1 !w-4 !h-4 !text-base">add_circle</mat-icon> Add Machine
                     </button>
                 </div>
 
                 <div formArrayName="machine_orders" class="space-y-3 relative z-10">
                     <div *ngFor="let order of machineOrders.controls; let i=index" [formGroupName]="i"
-                        class="group relative flex flex-col md:flex-row gap-3 items-start md:items-center p-4 bg-slate-50/80 backdrop-blur-sm rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+                        class="group relative flex flex-col md:flex-row gap-3 items-start md:items-end p-4 bg-gradient-to-br from-slate-50 to-gray-50 backdrop-blur-sm rounded-xl border-2 border-slate-200 hover:border-indigo-400 hover:from-white hover:to-indigo-50/30 hover:shadow-md transition-all duration-300">
 
                         <!-- Index Number -->
-                        <div class="flex-shrink-0">
+                        <div class="flex-shrink-0 self-start md:self-center">
                             <div
-                                class="w-6 h-6 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold text-xs shadow-md group-hover:scale-110 group-hover:bg-indigo-600 transition-all">
+                                class="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-700 to-slate-900 text-white flex items-center justify-center font-black text-sm shadow-md group-hover:scale-110 group-hover:from-indigo-600 group-hover:to-purple-600 transition-all">
                                 {{i + 1}}
                             </div>
                         </div>
 
                         <!-- Machine Select -->
-                        <div class="flex-1 w-full">
-                            <mat-form-field appearance="outline"
-                                class="w-full dense-field bg-white rounded-lg shadow-sm">
+                        <div class="flex-1 w-full space-y-1.5">
+                            <label class="block text-xs font-bold text-slate-700 ml-1">
+                                <mat-icon
+                                    class="!w-3.5 !h-3.5 !text-xs align-middle mr-1 text-indigo-600">settings_suggest</mat-icon>
+                                Select Machine <span class="text-red-500">*</span>
+                            </label>
+                            <mat-form-field appearance="outline" class="w-full">
                                 <mat-select formControlName="machine_id" placeholder="Choose a machine...">
                                     <mat-option *ngFor="let m of machines" [value]="m.id">
-                                        <div class="flex flex-col py-1">
-                                            <span class="font-bold text-slate-800 text-sm">{{m.name}}</span>
-                                            <span class="text-[10px] text-slate-500" *ngIf="m.code">Code:
-                                                {{m.code}}</span>
-                                        </div>
+                                        <span class="font-semibold">{{m.name}}</span>
+                                        <span class="text-xs text-gray-500 ml-2" *ngIf="m.code">({{m.code}})</span>
                                     </mat-option>
                                 </mat-select>
-                                <mat-icon matPrefix
-                                    class="mr-2 text-indigo-400 !w-4 !h-4 text-base">settings_suggest</mat-icon>
                             </mat-form-field>
                         </div>
 
                         <!-- Quantity Input -->
-                        <div class="w-full md:w-32">
-                            <mat-form-field appearance="outline"
-                                class="w-full dense-field bg-white rounded-lg shadow-sm">
-                                <input matInput type="number" formControlName="quantity" placeholder="100"
-                                    class="font-mono font-bold text-slate-800 text-right text-sm">
-                                <span matPrefix class="text-slate-400 mr-2 ml-1 text-xs">#</span>
-                                <span matSuffix
-                                    class="text-[10px] font-bold text-slate-500 mr-2 px-1 py-0.5 bg-slate-100 rounded">UNITS</span>
+                        <div class="w-full md:w-32 space-y-1.5">
+                            <label class="block text-xs font-bold text-slate-700 ml-1">
+                                <mat-icon
+                                    class="!w-3.5 !h-3.5 !text-xs align-middle mr-1 text-purple-600">production_quantity_limits</mat-icon>
+                                Quantity <span class="text-red-500">*</span>
+                            </label>
+                            <mat-form-field appearance="outline" class="w-full">
+                                <input matInput type="number" formControlName="quantity" placeholder="1" min="1">
                             </mat-form-field>
                         </div>
 
                         <!-- Delete Action -->
-                        <div class="flex-shrink-0 self-end md:self-center pt-2 md:pt-0">
-                            <button type="button" mat-icon-button color="warn" (click)="removeMachineOrder(i)"
-                                class="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all bg-white border border-slate-200 shadow-sm hover:shadow-md hover:bg-red-50 hover:border-red-200 !w-8 !h-8 flex items-center justify-center rounded-full"
-                                matTooltip="Remove">
-                                <mat-icon class="!w-4 !h-4 !text-base">delete_outline</mat-icon>
+                        <div class="flex-shrink-0 self-end md:self-center">
+                            <button type="button" mat-mini-fab color="warn" (click)="removeMachineOrder(i)"
+                                class="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all !bg-red-50 hover:!bg-red-600 !text-red-600 hover:!text-white border-2 border-red-200 hover:border-red-600 !shadow-md hover:!shadow-lg !w-8 !h-8"
+                                matTooltip="Remove machine">
+                                <mat-icon class="!w-4 !h-4 !text-base">delete</mat-icon>
                             </button>
                         </div>
                     </div>

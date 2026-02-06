@@ -46,14 +46,18 @@ export class InventoryFormDialogComponent implements OnInit {
     unitsList = signal<Unit[]>([]);
     locationsList = signal<Location[]>([]);
 
+    // Quick Add mode - shows only essential fields
+    isQuickAdd = false;
+
     constructor(
         private fb: FormBuilder,
         private quotationService: QuotationService,
         private notificationService: NotificationService,
         public dialogRef: MatDialogRef<InventoryFormDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: { item: InventoryItem | null }
+        @Inject(MAT_DIALOG_DATA) public data: { item: InventoryItem | null; quickAdd?: boolean }
     ) {
         this.isEditMode = !!data.item;
+        this.isQuickAdd = data.quickAdd || false;
     }
 
     ngOnInit(): void {
@@ -64,16 +68,17 @@ export class InventoryFormDialogComponent implements OnInit {
     }
 
     initForm(): void {
+        // Stock & Storage section is hidden, so unit and price are optional
         this.inventoryForm = this.fb.group({
             name: [this.data.item?.name || '', [Validators.required, Validators.minLength(2)]],
             description: [this.data.item?.description || ''],
-            unit_price: [this.data.item?.unit_price || 0, [Validators.required, Validators.min(0)]],
-            unit: [this.data.item?.unit || ''], // Will be set by base_unit change
+            unit_price: [this.data.item?.unit_price || 0, [Validators.min(0)]],
+            unit: [this.data.item?.unit || 'pcs'], // Default to 'pcs'
             category: [this.data.item?.category || ''],
             sku: [this.data.item?.sku || ''],
 
-            // New Inventory Fields
-            base_unit: [this.data.item?.base_unit || null, Validators.required],
+            // New Inventory Fields (all optional since section is hidden)
+            base_unit: [this.data.item?.base_unit || null],
             min_stock_level: [this.data.item?.min_stock_level || 0, [Validators.min(0)]],
             reorder_level: [this.data.item?.reorder_level || 0, [Validators.min(0)]],
             default_location: [this.data.item?.default_location || null],
@@ -131,11 +136,12 @@ export class InventoryFormDialogComponent implements OnInit {
             : this.quotationService.createInventoryItem(formData);
 
         request.subscribe({
-            next: () => {
+            next: (createdItem) => {
                 this.notificationService.showSuccess(
                     this.isEditMode ? 'Item updated successfully' : 'Item added successfully'
                 );
-                this.dialogRef.close(true);
+                // Return the created/updated item so it can be auto-selected
+                this.dialogRef.close(createdItem);
             },
             error: (error) => {
                 console.error('Error saving item:', error);
