@@ -209,11 +209,11 @@ def add_watermark(canvas, doc):
     center_y = A4[1] / 2
     
     # Set semi-transparent gray color for watermark
-    canvas.setFillColor(colors.HexColor('#CCCCCC'))  # Light gray
-    canvas.setFillAlpha(0.15)  # 15% opacity - subtle but visible
+    canvas.setFillColor(colors.HexColor('#999999'))  # Medium gray for better visibility
+    canvas.setFillAlpha(0.25)  # 25% opacity - visible but not intrusive
     
-    # Set font size for watermark
-    canvas.setFont('Helvetica-Bold', 60)
+    # Set font size for watermark (larger for better visibility)
+    canvas.setFont('Helvetica-Bold', 72)
     
     # Rotate canvas 45 degrees for diagonal watermark
     # Translate to center point, rotate around that point
