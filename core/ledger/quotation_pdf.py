@@ -113,14 +113,35 @@ def generate_quotation_pdf(quotation):
         fontName='Helvetica'
     )
     
-    # Header with company name
-    header_data = [
-        [Paragraph('<b>HAQ BAHOO MIAN & COMPANY</b>', company_name_style)],
-    ]
-    header_table = Table(header_data, colWidths=[7*inch])
+    # Logo path: try frontend assets, then project root static
+    _script_dir = os.path.dirname(os.path.abspath(__file__))  # .../core/ledger
+    _core_dir = os.path.dirname(_script_dir)                  # .../core
+    _project_root = os.path.dirname(_core_dir)                # .../inventory_hr_system
+    _logo_path = os.path.join(_project_root, 'frontend', 'public', 'assets', 'images', 'logo.jpeg')
+    if not os.path.isfile(_logo_path):
+        _logo_path = os.path.join(_project_root, 'assets', 'images', 'logo.jpeg')
+    if not os.path.isfile(_logo_path):
+        _logo_path = None
+
+    # Header with logo and company name
+    if _logo_path:
+        try:
+            logo_img = Image(_logo_path, width=1.0*inch, height=1.0*inch)
+            header_data = [[logo_img, Paragraph('<b>HAQ BAHOO MIAN & COMPANY</b>', company_name_style)]]
+            header_table = Table(header_data, colWidths=[1.2*inch, 5.8*inch])
+        except Exception:
+            header_data = [[Paragraph('<b>HAQ BAHOO MIAN & COMPANY</b>', company_name_style)]]
+            header_table = Table(header_data, colWidths=[7*inch])
+    else:
+        header_data = [[Paragraph('<b>HAQ BAHOO MIAN & COMPANY</b>', company_name_style)]]
+        header_table = Table(header_data, colWidths=[7*inch])
+
     header_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
         ('LINEBELOW', (0, 0), (-1, 0), 2, colors.black),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+        ('LEFTPADDING', (0, 0), (0, 0), 0),
+        ('RIGHTPADDING', (0, 0), (0, 0), 12),
     ]))
     elements.append(header_table)
     elements.append(Spacer(1, 10))
@@ -397,13 +418,17 @@ def add_footer(canvas, doc):
     canvas.setFillColor(colors.white)
     canvas.setFont('Helvetica', 9)
     
-    # Address
-    canvas.drawCentredString(A4[0]/2, 35, 
+    # Address (top line)
+    canvas.drawCentredString(A4[0]/2, 38,
                             'Near Lohlianwali Nahr Opp Railway Line G.T Road Gujranwla')
     
-    # Email and phone
-    canvas.drawString(80, 20, '✉ Haqbahoomianco mpany@Gmail.com')
-    canvas.drawString(A4[0] - 200, 20, '📞 +92 321 319 6814')
+    # Website (second line)
+    canvas.drawCentredString(A4[0]/2, 24, 'https://haqbahoomianco.com/')
+    
+    # Email and phone (bottom line)
+    canvas.setFont('Helvetica', 8)
+    canvas.drawString(80, 10, 'Haqbahoomiancompany@Gmail.com')
+    canvas.drawString(A4[0] - 200, 10, '+92 321 319 6814')
     
     canvas.restoreState()
 
