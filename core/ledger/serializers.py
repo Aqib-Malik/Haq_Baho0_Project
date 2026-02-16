@@ -341,9 +341,10 @@ class QuotationDetailSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data, **kwargs):
         items_data = validated_data.pop('items', [])
-        # Only pass model fields to create (exclude reverse relations like 'items')
+        # Only pass model fields to create (exclude reverse relations and auto-generated fields)
         quotation_field_names = {f.name for f in Quotation._meta.get_fields() if hasattr(f, 'name')}
-        quotation_field_names.discard('items')  # reverse relation, not a DB column
+        quotation_field_names.discard('items')  # reverse relation
+        quotation_field_names.discard('quotation_number')  # auto-generated in Quotation.save()
         quotation_kw = {k: v for k, v in validated_data.items() if k in quotation_field_names}
         # Normalize empty strings to None for optional fields to avoid DB/validation errors
         for key in ('valid_until', 'tax', 'ton', 'notes'):

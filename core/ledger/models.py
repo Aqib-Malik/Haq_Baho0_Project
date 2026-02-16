@@ -493,11 +493,12 @@ class Quotation(SoftDeleteMixin):
             self.total_amount = Decimal('0.00')
 
     def save(self, *args, **kwargs):
-        # Auto-generate quotation number if not set
+        # Auto-generate quotation number if not set.
+        # Use all_objects so we never reuse a number from soft-deleted rows (UNIQUE is on the column).
         if not self.quotation_number:
             from datetime import datetime
             year = datetime.now().year
-            last_quotation = Quotation.objects.filter(
+            last_quotation = Quotation.all_objects.filter(
                 quotation_number__startswith=f'QT-{year}-'
             ).order_by('-quotation_number').first()
             
