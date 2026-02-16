@@ -269,6 +269,17 @@ class QuotationItemSerializer(serializers.ModelSerializer):
             'quotation': {'required': False}  # Not required for nested creation
         }
     
+    def to_internal_value(self, data):
+        # Accept inventory_item as either pk (int) or object with id (from frontend select)
+        raw = dict(data)
+        inv = raw.get('inventory_item')
+        if inv is not None and isinstance(inv, dict):
+            raw['inventory_item'] = inv.get('id')
+        # Strip frontend-only fields so they are not passed to model create()
+        for key in ('use_manual',):
+            raw.pop(key, None)
+        return super().to_internal_value(raw)
+    
     def validate(self, data):
         # Ensure either inventory_item or manual item_name is provided
         if not data.get('inventory_item') and not data.get('item_name'):
@@ -328,12 +339,21 @@ class QuotationDetailSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['quotation_number', 'subtotal', 'tax_amount', 'discount_amount', 'total_amount']
     
-    def create(self, validated_data):
+    def create(self, validated_data, **kwargs):
         items_data = validated_data.pop('items', [])
-        quotation = Quotation.objects.create(**validated_data)
+        # Only pass model fields to create (exclude read_only and mixin audit if not provided)
+        quotation_model_fields = {f.name for f in Quotation._meta.get_fields() if hasattr(f, 'name')}
+        quotation_kw = {k: v for k, v in validated_data.items() if k in quotation_model_fields}
+        if 'created_by' in kwargs:
+            quotation_kw['created_by'] = kwargs['created_by']
+        quotation = Quotation.objects.create(**quotation_kw)
         
+        item_model_fields = {f.name for f in QuotationItem._meta.get_fields() if hasattr(f, 'name')}
+        item_model_fields.discard('quotation')  # we pass it as arg
+        item_model_fields.discard('subtotal')   # computed on save
         for item_data in items_data:
-            QuotationItem.objects.create(quotation=quotation, **item_data)
+            item_kw = {k: v for k, v in item_data.items() if k in item_model_fields}
+            QuotationItem.objects.create(quotation=quotation, **item_kw)
         
         # Recalculate totals
         quotation.calculate_totals()
@@ -355,15 +375,17 @@ class QuotationDetailSerializer(serializers.ModelSerializer):
             instance.items.all().delete()
             
             # Create new items
+            item_model_fields = {f.name for f in QuotationItem._meta.get_fields() if hasattr(f, 'name')}
+            item_model_fields.discard('quotation')
+            item_model_fields.discard('subtotal')
             for item_data in items_data:
-                QuotationItem.objects.create(quotation=instance, **item_data)
+                item_kw = {k: v for k, v in item_data.items() if k in item_model_fields}
+                QuotationItem.objects.create(quotation=instance, **item_kw)
         
         # Recalculate totals
         instance.calculate_totals()
         instance.save()
         
-        return instance
-
         return instance
 
 

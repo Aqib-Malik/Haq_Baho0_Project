@@ -136,6 +136,13 @@
 
             <!-- Right: Totals -->
             <div class="totals-container">
+                @if (quotation.ton) {
+                <div class="calc-row">
+                    <span class="calc-label">Ton</span>
+                    <span class="calc-value">{{ quotation.ton }}</span>
+                </div>
+                }
+
                 <div class="calc-row">
                     <span class="calc-label">Subtotal</span>
                     <span class="calc-value">{{ formatCurrency(quotation.subtotal) }}</span>

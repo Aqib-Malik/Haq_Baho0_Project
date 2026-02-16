@@ -297,13 +297,25 @@ export class QuotationFormDialogComponent implements OnInit {
         const formValue = this.quotationForm.value;
 
         const quotationData = {
-            ...formValue,
+            company: formValue.company,
             quotation_date: this.formatDate(formValue.quotation_date),
             valid_until: formValue.valid_until ? this.formatDate(formValue.valid_until) : null,
-            items: formValue.items.map((item: any) => ({
-                ...item,
-                inventory_item: item.use_manual ? null : item.inventory_item
-            }))
+            notes: formValue.notes ?? '',
+            status: formValue.status ?? 'draft',
+            tax: formValue.tax ?? null,
+            ton: formValue.ton ?? null,
+            items: formValue.items.map((item: any) => {
+                const inv = item.use_manual ? null : item.inventory_item;
+                return {
+                    inventory_item: inv != null && typeof inv === 'object' && 'id' in inv ? inv.id : inv,
+                    item_name: item.item_name,
+                    description: item.description ?? '',
+                    quantity: item.quantity,
+                    unit_price: item.unit_price,
+                    unit: item.unit ?? 'pcs',
+                    machine_cost: item.machine_cost ?? null
+                };
+            })
         };
 
         const request = this.isEditMode
