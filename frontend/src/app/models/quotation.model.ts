@@ -95,7 +95,7 @@ export interface InventoryItem {
     // New fields
     base_unit?: number;
     base_unit_name?: string;
-    min_stock_level: string;
+    min_stock_level?: string | null;
     reorder_level: string;
     default_location?: number;
     default_location_name?: string;

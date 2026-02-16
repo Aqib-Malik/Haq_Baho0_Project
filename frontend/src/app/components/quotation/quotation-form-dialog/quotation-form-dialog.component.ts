@@ -299,7 +299,7 @@ export class QuotationFormDialogComponent implements OnInit {
         const quotationData = {
             company: formValue.company,
             quotation_date: this.formatDate(formValue.quotation_date),
-            valid_until: formValue.valid_until ? this.formatDate(formValue.valid_until) : null,
+            valid_until: formValue.valid_until ? this.formatDate(formValue.valid_until) : undefined,
             notes: formValue.notes ?? '',
             status: formValue.status ?? 'draft',
             tax: formValue.tax ?? null,

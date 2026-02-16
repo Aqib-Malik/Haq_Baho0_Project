@@ -341,18 +341,26 @@ class QuotationDetailSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data, **kwargs):
         items_data = validated_data.pop('items', [])
-        # Only pass model fields to create (exclude read_only and mixin audit if not provided)
-        quotation_model_fields = {f.name for f in Quotation._meta.get_fields() if hasattr(f, 'name')}
-        quotation_kw = {k: v for k, v in validated_data.items() if k in quotation_model_fields}
+        # Only pass model fields to create (exclude reverse relations like 'items')
+        quotation_field_names = {f.name for f in Quotation._meta.get_fields() if hasattr(f, 'name')}
+        quotation_field_names.discard('items')  # reverse relation, not a DB column
+        quotation_kw = {k: v for k, v in validated_data.items() if k in quotation_field_names}
+        # Normalize empty strings to None for optional fields to avoid DB/validation errors
+        for key in ('valid_until', 'tax', 'ton', 'notes'):
+            if key in quotation_kw and quotation_kw[key] == '':
+                quotation_kw[key] = None
         if 'created_by' in kwargs:
             quotation_kw['created_by'] = kwargs['created_by']
         quotation = Quotation.objects.create(**quotation_kw)
         
-        item_model_fields = {f.name for f in QuotationItem._meta.get_fields() if hasattr(f, 'name')}
-        item_model_fields.discard('quotation')  # we pass it as arg
-        item_model_fields.discard('subtotal')   # computed on save
+        item_field_names = {f.name for f in QuotationItem._meta.get_fields() if hasattr(f, 'name')}
+        item_field_names.discard('quotation')
+        item_field_names.discard('subtotal')
         for item_data in items_data:
-            item_kw = {k: v for k, v in item_data.items() if k in item_model_fields}
+            item_kw = {k: v for k, v in item_data.items() if k in item_field_names}
+            for key in ('inventory_item', 'machine_cost', 'description'):
+                if key in item_kw and item_kw[key] == '':
+                    item_kw[key] = None
             QuotationItem.objects.create(quotation=quotation, **item_kw)
         
         # Recalculate totals
@@ -375,11 +383,14 @@ class QuotationDetailSerializer(serializers.ModelSerializer):
             instance.items.all().delete()
             
             # Create new items
-            item_model_fields = {f.name for f in QuotationItem._meta.get_fields() if hasattr(f, 'name')}
-            item_model_fields.discard('quotation')
-            item_model_fields.discard('subtotal')
+            item_field_names = {f.name for f in QuotationItem._meta.get_fields() if hasattr(f, 'name')}
+            item_field_names.discard('quotation')
+            item_field_names.discard('subtotal')
             for item_data in items_data:
-                item_kw = {k: v for k, v in item_data.items() if k in item_model_fields}
+                item_kw = {k: v for k, v in item_data.items() if k in item_field_names}
+                for key in ('inventory_item', 'machine_cost', 'description'):
+                    if key in item_kw and item_kw[key] == '':
+                        item_kw[key] = None
                 QuotationItem.objects.create(quotation=instance, **item_kw)
         
         # Recalculate totals

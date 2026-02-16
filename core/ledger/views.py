@@ -380,6 +380,17 @@ class QuotationViewSet(AuditMixin, viewsets.ModelViewSet):
     queryset = Quotation.objects.all()
     permission_classes = [IsAuthenticated, CustomDjangoModelPermissions]
     
+    def create(self, request, *args, **kwargs):
+        """Wrap create to return actual error message on 500 for debugging."""
+        import traceback
+        try:
+            return super().create(request, *args, **kwargs)
+        except Exception as e:
+            return Response(
+                {'detail': str(e), 'traceback': traceback.format_exc()},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
     def get_serializer_class(self):
         if self.action == 'list':
             return QuotationListSerializer
