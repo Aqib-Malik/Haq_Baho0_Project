@@ -293,17 +293,17 @@ def export_ledger_pdf(company, start_date=None, end_date=None):
                 f"Rs {entry['balance']:,.2f}"
             ])
 
-        # Create table: wider Description column so long text wraps inside cell without disturbing others
+        # Column widths: enough for "Rs X,XXX,XXX.XX" in amount columns so they don't overlap
         col_date, col_ref, col_desc, col_debit, col_credit, col_balance = (
-            0.7 * inch, 1.0 * inch, 3.0 * inch, 0.95 * inch, 0.95 * inch, 1.0 * inch
+            0.85 * inch, 1.0 * inch, 2.6 * inch, 1.25 * inch, 1.25 * inch, 1.3 * inch
         )
         ledger_table = Table(table_data, colWidths=[col_date, col_ref, col_desc, col_debit, col_credit, col_balance])
         ledger_table.setStyle(TableStyle([
             # Header row
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1a237e')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('ALIGN', (3, 1), (-1, -1), 'RIGHT'),  # Right align amounts
+            ('ALIGN', (0, 0), (2, -1), 'LEFT'),
+            ('ALIGN', (3, 0), (-1, -1), 'RIGHT'),  # Right align Debit, Credit, Balance
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, 0), 10),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
@@ -315,7 +315,14 @@ def export_ledger_pdf(company, start_date=None, end_date=None):
             ('FONTSIZE', (0, 1), (-1, -1), 9),
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f5f5f5')]),
             ('GRID', (0, 0), (-1, -1), 1, colors.grey),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # All cells vertically centered so amounts/date stay proper when row is tall
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            # Padding so date and amount cells don't overlap or look cramped
+            ('LEFTPADDING', (0, 0), (0, -1), 8),   # Date column
+            ('RIGHTPADDING', (0, 0), (0, -1), 6),
+            ('LEFTPADDING', (1, 0), (2, -1), 8),   # Reference, Description
+            ('RIGHTPADDING', (1, 0), (2, -1), 8),
+            ('LEFTPADDING', (3, 0), (-1, -1), 12),  # Debit, Credit, Balance: clear gap from previous column
+            ('RIGHTPADDING', (3, 0), (-1, -1), 12),
         ]))
         elements.append(ledger_table)
     else:
