@@ -257,13 +257,25 @@
 /* Items List */
 .items-list {
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    flex-direction: column;
+    gap: 8px;
     max-width: 300px;
-    max-height: 32px;
-    /* Limit to roughly one row */
-    overflow: hidden;
-    white-space: nowrap;
+}
+
+.items-portion {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.portion-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-right: 4px;
+    flex-shrink: 0;
 }
 
 .item-name-chip {
@@ -280,6 +292,12 @@
     overflow: hidden;
     text-overflow: ellipsis;
     vertical-align: middle;
+}
+
+.item-name-chip.machine-chip {
+    background: #ccfbf1;
+    color: #0d9488;
+    border-color: #99f6e4;
 }
 
 .item-count-badge {

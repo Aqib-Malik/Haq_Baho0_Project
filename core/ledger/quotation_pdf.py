@@ -171,21 +171,33 @@ def generate_quotation_pdf(quotation):
     elements.append(subject_quotation_table)
     elements.append(Spacer(1, 15))
     
-    # Items section
-    for idx, item in enumerate(quotation.items.all(), 1):
-        # Item title with rate
+    # Split items into Items (no machine) and Machines
+    all_items = list(quotation.items.all())
+    item_lines = [i for i in all_items if not i.machine_id]
+    machine_lines = [i for i in all_items if i.machine_id]
+
+    section_header_style = ParagraphStyle(
+        'SectionHeader',
+        parent=styles['Normal'],
+        fontSize=12,
+        textColor=colors.HexColor('#1e3a8a'),
+        spaceAfter=12,
+        spaceBefore=16,
+        alignment=TA_LEFT,
+        fontName='Helvetica-Bold',
+        borderPadding=(0, 0, 4, 0),
+    )
+
+    def append_item_block(item, elements):
+        """Append one item/machine block (title, description, rate) to elements."""
         item_title = Paragraph(f'<i>FOR {item.item_name.upper()}</i>', item_title_style)
         elements.append(item_title)
         elements.append(Spacer(1, 8))
-        
-        # Item description
         if item.description:
             desc_lines = item.description.split('\n')
             for line_idx, line in enumerate(desc_lines, 1):
                 desc_para = Paragraph(f'{line_idx}. {line}', item_desc_style)
                 elements.append(desc_para)
-        
-        # Rate aligned to right
         rate_data = [
             ['', f'RATE', f'{float(item.subtotal):,.0f}/-']
         ]
@@ -197,6 +209,18 @@ def generate_quotation_pdf(quotation):
         ]))
         elements.append(rate_table)
         elements.append(Spacer(1, 15))
+
+    # Items section
+    if item_lines:
+        elements.append(Paragraph('ITEMS', section_header_style))
+        for item in item_lines:
+            append_item_block(item, elements)
+
+    # Machines section
+    if machine_lines:
+        elements.append(Paragraph('MACHINES', section_header_style))
+        for item in machine_lines:
+            append_item_block(item, elements)
     
     # Ton display (if available)
     if quotation.ton is not None and quotation.ton > 0:

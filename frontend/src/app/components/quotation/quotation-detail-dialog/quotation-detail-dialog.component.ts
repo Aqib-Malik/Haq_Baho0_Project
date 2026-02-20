@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { Quotation } from '../../../models/quotation.model';
+import { Quotation, QuotationItem } from '../../../models/quotation.model';
 import { Company } from '../../../models/company.model';
 import { QuotationService } from '../../../services/quotation.service';
 
@@ -88,5 +88,17 @@ export class QuotationDetailDialogComponent {
             'expired': 'Expired'
         };
         return statusLabels[status] || status;
+    }
+
+    /** Items only (no machine) for separate table */
+    get quotationItems(): QuotationItem[] {
+        if (!this.quotation?.items) return [];
+        return this.quotation.items.filter((i: any) => !i.machine);
+    }
+
+    /** Machine lines only for separate table */
+    get quotationMachines(): QuotationItem[] {
+        if (!this.quotation?.items) return [];
+        return this.quotation.items.filter((i: any) => !!i.machine);
     }
 }

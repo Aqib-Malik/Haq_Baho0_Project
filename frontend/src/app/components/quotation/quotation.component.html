@@ -109,15 +109,30 @@
 
                 <!-- Items Column -->
                 <ng-container matColumnDef="items">
-                    <th mat-header-cell *matHeaderCellDef>Items</th>
+                    <th mat-header-cell *matHeaderCellDef>Items / Machines</th>
                     <td mat-cell *matCellDef="let quotation">
                         <div class="items-list">
                             @if (quotation.items && quotation.items.length > 0) {
-                            @for (item of quotation.items; track $index) {
-                            <span class="item-name-chip">{{ item.item_name }}</span>
+                            @let itemLines = quotation.items.filter(i => !i.machine);
+                            @let machineLines = quotation.items.filter(i => !!i.machine);
+                            @if (itemLines.length > 0) {
+                            <div class="items-portion">
+                                <span class="portion-label">Items:</span>
+                                @for (item of itemLines; track $index) {
+                                <span class="item-name-chip">{{ item.item_name }}</span>
+                                }
+                            </div>
+                            }
+                            @if (machineLines.length > 0) {
+                            <div class="items-portion">
+                                <span class="portion-label">Machines:</span>
+                                @for (m of machineLines; track $index) {
+                                <span class="item-name-chip machine-chip">{{ m.item_name }}</span>
+                                }
+                            </div>
                             }
                             } @else if (quotation.item_count && quotation.item_count > 0) {
-                            <span class="item-count-badge">{{ quotation.item_count }} item(s)</span>
+                            <span class="item-count-badge">{{ quotation.item_count }} line(s)</span>
                             } @else {
                             <span class="no-items">No items</span>
                             }

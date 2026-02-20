@@ -246,8 +246,17 @@ mat-icon[matPrefix] {
     color: #0d9488;
 }
 
-.item-row.machine-line .item-main .item-index {
+.item-row.machine-line .item-main .item-index,
+.machines-section .item-index {
     background: #ccfbf1;
+    color: #0d9488;
+}
+
+.machines-section {
+    margin-top: 20px;
+}
+
+.empty-state-machine .mat-icon {
     color: #0d9488;
 }
 

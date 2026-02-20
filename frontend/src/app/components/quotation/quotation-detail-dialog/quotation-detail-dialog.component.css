@@ -225,11 +225,31 @@
 }
 
 /* Table Design */
+.table-section-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+}
+
 .items-table-container {
     margin-bottom: 40px;
     border-radius: 12px;
     border: 1px solid #e2e8f0;
     overflow: hidden;
+}
+
+.machines-table-container {
+    margin-top: 8px;
+}
+
+.items-table .empty-row {
+    padding: 24px;
+    color: #94a3b8;
+    font-style: italic;
 }
 
 .items-table {

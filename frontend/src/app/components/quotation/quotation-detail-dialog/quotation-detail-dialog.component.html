@@ -80,6 +80,7 @@
 
         <!-- Items Table -->
         <div class="items-table-container">
+            <span class="table-section-label">Items</span>
             <table class="items-table">
                 <thead>
                     <tr>
@@ -90,7 +91,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @for (item of quotation.items; track $index) {
+                    @for (item of quotationItems; track $index) {
                     <tr>
                         <td>
                             <div class="item-main">{{ item.item_name }}</div>
@@ -109,11 +110,50 @@
                         </td>
                     </tr>
                     }
-                    @if (!quotation.items || quotation.items.length === 0) {
+                    @if (quotationItems.length === 0) {
                     <tr>
-                        <td colspan="4" class="text-center" style="padding: 40px; color: #94a3b8; font-style: italic;">
-                            No items included in this quotation.
+                        <td colspan="4" class="text-center empty-row">No items.</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Machines Table -->
+        <div class="items-table-container machines-table-container">
+            <span class="table-section-label">Machines</span>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Machine / Description</th>
+                        <th class="text-center col-qty">Qty</th>
+                        <th class="text-right col-rate">Rate</th>
+                        <th class="text-right col-amount">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (item of quotationMachines; track $index) {
+                    <tr>
+                        <td>
+                            <div class="item-main">{{ item.item_name }}</div>
+                            @if (item.description) {
+                            <div class="item-desc">{{ item.description }}</div>
+                            }
                         </td>
+                        <td class="text-center numeric-cell">
+                            {{ formatNumber(item.quantity) }} {{ item.unit }}
+                        </td>
+                        <td class="text-right numeric-cell">
+                            {{ formatCurrency(item.unit_price) }}
+                        </td>
+                        <td class="text-right numeric-cell total-cell">
+                            {{ formatCurrency(item.subtotal) }}
+                        </td>
+                    </tr>
+                    }
+                    @if (quotationMachines.length === 0) {
+                    <tr>
+                        <td colspan="4" class="text-center empty-row">No machines.</td>
                     </tr>
                     }
                 </tbody>
