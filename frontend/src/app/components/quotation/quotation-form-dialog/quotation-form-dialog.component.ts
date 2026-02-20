@@ -19,6 +19,7 @@ import { NotificationService } from '../../../services/notification.service';
 import { Company } from '../../../models/company.model';
 import { Tax, InventoryItem, Quotation } from '../../../models/quotation.model';
 import { ItemDialogComponent } from '../item-dialog/item-dialog.component';
+import { MachineDialogComponent, MachineLineData } from '../machine-dialog/machine-dialog.component';
 
 @Component({
     selector: 'app-quotation-form-dialog',
@@ -143,14 +144,15 @@ export class QuotationFormDialogComponent implements OnInit {
     createItemFormGroup(item?: any): FormGroup {
         return this.fb.group({
             id: [item?.id || null],
-            inventory_item: [item?.inventory_item || null],
+            inventory_item: [item?.inventory_item ?? null],
+            machine: [item?.machine ?? null],
             item_name: [item?.item_name || '', Validators.required],
             description: [item?.description || ''],
             quantity: [item?.quantity || 1, [Validators.required, Validators.min(0.01)]],
             unit_price: [item?.unit_price || 0, [Validators.required, Validators.min(0)]],
             unit: [item?.unit || 'pcs', Validators.required],
             machine_cost: [item?.machine_cost || 0, Validators.min(0)],
-            use_manual: [!item?.inventory_item]
+            use_manual: [!item?.inventory_item && !item?.machine]
         });
     }
 
@@ -162,11 +164,33 @@ export class QuotationFormDialogComponent implements OnInit {
 
         dialogRef.afterClosed().subscribe(result => {
             if (result) {
-                const newItem = this.createItemFormGroup(result);
+                const newItem = this.createItemFormGroup({ ...result, machine: null });
                 this.items.push(newItem);
-                // Force change detection
                 this.cdr.detectChanges();
-                // Trigger form update to recalculate totals
+                this.quotationForm.updateValueAndValidity();
+            }
+        });
+    }
+
+    addMachine(): void {
+        const dialogRef = this.dialog.open(MachineDialogComponent, {
+            width: '500px',
+            data: { line: null }
+        });
+
+        dialogRef.afterClosed().subscribe((result: MachineLineData | undefined) => {
+            if (result) {
+                const newItem = this.createItemFormGroup({
+                    machine: result.machine,
+                    item_name: result.item_name,
+                    description: result.description,
+                    quantity: result.quantity,
+                    unit: result.unit,
+                    unit_price: result.unit_price,
+                    inventory_item: null
+                });
+                this.items.push(newItem);
+                this.cdr.detectChanges();
                 this.quotationForm.updateValueAndValidity();
             }
         });
@@ -174,20 +198,41 @@ export class QuotationFormDialogComponent implements OnInit {
 
     editItem(index: number): void {
         const item = this.items.at(index).value;
-        const dialogRef = this.dialog.open(ItemDialogComponent, {
-            width: '500px',
-            data: { item: item }
-        });
+        const isMachineLine = !!item.machine;
 
-        dialogRef.afterClosed().subscribe(result => {
-            if (result) {
-                this.items.at(index).patchValue(result);
-                // Force change detection
-                this.cdr.detectChanges();
-                // Trigger form update to recalculate totals
-                this.quotationForm.updateValueAndValidity();
-            }
-        });
+        if (isMachineLine) {
+            const dialogRef = this.dialog.open(MachineDialogComponent, {
+                width: '500px',
+                data: { line: item }
+            });
+            dialogRef.afterClosed().subscribe((result: MachineLineData | undefined) => {
+                if (result) {
+                    this.items.at(index).patchValue({
+                        machine: result.machine,
+                        item_name: result.item_name,
+                        description: result.description,
+                        quantity: result.quantity,
+                        unit: result.unit,
+                        unit_price: result.unit_price,
+                        inventory_item: null
+                    });
+                    this.cdr.detectChanges();
+                    this.quotationForm.updateValueAndValidity();
+                }
+            });
+        } else {
+            const dialogRef = this.dialog.open(ItemDialogComponent, {
+                width: '500px',
+                data: { item }
+            });
+            dialogRef.afterClosed().subscribe(result => {
+                if (result) {
+                    this.items.at(index).patchValue({ ...result, machine: null });
+                    this.cdr.detectChanges();
+                    this.quotationForm.updateValueAndValidity();
+                }
+            });
+        }
     }
 
     removeItem(index: number): void {
@@ -306,8 +351,12 @@ export class QuotationFormDialogComponent implements OnInit {
             ton: formValue.ton ?? null,
             items: formValue.items.map((item: any) => {
                 const inv = item.use_manual ? null : item.inventory_item;
+                const machineId = item.machine != null && typeof item.machine === 'object' && 'id' in item.machine
+                    ? item.machine.id
+                    : item.machine;
                 return {
                     inventory_item: inv != null && typeof inv === 'object' && 'id' in inv ? inv.id : inv,
+                    machine: machineId ?? null,
                     item_name: item.item_name,
                     description: item.description ?? '',
                     quantity: item.quantity,

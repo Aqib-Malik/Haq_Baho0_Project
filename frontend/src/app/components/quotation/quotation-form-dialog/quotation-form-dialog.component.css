@@ -185,6 +185,12 @@ mat-icon[matPrefix] {
     align-items: center;
 }
 
+.add-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
 .add-btn {
     height: 32px;
     padding: 0 16px;
@@ -194,6 +200,17 @@ mat-icon[matPrefix] {
     color: #2563eb;
     border: 1px solid #dbeafe;
     background: #eff6ff;
+}
+
+.add-machine-btn {
+    color: #0d9488;
+    border-color: #99f6e4;
+    background: #ccfbf1;
+}
+
+.add-machine-btn:hover {
+    background: #99f6e4;
+    border-color: #0d9488;
 }
 
 .items-list {
@@ -216,6 +233,22 @@ mat-icon[matPrefix] {
     display: flex;
     align-items: center;
     gap: 12px;
+}
+
+.line-type-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #64748b;
+}
+
+.line-type-icon.machine {
+    color: #0d9488;
+}
+
+.item-row.machine-line .item-main .item-index {
+    background: #ccfbf1;
+    color: #0d9488;
 }
 
 .item-index {

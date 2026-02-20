@@ -514,7 +514,7 @@ class Quotation(SoftDeleteMixin):
 
 
 class QuotationItem(SoftDeleteMixin):
-    """Quotation item model for line items in quotations"""
+    """Quotation item model for line items in quotations (items or machines)"""
     quotation = models.ForeignKey(Quotation, on_delete=models.CASCADE, related_name='items')
     inventory_item = models.ForeignKey(
         InventoryItem,
@@ -523,8 +523,15 @@ class QuotationItem(SoftDeleteMixin):
         blank=True,
         related_name='quotation_items'
     )
-    
-    # Item details (can be from inventory or manual entry)
+    machine = models.ForeignKey(
+        'Machine',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='quotation_items'
+    )
+
+    # Item details (can be from inventory, machine, or manual entry)
     item_name = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     quantity = models.DecimalField(
@@ -568,7 +575,12 @@ class QuotationItem(SoftDeleteMixin):
             self.description = self.inventory_item.description
             self.unit_price = self.inventory_item.unit_price
             self.unit = self.inventory_item.unit
-        
+        # Auto-populate from machine if selected
+        if self.machine and not self.item_name:
+            self.item_name = self.machine.name
+            if self.machine.description and not self.description:
+                self.description = self.machine.description
+
         # Calculate subtotal
         self.calculate_subtotal()
         

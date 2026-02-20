@@ -110,6 +110,8 @@ export interface QuotationItem {
     quotation?: number;
     inventory_item?: number;
     inventory_item_name?: string;
+    machine?: number;
+    machine_name?: string;
     item_name: string;
     description?: string;
     quantity: number;

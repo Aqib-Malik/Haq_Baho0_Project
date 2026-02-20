@@ -260,7 +260,8 @@ class InventoryItemSerializer(serializers.ModelSerializer):
 
 class QuotationItemSerializer(serializers.ModelSerializer):
     inventory_item_name = serializers.ReadOnlyField(source='inventory_item.name')
-    
+    machine_name = serializers.ReadOnlyField(source='machine.name')
+
     class Meta:
         model = QuotationItem
         fields = '__all__'
@@ -268,23 +269,28 @@ class QuotationItemSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'quotation': {'required': False}  # Not required for nested creation
         }
-    
+
     def to_internal_value(self, data):
         # Accept inventory_item as either pk (int) or object with id (from frontend select)
         raw = dict(data)
         inv = raw.get('inventory_item')
         if inv is not None and isinstance(inv, dict):
             raw['inventory_item'] = inv.get('id')
+        # Accept machine as pk or object with id
+        machine = raw.get('machine')
+        if machine is not None and isinstance(machine, dict):
+            raw['machine'] = machine.get('id')
         # Strip frontend-only fields so they are not passed to model create()
         for key in ('use_manual',):
             raw.pop(key, None)
         return super().to_internal_value(raw)
-    
+
     def validate(self, data):
-        # Ensure either inventory_item or manual item_name is provided
-        if not data.get('inventory_item') and not data.get('item_name'):
-            raise serializers.ValidationError("Either inventory_item or item_name must be provided")
-        
+        # Ensure either inventory_item, machine, or manual item_name is provided
+        if not data.get('inventory_item') and not data.get('machine') and not data.get('item_name'):
+            raise serializers.ValidationError(
+                "Either inventory_item, machine, or item_name must be provided"
+            )
         # If inventory_item is selected, auto-populate fields
         if data.get('inventory_item') and not data.get('item_name'):
             data['item_name'] = data['inventory_item'].name
@@ -292,7 +298,9 @@ class QuotationItemSerializer(serializers.ModelSerializer):
                 data['unit_price'] = data['inventory_item'].unit_price
             if not data.get('unit'):
                 data['unit'] = data['inventory_item'].unit
-        
+        # If machine is selected, auto-populate item_name if not set
+        if data.get('machine') and not data.get('item_name'):
+            data['item_name'] = data['machine'].name
         return data
 
 
@@ -359,7 +367,7 @@ class QuotationDetailSerializer(serializers.ModelSerializer):
         item_field_names.discard('subtotal')
         for item_data in items_data:
             item_kw = {k: v for k, v in item_data.items() if k in item_field_names}
-            for key in ('inventory_item', 'machine_cost', 'description'):
+            for key in ('inventory_item', 'machine', 'machine_cost', 'description'):
                 if key in item_kw and item_kw[key] == '':
                     item_kw[key] = None
             QuotationItem.objects.create(quotation=quotation, **item_kw)
@@ -389,7 +397,7 @@ class QuotationDetailSerializer(serializers.ModelSerializer):
             item_field_names.discard('subtotal')
             for item_data in items_data:
                 item_kw = {k: v for k, v in item_data.items() if k in item_field_names}
-                for key in ('inventory_item', 'machine_cost', 'description'):
+                for key in ('inventory_item', 'machine', 'machine_cost', 'description'):
                     if key in item_kw and item_kw[key] == '':
                         item_kw[key] = None
                 QuotationItem.objects.create(quotation=instance, **item_kw)

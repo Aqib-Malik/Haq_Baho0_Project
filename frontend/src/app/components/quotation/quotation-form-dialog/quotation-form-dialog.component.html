@@ -87,17 +87,25 @@
             <div class="items-section">
                 <div class="items-header">
                     <span class="section-label">Line Items</span>
-                    <button mat-stroked-button type="button" class="add-btn" (click)="addItem()">
-                        <mat-icon>add</mat-icon> Add Item
-                    </button>
+                    <div class="add-buttons">
+                        <button mat-stroked-button type="button" class="add-btn" (click)="addItem()">
+                            <mat-icon>add</mat-icon> Add Item
+                        </button>
+                        <button mat-stroked-button type="button" class="add-btn add-machine-btn" (click)="addMachine()">
+                            <mat-icon>precision_manufacturing</mat-icon> Add Machine
+                        </button>
+                    </div>
                 </div>
 
                 @if (items.length > 0) {
                 <div class="items-list">
                     @for (item of items.controls; track $index; let i = $index) {
-                    <div class="item-row">
+                    <div class="item-row" [class.machine-line]="item.get('machine')?.value">
                         <div class="item-main">
                             <span class="item-index">{{ i + 1 }}</span>
+                            @if (item.get('machine')?.value) {
+                            <mat-icon class="line-type-icon machine" matTooltip="Machine">precision_manufacturing</mat-icon>
+                            }
                             <div class="item-details">
                                 <span class="item-name">{{ item.get('item_name')?.value }}</span>
                                 <span class="item-meta">
@@ -123,7 +131,7 @@
                 } @else {
                 <div class="empty-state" (click)="addItem()">
                     <mat-icon>post_add</mat-icon>
-                    <span>No items added. Click to add.</span>
+                    <span>No items added. Click to add item or use the buttons above to add machine.</span>
                 </div>
                 }
             </div>
