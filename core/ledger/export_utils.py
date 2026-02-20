@@ -188,13 +188,30 @@ def export_ledger_pdf(company, start_date=None, end_date=None):
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('LEFTPADDING', (0, 0), (0, 0), 0),
         ('RIGHTPADDING', (0, 0), (0, 0), 12),
+        ('LINEBELOW', (0, 0), (-1, 0), 1.5, colors.HexColor('#1a237e')),
     ]))
     elements.append(header_table)
-    elements.append(Spacer(1, 0.1 * inch))
+    elements.append(Spacer(1, 0.15 * inch))
 
-    contact_text = 'Near Lohlianwali Nahr Opp Railway Line G.T Road Gujranwala<br/>https://haqbahoomianco.com/  |  Haqbahoomiancompany@Gmail.com  |  +92 321 319 6814'
-    elements.append(Paragraph(contact_text, contact_style))
-    elements.append(Spacer(1, 0.2 * inch))
+    # Professional contact block: address and contact details in a styled table
+    contact_address = 'Near Lohlianwali Nahr Opp Railway Line G.T Road Gujranwala'
+    contact_line2 = 'https://haqbahoomianco.com  |  Haqbahoomiancompany@Gmail.com  |  +92 321 319 6814'
+    contact_table_data = [
+        [Paragraph(f'<b>Address:</b> {contact_address}', contact_style)],
+        [Paragraph(f'<b>Web / Email / Phone:</b> {contact_line2}', contact_style)],
+    ]
+    contact_table = Table(contact_table_data, colWidths=[6.2 * inch])
+    contact_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#f8fafc')),
+        ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+        ('LINEABOVE', (0, 0), (-1, 0), 0.5, colors.HexColor('#cbd5e1')),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+    ]))
+    elements.append(contact_table)
+    elements.append(Spacer(1, 0.25 * inch))
 
     # Report title
     elements.append(Paragraph("COMPANY LEDGER", title_style))
@@ -298,9 +315,7 @@ def export_ledger_pdf(company, start_date=None, end_date=None):
             ('FONTSIZE', (0, 1), (-1, -1), 9),
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f5f5f5')]),
             ('GRID', (0, 0), (-1, -1), 1, colors.grey),
-            ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),  # Header row centered
-            ('VALIGN', (0, 1), (2, -1), 'TOP'),     # Date, Ref, Description: top (description wraps)
-            ('VALIGN', (3, 1), (-1, -1), 'TOP'),     # Debit, Credit, Balance: top so numbers don't sit at bottom
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # All cells vertically centered so amounts/date stay proper when row is tall
         ]))
         elements.append(ledger_table)
     else:
