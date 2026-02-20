@@ -596,7 +596,15 @@ class Machine(SoftDeleteMixin):
     name = models.CharField(max_length=200, unique=True)
     code = models.CharField(max_length=50, unique=True, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    
+    amount = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        blank=True,
+        validators=[MinValueValidator(Decimal('0.00'))],
+        help_text='Default rate/amount for this machine (user-defined)'
+    )
+
     class Meta:
         ordering = ['name']
 

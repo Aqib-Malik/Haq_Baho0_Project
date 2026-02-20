@@ -90,9 +90,11 @@ export class MachineDialogComponent implements OnInit {
   onMachineSelected(machineId: number): void {
     const machine = this.machines.find(m => m.id === machineId);
     if (machine) {
+      const amount = machine.amount != null ? parseFloat(machine.amount) : 0;
       this.machineForm.patchValue({
         item_name: machine.name,
-        description: machine.description || ''
+        description: machine.description || '',
+        unit_price: amount
       });
     }
   }

@@ -17,7 +17,7 @@ import { Machine } from '../../../models/machine.model';
 })
 export class MachineListComponent implements OnInit {
     machines = new MatTableDataSource<Machine>([]);
-    displayedColumns: string[] = ['name', 'description', 'actions'];
+    displayedColumns: string[] = ['name', 'description', 'amount', 'actions'];
 
     constructor(
         private machineService: MachineService,

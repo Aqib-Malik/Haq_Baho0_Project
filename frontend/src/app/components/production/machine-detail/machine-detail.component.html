@@ -17,7 +17,7 @@
                     {{ machineId ? machineForm.get('name')?.value : 'Configure Machine' }}
                 </h1>
                 <p class="text-sm text-gray-500 font-light">
-                    {{ machineId ? 'Manage details and materials.' : 'Define specifications for new unit.' }}
+                    {{ machineId ? 'Manage details and default amount.' : 'Define specifications for new unit.' }}
                 </p>
             </div>
 
@@ -31,17 +31,13 @@
         </div>
     </div>
 
-    <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5">
-
-        <!-- LEFT COLUMN: Machine Details Form -->
-        <div class="lg:col-span-5 space-y-4 animate-fade-in-up" style="animation-delay: 200ms;">
+    <div class="max-w-5xl mx-auto">
+        <!-- Machine Details Form -->
+        <div class="max-w-xl space-y-4 animate-fade-in-up" style="animation-delay: 200ms;">
             <div
                 class="bg-white rounded-2xl shadow-lg shadow-blue-900/5 border border-white p-5 relative overflow-hidden transition-all hover:shadow-xl">
 
-                <!-- decorative bg blob -->
-                <div
-                    class="absolute -top-20 -right-20 w-40 h-40 bg-blue-50 rounded-full blur-2xl opacity-60 pointer-events-none">
-                </div>
+                <div class="absolute -top-20 -right-20 w-40 h-40 bg-blue-50 rounded-full blur-2xl opacity-60 pointer-events-none"></div>
 
                 <div class="relative z-10">
                     <div class="flex items-center gap-3 mb-5">
@@ -55,35 +51,39 @@
                     <form [formGroup]="machineForm" (ngSubmit)="saveMachine()" class="space-y-4">
 
                         <div class="group">
-                            <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Name <span
-                                    class="text-red-500">*</span></label>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Name <span class="text-red-500">*</span></label>
                             <mat-form-field appearance="outline" class="w-full !rounded-lg theme-input compact-field">
                                 <input matInput formControlName="name" placeholder="Name" class="!text-sm">
                                 <mat-icon matSuffix class="text-gray-400 !text-lg scale-75">text_fields</mat-icon>
-                                <mat-error *ngIf="machineForm.get('name')?.hasError('required')">Name is
-                                    required</mat-error>
+                                <mat-error *ngIf="machineForm.get('name')?.hasError('required')">Name is required</mat-error>
                             </mat-form-field>
                         </div>
 
                         <div class="group">
-                            <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Asset Code <span
-                                    class="text-red-500">*</span></label>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Asset Code <span class="text-red-500">*</span></label>
                             <mat-form-field appearance="outline" class="w-full theme-input compact-field">
                                 <input matInput formControlName="code" placeholder="Code" class="!text-sm">
                                 <div matSuffix class="flex items-center pr-2">
-                                    <span
-                                        class="px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 text-[10px] font-mono font-bold border border-gray-200">ID</span>
+                                    <span class="px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 text-[10px] font-mono font-bold border border-gray-200">ID</span>
                                 </div>
-                                <mat-error *ngIf="machineForm.get('code')?.hasError('required')">Asset Code is
-                                    required</mat-error>
+                                <mat-error *ngIf="machineForm.get('code')?.hasError('required')">Asset Code is required</mat-error>
                             </mat-form-field>
+                        </div>
+
+                        <div class="group">
+                            <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Amount (Rs)</label>
+                            <mat-form-field appearance="outline" class="w-full theme-input compact-field">
+                                <input matInput type="number" formControlName="amount" min="0" step="0.01" placeholder="0" class="!text-sm">
+                                <span matPrefix class="text-gray-500 mr-1">Rs</span>
+                                <mat-error *ngIf="machineForm.get('amount')?.hasError('min')">Amount cannot be negative</mat-error>
+                            </mat-form-field>
+                            <p class="text-[11px] text-gray-500 mt-0.5 ml-1">Default rate/amount for this machine. Used when adding to quotations.</p>
                         </div>
 
                         <div class="group">
                             <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Description</label>
                             <mat-form-field appearance="outline" class="w-full theme-input compact-field">
-                                <textarea matInput formControlName="description" rows="3" placeholder="Description..."
-                                    class="!text-sm"></textarea>
+                                <textarea matInput formControlName="description" rows="3" placeholder="Description..." class="!text-sm"></textarea>
                             </mat-form-field>
                         </div>
 
@@ -98,131 +98,6 @@
                             </button>
                         </div>
                     </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- RIGHT COLUMN: BOM / Requirements -->
-        <div class="lg:col-span-7 space-y-4 animate-fade-in-up" style="animation-delay: 300ms;">
-
-            <!-- Onboarding / Empty State for New Machines -->
-            <div *ngIf="!machineId"
-                class="h-full min-h-[300px] flex flex-col items-center justify-center text-center p-6 bg-white/60 backdrop-blur-sm rounded-2xl border border-white border-dashed shadow-sm">
-                <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                    <mat-icon class="!w-8 !h-8 !text-3xl text-blue-400">precision_manufacturing</mat-icon>
-                </div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">Setup Production</h3>
-                <p class="text-sm text-gray-500 max-w-xs leading-relaxed">
-                    Create the machine profile first. Then you can configure the <strong
-                        class="text-blue-600">BOM</strong>.
-                </p>
-            </div>
-
-            <!-- Material Configuration Panel (Visible only when editing) -->
-            <div *ngIf="machineId">
-                <div class="bg-gray-900 text-white rounded-2xl shadow-lg overflow-hidden">
-                    <!-- Header -->
-                    <div class="px-5 py-4 border-b border-gray-800 bg-gradient-to-r from-gray-900 to-gray-800">
-                        <div class="flex justify-between items-center">
-                            <h2 class="text-lg font-bold flex items-center gap-2">
-                                <mat-icon class="text-purple-400 !w-5 !h-5 !text-lg">inventory</mat-icon> Required
-                                Materials
-                            </h2>
-                            <div class="px-2 py-0.5 bg-white/10 rounded text-[10px] font-mono text-gray-300">
-                                BOM Config
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Add New Item Area -->
-                    <div class="p-4 bg-gray-800/50">
-                        <div class="flex flex-col gap-2">
-                            <div class="flex gap-2 items-center">
-                                <div class="flex-1 relative">
-                                    <input type="text" [formControl]="newItemControl" [matAutocomplete]="auto"
-                                        placeholder="Search material..."
-                                        class="w-full h-10 rounded-lg bg-gray-700 border border-gray-600 text-white px-3 pr-10 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
-                                    <mat-icon
-                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none !text-xl">search</mat-icon>
-                                    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn"
-                                        class="modern-autocomplete">
-                                        <mat-option *ngFor="let item of filteredItems | async" [value]="item"
-                                            class="!h-10 !text-sm">
-                                            <div class="flex justify-between items-center w-full">
-                                                <span>{{item.name}}</span>
-                                                <span
-                                                    class="text-xs opacity-60 bg-gray-100 px-1.5 rounded">{{item.unit}}</span>
-                                            </div>
-                                        </mat-option>
-                                    </mat-autocomplete>
-                                </div>
-
-                                <!-- Quick Add Item Button -->
-                                <button mat-mini-fab (click)="openQuickAddDialog()" matTooltip="Add new inventory item"
-                                    class="!bg-green-600 hover:!bg-green-700 !text-white !shadow-lg !w-10 !h-10 !flex !items-center !justify-center">
-                                    <mat-icon class="!text-xl">add_box</mat-icon>
-                                </button>
-
-                                <div class="w-28 relative">
-                                    <input type="number" [formControl]="newQtyControl" placeholder="Qty"
-                                        class="w-full h-10 rounded-lg bg-gray-700 border border-gray-600 text-white px-3 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-mono text-center">
-                                </div>
-
-                                <button mat-mini-fab (click)="addRequirement()"
-                                    [disabled]="newItemControl.invalid || newQtyControl.invalid"
-                                    class="!shadow-lg !w-10 !h-10 !flex !items-center !justify-center">
-                                    <mat-icon class="!text-xl">add</mat-icon>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Table List -->
-                    <div class="bg-white">
-                        <div *ngIf="requirements.data.length === 0" class="p-8 text-center text-gray-400 text-sm">
-                            <p>No materials configured.</p>
-                        </div>
-
-                        <table *ngIf="requirements.data.length > 0" mat-table [dataSource]="requirements"
-                            class="w-full">
-                            <ng-container matColumnDef="item">
-                                <th mat-header-cell *matHeaderCellDef
-                                    class="!pl-5 !py-3 text-[10px] uppercase text-gray-400 font-bold tracking-wider">
-                                    Material</th>
-                                <td mat-cell *matCellDef="let element" class="!pl-5 !py-2">
-                                    <div class="font-bold text-gray-800 text-sm">{{element.inventory_item_name}}</div>
-                                    <div class="text-[10px] text-gray-400">{{element.inventory_item_unit}}</div>
-                                </td>
-                            </ng-container>
-
-                            <ng-container matColumnDef="quantity">
-                                <th mat-header-cell *matHeaderCellDef
-                                    class="text-right text-[10px] uppercase text-gray-400 font-bold tracking-wider">Qty
-                                </th>
-                                <td mat-cell *matCellDef="let element" class="text-right">
-                                    <div
-                                        class="inline-block bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md font-mono font-bold text-xs">
-                                        {{element.quantity}}
-                                    </div>
-                                </td>
-                            </ng-container>
-
-                            <ng-container matColumnDef="actions">
-                                <th mat-header-cell *matHeaderCellDef class="!pr-5"></th>
-                                <td mat-cell *matCellDef="let element" class="!pr-5 text-right">
-                                    <button mat-icon-button (click)="deleteRequirement(element.id)"
-                                        class="text-gray-300 hover:text-red-500 transition-colors scale-75">
-                                        <mat-icon>remove_circle_outline</mat-icon>
-                                    </button>
-                                </td>
-                            </ng-container>
-
-                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                            <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-                                class="hover:bg-gray-50 border-b border-gray-100 last:border-0 transition-colors"></tr>
-                        </table>
-                    </div>
-
                 </div>
             </div>
         </div>
