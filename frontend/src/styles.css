@@ -16,6 +16,17 @@
   z-index: 10000 !important;
 }
 
+/* Machine dialog: wider on desktop, full width on mobile */
+.machine-dialog-panel {
+  max-width: 96vw !important;
+}
+
+@media (max-width: 672px) {
+  .machine-dialog-panel {
+    width: 96vw !important;
+    max-width: 96vw !important;
+  }
+}
 
 /* Global Styles */
 * {

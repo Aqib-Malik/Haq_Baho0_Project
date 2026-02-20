@@ -524,11 +524,18 @@ class DemandViewSet(AuditMixin, viewsets.ModelViewSet):
              return Response({'error': 'Invalid demand IDs'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Aggregate materials
-        # Optimization: Filter by indexed demand_id, group by inventory_item_id (indexed FK)
         materials = DemandMaterial.objects.filter(demand_id__in=demand_ids)\
             .values('inventory_item__id', 'inventory_item__name', 'inventory_item__unit')\
             .annotate(total_quantity=Sum('quantity'))\
             .order_by('inventory_item__name')
-        
-        # Force evaluation to list to resolve query before serialization overhead
-        return Response(list(materials))
+
+        # Aggregate machines (machine name, amount, total quantity)
+        machines = DemandMachineOrder.objects.filter(demand_id__in=demand_ids)\
+            .values('machine__id', 'machine__name', 'machine__amount')\
+            .annotate(total_quantity=Sum('quantity'))\
+            .order_by('machine__name')
+
+        return Response({
+            'materials': list(materials),
+            'machines': list(machines)
+        })

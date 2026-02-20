@@ -20,7 +20,7 @@ import { LedgerService } from '../../services/ledger.service';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import { Company } from '../../models/company.model';
-import { Quotation } from '../../models/quotation.model';
+import { Quotation, QuotationItem } from '../../models/quotation.model';
 import { QuotationFormDialogComponent } from './quotation-form-dialog/quotation-form-dialog.component';
 import { QuotationDetailDialogComponent } from './quotation-detail-dialog/quotation-detail-dialog.component';
 
@@ -289,5 +289,15 @@ export class QuotationComponent implements OnInit {
             'expired': 'Expired'
         };
         return statusLabels[status] || status;
+    }
+
+    getItemLines(quotation: Quotation): QuotationItem[] {
+        if (!quotation?.items?.length) return [];
+        return quotation.items.filter((i: any) => !i.machine);
+    }
+
+    getMachineLines(quotation: Quotation): QuotationItem[] {
+        if (!quotation?.items?.length) return [];
+        return quotation.items.filter((i: any) => !!i.machine);
     }
 }

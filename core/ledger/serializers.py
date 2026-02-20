@@ -428,10 +428,14 @@ class MachineSerializer(serializers.ModelSerializer):
 
 class DemandMachineOrderSerializer(serializers.ModelSerializer):
     machine_name = serializers.ReadOnlyField(source='machine.name')
-    
+    machine_amount = serializers.DecimalField(
+        source='machine.amount', max_digits=15, decimal_places=2,
+        read_only=True, allow_null=True
+    )
+
     class Meta:
         model = DemandMachineOrder
-        fields = ['id', 'demand', 'machine', 'machine_name', 'quantity']
+        fields = ['id', 'demand', 'machine', 'machine_name', 'machine_amount', 'quantity']
 
 class DemandMaterialSerializer(serializers.ModelSerializer):
     inventory_item_name = serializers.ReadOnlyField(source='inventory_item.name')

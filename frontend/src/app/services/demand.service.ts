@@ -39,7 +39,7 @@ export class DemandService {
         return this.http.delete<void>(`${this.apiUrl}${id}/`);
     }
 
-    aggregateDemands(demandIds: number[]): Observable<any[]> {
-        return this.http.post<any[]>(`${this.apiUrl}aggregate/`, { demand_ids: demandIds });
+    aggregateDemands(demandIds: number[]): Observable<{ materials: any[]; machines: any[] }> {
+        return this.http.post<{ materials: any[]; machines: any[] }>(`${this.apiUrl}aggregate/`, { demand_ids: demandIds });
     }
 }

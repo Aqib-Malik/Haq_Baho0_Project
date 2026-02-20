@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
-import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -106,6 +106,21 @@ export class DemandCreateComponent implements OnInit {
 
     removeMachineOrder(index: number) {
         this.machineOrders.removeAt(index);
+    }
+
+    /** Amount (Rs) for the selected machine in this order row */
+    getAmountForOrder(order: AbstractControl): number | null {
+        const mid = order.get('machine_id')?.value;
+        const m = this.machines.find(x => x.id === mid);
+        return m?.amount != null ? Number(m.amount) : null;
+    }
+
+    /** Total (Rs) = amount × quantity for this order row */
+    getTotalForOrder(order: AbstractControl): number | null {
+        const amt = this.getAmountForOrder(order);
+        const qty = order.get('quantity')?.value;
+        if (amt == null || qty == null) return null;
+        return amt * Number(qty);
     }
 
     onSubmit() {

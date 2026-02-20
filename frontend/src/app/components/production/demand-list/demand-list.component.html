@@ -145,7 +145,7 @@
                 <!-- Report Content -->
                 <div class="p-8 md:p-12 min-h-[600px] print:p-0">
                     <div class="text-center border-b border-gray-800 pb-6 mb-8">
-                        <h1 class="text-4xl font-serif font-bold text-gray-900 uppercase tracking-widest">Material
+                        <h1 class="text-4xl font-serif font-bold text-gray-900 uppercase tracking-widest">Demand
                             Summary</h1>
                         <p class="text-gray-500 mt-2">Generated on {{ today | date:'fullDate' }}</p>
                     </div>
@@ -161,32 +161,57 @@
                         </div>
                     </div>
 
-                    <table class="w-full border-collapse">
-                        <thead>
-                            <tr class="border-b-2 border-gray-800">
-                                <th class="py-3 text-left font-bold text-gray-900 uppercase text-sm">Item Description
-                                </th>
-                                <th class="py-3 text-right font-bold text-gray-900 uppercase text-sm">Quantity</th>
-                                <th class="py-3 text-left pl-4 font-bold text-gray-900 uppercase text-sm w-20">Unit</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            <tr *ngFor="let item of aggregatedMaterials; trackBy: trackByItem"
-                                class="hover:bg-gray-50 print:hover:bg-transparent">
-                                <td class="py-4 text-gray-800 font-medium">{{ item.inventory_item__name }}</td>
-                                <td class="py-4 text-right font-mono text-lg font-bold text-gray-900">{{
-                                    item.total_quantity | number:'1.0-4' }}</td>
-                                <td class="py-4 pl-4 text-gray-500 text-sm">{{ item.inventory_item__unit }}</td>
-                            </tr>
-                        </tbody>
-                        <tfoot>
-                            <tr class="border-t-2 border-gray-800">
-                                <td class="py-4 font-bold text-gray-900">Total Items: {{aggregatedMaterials.length}}
-                                </td>
-                                <td colspan="2"></td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                    <!-- Machine Summary (with amounts) -->
+                    <div class="mb-10" *ngIf="aggregatedMachines.length > 0">
+                        <h2 class="text-lg font-bold text-gray-900 uppercase tracking-wide mb-4">Machine Summary</h2>
+                        <table class="w-full border-collapse">
+                            <thead>
+                                <tr class="border-b-2 border-gray-800">
+                                    <th class="py-3 text-left font-bold text-gray-900 uppercase text-sm">Machine</th>
+                                    <th class="py-3 text-right font-bold text-gray-900 uppercase text-sm">Amount (Rs)</th>
+                                    <th class="py-3 text-right font-bold text-gray-900 uppercase text-sm">Total Qty</th>
+                                    <th class="py-3 text-right font-bold text-gray-900 uppercase text-sm">Total (Rs)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr *ngFor="let item of aggregatedMachines; trackBy: trackByMachine"
+                                    class="hover:bg-gray-50 print:hover:bg-transparent">
+                                    <td class="py-4 text-gray-800 font-medium">{{ item.machine__name }}</td>
+                                    <td class="py-4 text-right font-mono text-gray-700">{{ item.machine__amount != null ? (item.machine__amount | number:'1.2-2') : '—' }}</td>
+                                    <td class="py-4 text-right font-mono font-bold text-gray-900">{{ item.total_quantity | number:'1.0-2' }}</td>
+                                    <td class="py-4 text-right font-mono font-bold text-indigo-700">{{ getMachineTotal(item) != null ? ('Rs ' + (getMachineTotal(item) | number:'1.2-2')) : '—' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Material Summary -->
+                    <div [class.mb-10]="aggregatedMachines.length > 0">
+                        <h2 class="text-lg font-bold text-gray-900 uppercase tracking-wide mb-4">Material Summary</h2>
+                        <table class="w-full border-collapse">
+                            <thead>
+                                <tr class="border-b-2 border-gray-800">
+                                    <th class="py-3 text-left font-bold text-gray-900 uppercase text-sm">Item Description</th>
+                                    <th class="py-3 text-right font-bold text-gray-900 uppercase text-sm">Quantity</th>
+                                    <th class="py-3 text-left pl-4 font-bold text-gray-900 uppercase text-sm w-20">Unit</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr *ngFor="let item of aggregatedMaterials; trackBy: trackByItem"
+                                    class="hover:bg-gray-50 print:hover:bg-transparent">
+                                    <td class="py-4 text-gray-800 font-medium">{{ item.inventory_item__name }}</td>
+                                    <td class="py-4 text-right font-mono text-lg font-bold text-gray-900">{{ item.total_quantity | number:'1.0-4' }}</td>
+                                    <td class="py-4 pl-4 text-gray-500 text-sm">{{ item.inventory_item__unit }}</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr class="border-t-2 border-gray-800">
+                                    <td class="py-4 font-bold text-gray-900">Total Items: {{aggregatedMaterials.length}}</td>
+                                    <td colspan="2"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
 
                     <div
                         class="mt-16 pt-8 border-t border-gray-200 flex justify-between text-xs text-gray-400 print:flex">

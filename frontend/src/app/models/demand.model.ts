@@ -3,6 +3,7 @@ export interface DemandMachineOrder {
     demand: number;
     machine: number;
     machine_name: string;
+    machine_amount?: string | null;
     quantity: string;
 }
 

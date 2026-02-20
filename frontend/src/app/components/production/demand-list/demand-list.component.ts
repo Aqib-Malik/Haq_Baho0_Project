@@ -28,6 +28,7 @@ export class DemandListComponent implements OnInit {
     isLoading = false;
 
     aggregatedMaterials: any[] = [];
+    aggregatedMachines: any[] = [];
     showSummary = false;
     today = new Date();
 
@@ -79,10 +80,9 @@ export class DemandListComponent implements OnInit {
         this.demandService.aggregateDemands(selectedIds)
             .subscribe({
                 next: (data) => {
-                    // Use setTimeout to avoid NG0100 (ExpressionChangedAfterItHasBeenCheckedError)
-                    // if the response is too fast or interferes with current CD cycle
                     setTimeout(() => {
-                        this.aggregatedMaterials = data;
+                        this.aggregatedMaterials = data.materials ?? (Array.isArray(data) ? data : []);
+                        this.aggregatedMachines = data.machines ?? [];
                         this.showSummary = true;
                         this.isLoading = false;
                         this.cdr.detectChanges();
@@ -105,6 +105,18 @@ export class DemandListComponent implements OnInit {
 
     trackByItem(index: number, item: any): number {
         return item.inventory_item__id;
+    }
+
+    trackByMachine(index: number, item: any): number {
+        return item.machine__id ?? index;
+    }
+
+    /** Total Rs for aggregated machine row: amount × total_quantity */
+    getMachineTotal(item: any): number | null {
+        const amt = item.machine__amount != null ? Number(item.machine__amount) : null;
+        const qty = item.total_quantity != null ? Number(item.total_quantity) : null;
+        if (amt == null || qty == null) return null;
+        return amt * qty;
     }
 
     deleteDemand(id: number) {

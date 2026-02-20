@@ -1,105 +1,74 @@
-<div class="min-h-screen bg-gray-50/50 p-4 font-sans">
-
-    <!-- Navigation & Header -->
-    <div class="max-w-5xl mx-auto mb-6">
-        <nav class="flex items-center gap-2 text-xs text-gray-500 mb-2 animate-fade-in-down">
-            <a routerLink="/production/machines" class="hover:text-blue-600 transition-colors flex items-center gap-1">
-                <mat-icon class="!text-base !w-4 !h-4">arrow_back</mat-icon> Back
+<div class="machine-page">
+    <div class="machine-page__inner">
+        <!-- Compact top bar -->
+        <nav class="machine-nav">
+            <a routerLink="/production/machines" class="machine-nav__back">
+                <mat-icon>arrow_back</mat-icon> Back to Machines
             </a>
-            <span>/</span>
-            <span class="text-gray-800 font-medium">{{ machineId ? 'Edit' : 'New' }}</span>
+            <span class="machine-nav__sep">/</span>
+            <span class="machine-nav__current">{{ machineId ? 'Edit' : 'New Machine' }}</span>
         </nav>
 
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 animate-fade-in-down"
-            style="animation-delay: 100ms;">
-            <div>
-                <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">
-                    {{ machineId ? machineForm.get('name')?.value : 'Configure Machine' }}
-                </h1>
-                <p class="text-sm text-gray-500 font-light">
-                    {{ machineId ? 'Manage details and default amount.' : 'Define specifications for new unit.' }}
-                </p>
+        <header class="machine-header">
+            <div class="machine-header__left">
+                <h1 class="machine-title">{{ machineId ? machineForm.get('name')?.value : 'Configure Machine' }}</h1>
+                <p class="machine-subtitle">{{ machineId ? 'Update details' : 'Add name, code, amount & description' }}</p>
             </div>
+            <div *ngIf="machineId" class="machine-badge">Active</div>
+        </header>
 
-            <div *ngIf="machineId">
-                <span
-                    class="px-3 py-1 rounded-full bg-green-100 text-green-700 font-bold text-xs border border-green-200 shadow-sm flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                    Active
-                </span>
-            </div>
-        </div>
-    </div>
-
-    <div class="max-w-5xl mx-auto">
-        <!-- Machine Details Form -->
-        <div class="max-w-xl space-y-4 animate-fade-in-up" style="animation-delay: 200ms;">
-            <div
-                class="bg-white rounded-2xl shadow-lg shadow-blue-900/5 border border-white p-5 relative overflow-hidden transition-all hover:shadow-xl">
-
-                <div class="absolute -top-20 -right-20 w-40 h-40 bg-blue-50 rounded-full blur-2xl opacity-60 pointer-events-none"></div>
-
-                <div class="relative z-10">
-                    <div class="flex items-center gap-3 mb-5">
-                        <div
-                            class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md">
-                            <mat-icon class="!text-lg !w-5 !h-5 !leading-none">settings</mat-icon>
-                        </div>
-                        <h2 class="text-base font-bold text-gray-900">Core Specs</h2>
-                    </div>
-
-                    <form [formGroup]="machineForm" (ngSubmit)="saveMachine()" class="space-y-4">
-
-                        <div class="group">
-                            <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Name <span class="text-red-500">*</span></label>
-                            <mat-form-field appearance="outline" class="w-full !rounded-lg theme-input compact-field">
-                                <input matInput formControlName="name" placeholder="Name" class="!text-sm">
-                                <mat-icon matSuffix class="text-gray-400 !text-lg scale-75">text_fields</mat-icon>
-                                <mat-error *ngIf="machineForm.get('name')?.hasError('required')">Name is required</mat-error>
-                            </mat-form-field>
-                        </div>
-
-                        <div class="group">
-                            <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Asset Code <span class="text-red-500">*</span></label>
-                            <mat-form-field appearance="outline" class="w-full theme-input compact-field">
-                                <input matInput formControlName="code" placeholder="Code" class="!text-sm">
-                                <div matSuffix class="flex items-center pr-2">
-                                    <span class="px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 text-[10px] font-mono font-bold border border-gray-200">ID</span>
-                                </div>
-                                <mat-error *ngIf="machineForm.get('code')?.hasError('required')">Asset Code is required</mat-error>
-                            </mat-form-field>
-                        </div>
-
-                        <div class="group">
-                            <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Amount (Rs)</label>
-                            <mat-form-field appearance="outline" class="w-full theme-input compact-field">
-                                <input matInput type="number" formControlName="amount" min="0" step="0.01" placeholder="0" class="!text-sm">
-                                <span matPrefix class="text-gray-500 mr-1">Rs</span>
-                                <mat-error *ngIf="machineForm.get('amount')?.hasError('min')">Amount cannot be negative</mat-error>
-                            </mat-form-field>
-                            <p class="text-[11px] text-gray-500 mt-0.5 ml-1">Default rate/amount for this machine. Used when adding to quotations.</p>
-                        </div>
-
-                        <div class="group">
-                            <label class="block text-xs font-semibold text-gray-700 mb-1 ml-1">Description</label>
-                            <mat-form-field appearance="outline" class="w-full theme-input compact-field">
-                                <textarea matInput formControlName="description" rows="3" placeholder="Description..." class="!text-sm"></textarea>
-                            </mat-form-field>
-                        </div>
-
-                        <div class="pt-2">
-                            <button mat-raised-button color="primary" type="submit"
-                                class="w-full !h-10 !rounded-lg !text-sm !font-bold tracking-wide shadow-md transition-all transform active:scale-95"
-                                [disabled]="machineForm.invalid">
-                                <div class="flex items-center justify-center gap-2">
-                                    <span>{{ machineId ? 'Save' : 'Create' }}</span>
-                                    <mat-icon class="!w-4 !h-4 !text-base">arrow_forward</mat-icon>
-                                </div>
-                            </button>
-                        </div>
-                    </form>
+        <!-- Wide form card -->
+        <div class="machine-card">
+            <div class="machine-card__accent"></div>
+            <div class="machine-card__head">
+                <div class="machine-card__icon">
+                    <mat-icon>precision_manufacturing</mat-icon>
                 </div>
+                <h2 class="machine-card__title">Core Specs</h2>
             </div>
+
+            <form [formGroup]="machineForm" (ngSubmit)="saveMachine()" class="machine-form">
+                <div class="machine-form__row machine-form__row--2">
+                    <mat-form-field appearance="outline" class="machine-field theme-input">
+                        <mat-label>Name</mat-label>
+                        <input matInput formControlName="name" placeholder="Machine name">
+                        <mat-icon matSuffix>badge</mat-icon>
+                        <mat-error *ngIf="machineForm.get('name')?.hasError('required')">Name is required</mat-error>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="machine-field theme-input">
+                        <mat-label>Asset Code</mat-label>
+                        <input matInput formControlName="code" placeholder="e.g. M001">
+                        <mat-icon matSuffix>tag</mat-icon>
+                        <mat-error *ngIf="machineForm.get('code')?.hasError('required')">Code is required</mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="machine-form__row machine-form__row--1">
+                    <mat-form-field appearance="outline" class="machine-field machine-field--amount theme-input">
+                        <mat-label>Amount (Rs)</mat-label>
+                        <input matInput type="number" formControlName="amount" min="0" step="0.01" placeholder="0">
+                        <span matPrefix class="machine-field__prefix">Rs</span>
+                        <mat-hint>Default rate when adding to quotations</mat-hint>
+                        <mat-error *ngIf="machineForm.get('amount')?.hasError('min')">Amount cannot be negative</mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="machine-form__row machine-form__row--1">
+                    <mat-form-field appearance="outline" class="machine-field machine-field--full theme-input">
+                        <mat-label>Description</mat-label>
+                        <textarea matInput formControlName="description" placeholder="Optional notes..." rows="2"></textarea>
+                        <mat-icon matSuffix>notes</mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <div class="machine-form__actions">
+                    <button mat-stroked-button type="button" routerLink="/production/machines">Cancel</button>
+                    <button mat-raised-button color="primary" type="submit" class="machine-submit" [disabled]="machineForm.invalid">
+                        <mat-icon>{{ machineId ? 'save' : 'add_circle' }}</mat-icon>
+                        {{ machineId ? 'Save' : 'Create' }}
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

@@ -188,7 +188,8 @@ export class QuotationFormDialogComponent implements OnInit {
 
     addMachine(): void {
         const dialogRef = this.dialog.open(MachineDialogComponent, {
-            width: '500px',
+            width: '640px',
+            panelClass: 'machine-dialog-panel',
             data: { line: null }
         });
 
@@ -219,7 +220,8 @@ export class QuotationFormDialogComponent implements OnInit {
     editMachine(index: number): void {
         const line = this.machines.at(index).value;
         const dialogRef = this.dialog.open(MachineDialogComponent, {
-            width: '500px',
+            width: '640px',
+            panelClass: 'machine-dialog-panel',
             data: { line }
         });
         dialogRef.afterClosed().subscribe((result: MachineLineData | undefined) => {

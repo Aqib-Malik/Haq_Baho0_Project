@@ -132,21 +132,43 @@
                                     <mat-option *ngFor="let m of machines" [value]="m.id">
                                         <span class="font-semibold">{{m.name}}</span>
                                         <span class="text-xs text-gray-500 ml-2" *ngIf="m.code">({{m.code}})</span>
+                                        <span class="text-xs text-green-600 ml-2" *ngIf="m.amount != null">— Rs {{ m.amount }}</span>
                                     </mat-option>
                                 </mat-select>
                             </mat-form-field>
                         </div>
 
                         <!-- Quantity Input -->
-                        <div class="w-full md:w-32 space-y-1.5">
+                        <div class="w-full md:w-28 space-y-1.5">
                             <label class="block text-xs font-bold text-slate-700 ml-1">
                                 <mat-icon
                                     class="!w-3.5 !h-3.5 !text-xs align-middle mr-1 text-purple-600">production_quantity_limits</mat-icon>
-                                Quantity <span class="text-red-500">*</span>
+                                Qty <span class="text-red-500">*</span>
                             </label>
                             <mat-form-field appearance="outline" class="w-full">
                                 <input matInput type="number" formControlName="quantity" placeholder="1" min="1">
                             </mat-form-field>
+                        </div>
+
+                        <!-- Amount (Rs) display -->
+                        <div class="w-full md:w-32 space-y-1.5 flex flex-col justify-end">
+                            <label class="block text-xs font-bold text-slate-700 ml-1">
+                                <mat-icon class="!w-3.5 !h-3.5 !text-xs align-middle mr-1 text-emerald-600">payments</mat-icon>
+                                Amount (Rs)
+                            </label>
+                            <div class="text-sm font-semibold text-slate-800 py-2">
+                                <span *ngIf="getAmountForOrder(order) != null">Rs {{ getAmountForOrder(order) | number:'1.2-2' }}</span>
+                                <span *ngIf="getAmountForOrder(order) == null" class="text-slate-400">—</span>
+                            </div>
+                        </div>
+
+                        <!-- Total (Rs) display -->
+                        <div class="w-full md:w-36 space-y-1.5 flex flex-col justify-end">
+                            <label class="block text-xs font-bold text-slate-700 ml-1">Total (Rs)</label>
+                            <div class="text-sm font-bold text-indigo-700 py-2">
+                                <span *ngIf="getTotalForOrder(order) != null">Rs {{ getTotalForOrder(order) | number:'1.2-2' }}</span>
+                                <span *ngIf="getTotalForOrder(order) == null" class="text-slate-400">—</span>
+                            </div>
                         </div>
 
                         <!-- Delete Action -->
