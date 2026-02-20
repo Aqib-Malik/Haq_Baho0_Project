@@ -1,12 +1,12 @@
-<div class="min-h-screen bg-gray-50 p-6">
+<div class="demand-list-page">
 
     <!-- Header -->
-    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 no-print">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-800 tracking-tight">Demand Sheets</h1>
-            <p class="text-gray-500 mt-1">Manage production orders and material aggregation</p>
+    <div class="demand-list-header no-print">
+        <div class="demand-list-header__left">
+            <h1 class="demand-list-title">Demand Sheets</h1>
+            <p class="demand-list-subtitle">Manage production orders and material aggregation</p>
         </div>
-        <div class="flex gap-3">
+        <div class="demand-list-actions">
             <button mat-flat-button color="accent" (click)="aggregateSelected()"
                 [disabled]="selection.isEmpty() || isLoading"
                 class="!rounded-full !px-4 md:!px-6 py-2 shadow-md transition-all transform active:scale-95 disabled:shadow-none flex items-center relative overflow-hidden"
@@ -35,21 +35,20 @@
     </div>
 
     <!-- Main Content Area -->
-    <div class="grid grid-cols-1 gap-6">
+    <div class="demand-list-content">
 
         <!-- Demand List Panel -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden no-print transition-all duration-300"
-            [ngClass]="{'opacity-50 pointer-events-none hidden': showSummary}">
+        <div class="demand-list-panel no-print" [ngClass]="{'demand-list-panel--hidden': showSummary}">
 
-            <div class="p-4 bg-gray-50/50 border-b border-gray-100 flex justify-between items-center">
-                <div class="flex items-center gap-2 text-gray-500 text-sm">
-                    <mat-icon class="!w-5 !h-5 !text-lg">filter_list</mat-icon>
+            <div class="demand-list-panel__bar">
+                <div class="demand-list-panel__bar-inner">
+                    <mat-icon>filter_list</mat-icon>
                     <span>All Demands</span>
                 </div>
-                <!-- Optional Paginator or Sort could go here -->
             </div>
 
-            <table mat-table [dataSource]="demands" class="w-full">
+            <div class="demand-list-table-wrap">
+            <table mat-table [dataSource]="demands" class="demand-list-table">
                 <!-- Checkbox Column -->
                 <ng-container matColumnDef="select">
                     <th mat-header-cell *matHeaderCellDef class="!bg-gray-50 w-16 text-center">
@@ -114,19 +113,19 @@
 
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selection.toggle(row)"
-                    class="hover:bg-blue-50/10 cursor-pointer border-b border-gray-50 transition-colors">
+                    class="demand-list-row">
                 </tr>
             </table>
+            </div>
 
-            <div *ngIf="demands.data.length === 0" class="p-12 text-center text-gray-400">
+            <div *ngIf="demands.data.length === 0" class="demand-list-empty">
                 No demand sheets found.
             </div>
         </div>
 
         <!-- Summary Report Overlay -->
-        <div *ngIf="showSummary"
-            class="bg-gray-500/20 fixed inset-0 z-50 overflow-y-auto no-print backdrop-blur-sm flex items-start justify-center pt-10 pb-10">
-            <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden print-section animate-slide-up">
+        <div *ngIf="showSummary" class="demand-list-overlay no-print">
+            <div class="demand-list-modal print-section animate-slide-up">
 
                 <!-- Print Header Actions -->
                 <div class="bg-gray-900 text-white p-4 flex justify-between items-center no-print">
@@ -143,7 +142,7 @@
                 </div>
 
                 <!-- Report Content -->
-                <div class="p-8 md:p-12 min-h-[600px] print:p-0">
+                <div class="demand-list-report-content print:p-0">
                     <div class="text-center border-b border-gray-800 pb-6 mb-8">
                         <h1 class="text-4xl font-serif font-bold text-gray-900 uppercase tracking-widest">Demand
                             Summary</h1>

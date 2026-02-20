@@ -1,0 +1,78 @@
+<div class="demand-detail">
+    <div class="demand-detail__inner">
+        <!-- Back + Edit -->
+        <nav class="demand-detail__nav">
+            <a routerLink="/production/demands" class="demand-detail__back">
+                <mat-icon>arrow_back</mat-icon> Back to List
+            </a>
+            <span class="demand-detail__sep">/</span>
+            <span class="demand-detail__current">Demand #{{ demand?.id }}</span>
+            <!-- <a *ngIf="demand" [routerLink]="['/production/demands', demand.id, 'edit']" mat-raised-button color="primary" class="demand-detail__edit">
+                <mat-icon>edit</mat-icon> Edit
+            </a> -->
+        </nav>
+
+        <ng-container *ngIf="loading">
+            <p class="demand-detail__msg">Loading...</p>
+        </ng-container>
+        <ng-container *ngIf="error">
+            <p class="demand-detail__msg demand-detail__msg--error">Demand not found.</p>
+        </ng-container>
+
+        <ng-container *ngIf="demand && !loading">
+            <header class="demand-detail__header">
+                <div>
+                    <h1 class="demand-detail__title">Demand Sheet</h1>
+                    <p class="demand-detail__subtitle">View production order details</p>
+                </div>
+                <span class="demand-detail__badge" [class.demand-detail__badge--finalized]="demand.status === 'finalized'">
+                    {{ demand.status }}
+                </span>
+            </header>
+
+            <div class="demand-detail__card">
+                <div class="demand-detail__accent"></div>
+                <h2 class="demand-detail__card-title">Order info</h2>
+                <dl class="demand-detail__grid">
+                    <dt>Client / Mill</dt>
+                    <dd>{{ demand.company_name ?? '—' }}</dd>
+                    <dt>Order Date</dt>
+                    <dd>{{ demand.date | date:'mediumDate' }}</dd>
+                    <dt>Reference No.</dt>
+                    <dd>{{ demand.reference_number || '—' }}</dd>
+                </dl>
+            </div>
+
+            <div class="demand-detail__card">
+                <div class="demand-detail__accent"></div>
+                <h2 class="demand-detail__card-title">
+                    <mat-icon>precision_manufacturing</mat-icon>
+                    Machine Orders
+                </h2>
+                <div *ngIf="demand.machine_orders && demand.machine_orders.length > 0" class="demand-detail__table-wrap">
+                    <table class="demand-detail__table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Machine</th>
+                                <th class="num">Qty</th>
+                                <th class="num">Amount (Rs)</th>
+                                <th class="num">Total (Rs)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let order of demand.machine_orders; let i = index">
+                                <td>{{ i + 1 }}</td>
+                                <td>{{ order.machine_name }}</td>
+                                <td class="num">{{ order.quantity }}</td>
+                                <td class="num">{{ order.machine_amount != null ? (order.machine_amount | number:'1.2-2') : '—' }}</td>
+                                <td class="num total">{{ getOrderTotal(order) != null ? ('Rs ' + (getOrderTotal(order) | number:'1.2-2')) : '—' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p *ngIf="!demand.machine_orders || demand.machine_orders.length === 0" class="demand-detail__empty">No machine orders.</p>
+            </div>
+        </ng-container>
+    </div>
+</div>

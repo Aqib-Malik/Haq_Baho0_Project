@@ -3,12 +3,14 @@ from django.db.models import Sum, Q
 from datetime import datetime
 from decimal import Decimal
 from io import BytesIO
+from xml.sax.saxutils import escape
+import os
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak, Image
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 
 from openpyxl import Workbook
@@ -132,8 +134,69 @@ def export_ledger_pdf(company, start_date=None, end_date=None):
         spaceAfter=12
     )
     normal_style = styles['Normal']
+    desc_style = ParagraphStyle(
+        'DescCell',
+        parent=styles['Normal'],
+        fontSize=9,
+        alignment=TA_LEFT,
+        leftIndent=0,
+        rightIndent=0,
+        spaceBefore=2,
+        spaceAfter=2,
+    )
+    company_name_style = ParagraphStyle(
+        'LedgerCompanyName',
+        parent=styles['Heading1'],
+        fontSize=20,
+        textColor=colors.HexColor('#1a237e'),
+        alignment=TA_LEFT,
+        fontName='Helvetica-Bold',
+        spaceAfter=4,
+    )
+    contact_style = ParagraphStyle(
+        'LedgerContact',
+        parent=styles['Normal'],
+        fontSize=9,
+        textColor=colors.black,
+        alignment=TA_LEFT,
+        spaceAfter=2,
+    )
 
-    # Title
+    # Haq Bahoo header: logo + title + address, phone, email
+    _script_dir = os.path.dirname(os.path.abspath(__file__))
+    _core_dir = os.path.dirname(_script_dir)
+    _project_root = os.path.dirname(_core_dir)
+    _logo_path = os.path.join(_project_root, 'frontend', 'public', 'assets', 'images', 'logo.jpeg')
+    if not os.path.isfile(_logo_path):
+        _logo_path = os.path.join(_project_root, 'assets', 'images', 'logo.jpeg')
+    if not os.path.isfile(_logo_path):
+        _logo_path = None
+
+    if _logo_path:
+        try:
+            logo_img = Image(_logo_path, width=1.0 * inch, height=1.0 * inch)
+            header_cells = [[logo_img, Paragraph('<b>HAQ BAHOO MIAN & COMPANY</b>', company_name_style)]]
+            header_table = Table(header_cells, colWidths=[1.2 * inch, 5 * inch])
+        except Exception:
+            header_cells = [[Paragraph('<b>HAQ BAHOO MIAN & COMPANY</b>', company_name_style)]]
+            header_table = Table(header_cells, colWidths=[6.2 * inch])
+    else:
+        header_cells = [[Paragraph('<b>HAQ BAHOO MIAN & COMPANY</b>', company_name_style)]]
+        header_table = Table(header_cells, colWidths=[6.2 * inch])
+
+    header_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('LEFTPADDING', (0, 0), (0, 0), 0),
+        ('RIGHTPADDING', (0, 0), (0, 0), 12),
+    ]))
+    elements.append(header_table)
+    elements.append(Spacer(1, 0.1 * inch))
+
+    contact_text = 'Near Lohlianwali Nahr Opp Railway Line G.T Road Gujranwala<br/>https://haqbahoomianco.com/  |  Haqbahoomiancompany@Gmail.com  |  +92 321 319 6814'
+    elements.append(Paragraph(contact_text, contact_style))
+    elements.append(Spacer(1, 0.2 * inch))
+
+    # Report title
     elements.append(Paragraph("COMPANY LEDGER", title_style))
     elements.append(Spacer(1, 0.2 * inch))
 
@@ -169,12 +232,12 @@ def export_ledger_pdf(company, start_date=None, end_date=None):
     elements.append(company_table)
     elements.append(Spacer(1, 0.3 * inch))
 
-    # Summary
+    # Summary (use "Rs" for PDF font compatibility; "₹" may render as block)
     summary_data = [
-        ['Opening Balance', f"₹ {data['opening_balance']:,.2f}"],
-        ['Total Debit', f"₹ {data['total_debit']:,.2f}"],
-        ['Total Credit', f"₹ {data['total_credit']:,.2f}"],
-        ['Closing Balance', f"₹ {data['closing_balance']:,.2f}"],
+        ['Opening Balance', f"Rs {data['opening_balance']:,.2f}"],
+        ['Total Debit', f"Rs {data['total_debit']:,.2f}"],
+        ['Total Credit', f"Rs {data['total_credit']:,.2f}"],
+        ['Closing Balance', f"Rs {data['closing_balance']:,.2f}"],
     ]
     summary_table = Table(summary_data, colWidths=[3 * inch, 3 * inch])
     summary_table.setStyle(TableStyle([
@@ -198,21 +261,26 @@ def export_ledger_pdf(company, start_date=None, end_date=None):
         # Table header
         table_data = [['Date', 'Reference', 'Description', 'Debit', 'Credit', 'Balance']]
         
-        # Add entries
+        # Add entries: use Paragraph for Description so long text wraps inside the column
         for entry in data['entries']:
-            debit_str = f"₹ {entry['debit']:,.2f}" if entry['debit'] else ""
-            credit_str = f"₹ {entry['credit']:,.2f}" if entry['credit'] else ""
+            debit_str = f"Rs {entry['debit']:,.2f}" if entry['debit'] else ""
+            credit_str = f"Rs {entry['credit']:,.2f}" if entry['credit'] else ""
+            desc_text = (entry['description'] or '').strip()
+            desc_para = Paragraph(escape(desc_text), desc_style) if desc_text else ''
             table_data.append([
                 entry['date'].strftime('%Y-%m-%d'),
                 entry['reference'],
-                entry['description'][:50] if entry['description'] else '',  # Truncate long descriptions
+                desc_para,
                 debit_str,
                 credit_str,
-                f"₹ {entry['balance']:,.2f}"
+                f"Rs {entry['balance']:,.2f}"
             ])
 
-        # Create table
-        ledger_table = Table(table_data, colWidths=[0.8 * inch, 1.2 * inch, 2 * inch, 1 * inch, 1 * inch, 1 * inch])
+        # Create table: wider Description column so long text wraps inside cell without disturbing others
+        col_date, col_ref, col_desc, col_debit, col_credit, col_balance = (
+            0.7 * inch, 1.0 * inch, 3.0 * inch, 0.95 * inch, 0.95 * inch, 1.0 * inch
+        )
+        ledger_table = Table(table_data, colWidths=[col_date, col_ref, col_desc, col_debit, col_credit, col_balance])
         ledger_table.setStyle(TableStyle([
             # Header row
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1a237e')),
@@ -230,7 +298,9 @@ def export_ledger_pdf(company, start_date=None, end_date=None):
             ('FONTSIZE', (0, 1), (-1, -1), 9),
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f5f5f5')]),
             ('GRID', (0, 0), (-1, -1), 1, colors.grey),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),  # Header row centered
+            ('VALIGN', (0, 1), (2, -1), 'TOP'),     # Date, Ref, Description: top (description wraps)
+            ('VALIGN', (3, 1), (-1, -1), 'TOP'),     # Debit, Credit, Balance: top so numbers don't sit at bottom
         ]))
         elements.append(ledger_table)
     else:

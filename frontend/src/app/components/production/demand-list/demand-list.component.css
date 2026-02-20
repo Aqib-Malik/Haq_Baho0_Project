@@ -3,13 +3,175 @@
     display: block;
 }
 
-.mat-column-select {
-    width: 60px;
-    padding-left: 16px;
+.demand-list-page {
+    min-height: 100vh;
+    background: #f9fafb;
+    padding: 0.75rem;
 }
 
-.mat-column-status {
-    width: 120px;
+/* Header: stack on mobile, row on desktop */
+.demand-list-header {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.demand-list-header__left {
+    flex: 1;
+}
+
+.demand-list-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    letter-spacing: -0.025em;
+}
+
+.demand-list-subtitle {
+    margin: 0.25rem 0 0;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.demand-list-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.demand-list-actions .mat-mdc-button {
+    min-width: 0;
+}
+
+/* Panel */
+.demand-list-panel {
+    background: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    border: 1px solid #f3f4f6;
+    overflow: hidden;
+    transition: opacity 0.3s;
+}
+
+.demand-list-panel--hidden {
+    opacity: 0.5;
+    pointer-events: none;
+    display: none;
+}
+
+.demand-list-panel__bar {
+    padding: 0.75rem 1rem;
+    background: #f9fafb;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.demand-list-panel__bar-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.demand-list-panel__bar-inner mat-icon {
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+/* Table: horizontal scroll on small screens */
+.demand-list-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.demand-list-table {
+    width: 100%;
+    min-width: 600px;
+}
+
+.demand-list-row {
+    cursor: pointer;
+    border-bottom: 1px solid #f9fafb;
+}
+
+.demand-list-row:hover {
+    background: rgba(239, 246, 255, 0.5);
+}
+
+.demand-list-empty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.875rem;
+}
+
+/* Column min-widths for mobile scroll */
+.demand-list-table-wrap .mat-column-select {
+    width: 52px;
+    min-width: 52px;
+    padding-left: 12px;
+}
+
+.demand-list-table-wrap .mat-column-date {
+    min-width: 100px;
+}
+
+.demand-list-table-wrap .mat-column-company {
+    min-width: 120px;
+}
+
+.demand-list-table-wrap .mat-column-reference {
+    min-width: 80px;
+}
+
+.demand-list-table-wrap .mat-column-status {
+    width: 100px;
+    min-width: 100px;
+}
+
+.demand-list-table-wrap .mat-column-actions {
+    width: 100px;
+    min-width: 100px;
+}
+
+.demand-list-table-wrap .mat-mdc-header-cell,
+.demand-list-table-wrap .mat-mdc-cell {
+    padding: 0.75rem 12px;
+    font-size: 0.875rem;
+}
+
+/* Overlay & modal */
+.demand-list-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 0.5rem;
+    padding-bottom: 2rem;
+}
+
+.demand-list-modal {
+    background: #fff;
+    border-radius: 0.75rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    width: 100%;
+    max-width: 56rem;
+    overflow: hidden;
+}
+
+.demand-list-report-content {
+    padding: 1rem;
+    min-height: 400px;
 }
 
 /* Animations */
@@ -18,7 +180,6 @@
         opacity: 0;
         transform: translateY(20px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -29,14 +190,44 @@
     animation: slideUp 0.3s ease-out forwards;
 }
 
-/* Print Styles */
+/* Desktop */
+@media (min-width: 768px) {
+    .demand-list-page {
+        padding: 1.5rem;
+    }
+
+    .demand-list-header {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+    }
+
+    .demand-list-title {
+        font-size: 1.875rem;
+    }
+
+    .demand-list-actions {
+        flex-shrink: 0;
+    }
+
+    .demand-list-table {
+        min-width: 0;
+    }
+
+    .demand-list-report-content {
+        padding: 2rem 3rem;
+        min-height: 600px;
+    }
+}
+
+/* Print */
 @media print {
     .no-print {
         display: none !important;
     }
 
-    /* Reset overlay styles for printing so it looks like a document */
-    .fixed {
+    .demand-list-overlay {
         position: static !important;
         overflow: visible !important;
         background: white !important;

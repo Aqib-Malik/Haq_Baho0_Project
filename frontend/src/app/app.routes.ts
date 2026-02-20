@@ -86,8 +86,12 @@ export const routes: Routes = [
                 loadComponent: () => import('./components/production/demand-create/demand-create.component').then(m => m.DemandCreateComponent)
             },
             {
-                path: 'production/demands/:id',
+                path: 'production/demands/:id/edit',
                 loadComponent: () => import('./components/production/demand-create/demand-create.component').then(m => m.DemandCreateComponent)
+            },
+            {
+                path: 'production/demands/:id',
+                loadComponent: () => import('./components/production/demand-detail/demand-detail.component').then(m => m.DemandDetailComponent)
             }
         ]
     },
