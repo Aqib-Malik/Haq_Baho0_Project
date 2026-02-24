@@ -30,16 +30,16 @@ def generate_quotation_pdf(quotation):
     # Define styles
     styles = getSampleStyleSheet()
     
-    # Company header style
+    # Company header style - single line (non-breaking spaces), slightly smaller to fit
     company_name_style = ParagraphStyle(
         'CompanyName',
         parent=styles['Heading1'],
-        fontSize=28,
+        fontSize=22,
         textColor=colors.black,
         spaceAfter=2,
         alignment=TA_CENTER,
         fontName='Helvetica-Bold',
-        leading=32
+        leading=26
     )
     
     company_subtitle_style = ParagraphStyle(
@@ -123,17 +123,19 @@ def generate_quotation_pdf(quotation):
     if not os.path.isfile(_logo_path):
         _logo_path = None
 
+    # Company name with non-breaking spaces so it stays on one line
+    company_name_para = Paragraph('<b>HAQ&#160;BAHOO&#160;MIAN&#160;&amp;&#160;COMPANY</b>', company_name_style)
     # Header with logo and company name
     if _logo_path:
         try:
             logo_img = Image(_logo_path, width=1.0*inch, height=1.0*inch)
-            header_data = [[logo_img, Paragraph('<b>HAQ BAHOO MIAN & COMPANY</b>', company_name_style)]]
+            header_data = [[logo_img, company_name_para]]
             header_table = Table(header_data, colWidths=[1.2*inch, 5.8*inch])
         except Exception:
-            header_data = [[Paragraph('<b>HAQ BAHOO MIAN & COMPANY</b>', company_name_style)]]
+            header_data = [[company_name_para]]
             header_table = Table(header_data, colWidths=[7*inch])
     else:
-        header_data = [[Paragraph('<b>HAQ BAHOO MIAN & COMPANY</b>', company_name_style)]]
+        header_data = [[company_name_para]]
         header_table = Table(header_data, colWidths=[7*inch])
 
     header_table.setStyle(TableStyle([
@@ -162,13 +164,19 @@ def generate_quotation_pdf(quotation):
     elements.append(subtitle_date_table)
     elements.append(Spacer(1, 20))
     
-    # Subject and Quotation heading
-    subject_quotation_data = [
-        [Paragraph('SUBJECT', subject_style), 
-         Paragraph('<b>Q U O T A T I O N</b>', quotation_heading_style)]
-    ]
-    subject_quotation_table = Table(subject_quotation_data, colWidths=[1.5*inch, 5.5*inch])
-    elements.append(subject_quotation_table)
+    # Subject row (left-aligned)
+    subject_row = [[Paragraph('SUBJECT', subject_style)]]
+    subject_table = Table(subject_row, colWidths=[7*inch])
+    elements.append(subject_table)
+    elements.append(Spacer(1, 6))
+    # Quotation heading - full width, centered on page
+    quotation_row = [[Paragraph('<b>Q U O T A T I O N</b>', quotation_heading_style)]]
+    quotation_table = Table(quotation_row, colWidths=[7*inch])
+    quotation_table.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]))
+    elements.append(quotation_table)
     elements.append(Spacer(1, 15))
     
     # Split items into Items (no machine) and Machines
@@ -198,12 +206,14 @@ def generate_quotation_pdf(quotation):
             for line_idx, line in enumerate(desc_lines, 1):
                 desc_para = Paragraph(f'{line_idx}. {line}', item_desc_style)
                 elements.append(desc_para)
+        qty_unit = f'{float(item.quantity):,.2f}'.rstrip('0').rstrip('.') + f' {item.unit or "pcs"}'
         rate_data = [
-            ['', f'RATE', f'{float(item.subtotal):,.0f}/-']
+            ['', qty_unit, 'RATE', f'{float(item.subtotal):,.0f}/-']
         ]
-        rate_table = Table(rate_data, colWidths=[4*inch, 1.5*inch, 1.5*inch])
+        rate_table = Table(rate_data, colWidths=[3*inch, 1.8*inch, 1.2*inch, 1.5*inch])
         rate_table.setStyle(TableStyle([
-            ('ALIGN', (1, 0), (-1, 0), 'RIGHT'),
+            ('ALIGN', (1, 0), (1, 0), 'LEFT'),
+            ('ALIGN', (2, 0), (-1, 0), 'RIGHT'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica'),
             ('FONTSIZE', (0, 0), (-1, 0), 10),
         ]))

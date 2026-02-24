@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
@@ -9,7 +9,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 import { MachineService } from '../../../services/machine.service';
+import { QuotationService } from '../../../services/quotation.service';
 import { Machine } from '../../../models/machine.model';
+import { Unit } from '../../../models/quotation.model';
 
 export interface MachineLineData {
   id?: number | null;
@@ -43,19 +45,13 @@ export interface MachineLineData {
 export class MachineDialogComponent implements OnInit {
   machineForm!: FormGroup;
   machines: Machine[] = [];
+  unitsList = signal<Unit[]>([]);
   isEditMode = false;
-
-  units = [
-    { value: 'hr', label: 'Hour (hr)' },
-    { value: 'run', label: 'Run(s)' },
-    { value: 'pcs', label: 'Pieces (pcs)' },
-    { value: 'day', label: 'Day(s)' },
-    { value: 'shift', label: 'Shift(s)' }
-  ];
 
   constructor(
     private fb: FormBuilder,
     private machineService: MachineService,
+    private quotationService: QuotationService,
     public dialogRef: MatDialogRef<MachineDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { line: MachineLineData | null }
   ) {
@@ -65,6 +61,21 @@ export class MachineDialogComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadMachines();
+    this.loadUnits();
+  }
+
+  loadUnits(): void {
+    this.quotationService.getUnits().subscribe({
+      next: (list) => {
+        const units = Array.isArray(list) ? list : [];
+        this.unitsList.set(units);
+        const currentUnit = this.machineForm?.get('unit')?.value;
+        if (units.length && currentUnit != null && !units.some(u => u.code === currentUnit)) {
+          this.machineForm.patchValue({ unit: units[0].code });
+        }
+      },
+      error: (err) => console.error('Error loading units:', err)
+    });
   }
 
   initForm(): void {
@@ -90,11 +101,14 @@ export class MachineDialogComponent implements OnInit {
   onMachineSelected(machineId: number): void {
     const machine = this.machines.find(m => m.id === machineId);
     if (machine) {
+      const amount = machine.amount != null && machine.amount !== ''
+        ? parseFloat(String(machine.amount))
+        : 0;
       this.machineForm.patchValue({
         item_name: machine.name,
-        description: machine.description || ''
+        description: machine.description || '',
+        unit_price: amount
       });
-      // Amount/rate is left for user to enter themselves (no auto-fill)
     }
   }
 

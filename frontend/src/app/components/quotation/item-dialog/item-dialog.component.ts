@@ -11,7 +11,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { QuotationService } from '../../../services/quotation.service';
 import { NotificationService } from '../../../services/notification.service';
-import { InventoryItem } from '../../../models/quotation.model';
+import { InventoryItem, Unit } from '../../../models/quotation.model';
 
 @Component({
   selector: 'app-item-dialog',
@@ -33,17 +33,8 @@ import { InventoryItem } from '../../../models/quotation.model';
 export class ItemDialogComponent implements OnInit {
   itemForm!: FormGroup;
   inventoryItems = signal<InventoryItem[]>([]);
+  unitsList = signal<Unit[]>([]);
   isEditMode = false;
-
-  units = [
-    { value: 'pcs', label: 'Pieces (pcs)' },
-    { value: 'kg', label: 'Kilograms (kg)' },
-    { value: 'm', label: 'Meters (m)' },
-    { value: 'l', label: 'Liters (l)' },
-    { value: 'box', label: 'Box' },
-    { value: 'set', label: 'Set' },
-    { value: 'hr', label: 'Hour (hr)' }
-  ];
 
   constructor(
     private fb: FormBuilder,
@@ -58,6 +49,21 @@ export class ItemDialogComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadInventoryItems();
+    this.loadUnits();
+  }
+
+  loadUnits(): void {
+    this.quotationService.getUnits().subscribe({
+      next: (list) => {
+        this.unitsList.set(Array.isArray(list) ? list : []);
+        const units = this.unitsList();
+        const currentUnit = this.itemForm?.get('unit')?.value;
+        if (units.length && currentUnit !== null && currentUnit !== undefined && !units.some(u => u.code === currentUnit)) {
+          this.itemForm.patchValue({ unit: units[0].code });
+        }
+      },
+      error: (err) => console.error('Error loading units:', err)
+    });
   }
 
   initForm(): void {
